@@ -1,6 +1,6 @@
 # XML collections for xpact verification
 
-Research date: 27 September 2026. This note supplements the ten-week student assignment, especially tasks G01 (portable corpus), G03 (cross-engine comparison), and the optional Xpact-core integration.
+Research date: 27 September 2026; W3C integration updated 6 October 2026. This note supplements the ten-week student assignment, especially tasks G01 (portable corpus), G03 (cross-engine comparison), and the optional Xpact-core integration.
 
 **Recommendation:** use the W3C XML conformance suite as the main correctness collection, Xpact-core's fixtures for targeted regressions, SVG and selected libxml2 inputs for variety, and PubMed for large-file streaming tests. Keep assertions enabled in xpact and Xpact-core builds used for verification.
 
@@ -60,9 +60,9 @@ Downloaded [the 20130923 ZIP](https://www.w3.org/XML/Test/xmlts20130923.zip) and
 - Archive contents: **3,386 files**, including **3,078 `.xml` files**, 149 DTD files and 141 `.ent` files. Other extensions also contain dependencies.
 - Archive SHA-256: `f9510b3532926e1b4c2e54855b021e4b8a66ec98a5337dcf4ff07e8a41968deb`.
 
-The `.xml` count includes catalog and expected-output files. **Do not count every file as a test or assume every input should be accepted.** Use `xmlconf.xml` and its included catalogs to identify test cases. The download and inventory are under ignored `build/`; the suite has not yet been connected to, or executed against, xpact in this task.
+The `.xml` count includes catalog and expected-output files. **Do not count every file as a test or assume every input should be accepted.** Use `xmlconf.xml` and its included catalogs to identify test cases. The download and inventory are under ignored `build/`. The suite is now integrated into `scripts/run_benchmarks.ps1` and both Jenkins benchmark pipelines through `scripts/run_w3c_conformance.py`; see [W3C conformance benchmarks](w3c-xml-conformance.md) for execution, reports, and offline setup. The automatic runner caches its verified ZIP at `build/validation-corpora/w3c-xml-20130923/xmlts20130923.zip`, independently of the earlier research download above.
 
-Catalog inspection found **2,585 active cases**: 812 `valid`, 242 `invalid`, 1,498 `not-wf` and 33 `error`. These are counts before filtering for supported configurations. One commented-out case was excluded. The root catalog has a misencoded comment; counting used an ISO-8859-1 override for that catalog in memory, while child catalogs retained their declared encodings. Original files were preserved. The eventual catalog importer should document this accommodation separately from parser tests.
+Catalog inspection found **2,585 active cases**: 812 `valid`, 242 `invalid`, 1,498 `not-wf` and 33 `error`. These are counts before filtering for supported configurations. One commented-out case was excluded. The implemented importer accommodates the root catalog's misencoded comment in memory with an ISO-8859-1 override, while child catalogs retain their declared encodings. It also corrects the root catalog's `eduni/namespaces/misc/` base to `eduni/misc/` in memory. Both accommodations require the exact known root catalog hash; original files remain unchanged.
 
 The [W3C test matrix](https://www.w3.org/XML/Test/xmlconf-20130923.html) distinguishes these outcomes:
 
@@ -73,7 +73,7 @@ The [W3C test matrix](https://www.w3.org/XML/Test/xmlconf-20130923.html) disting
 | `not-wf` | Reject, subject to the documented external-entity processing rules. |
 | `error` | Optional error detection; there is no universal accept/reject requirement. |
 
-Select the XML version, edition, namespace mode and external-entity policy from catalog metadata. XML 1.1 cases must not silently enter an XML 1.0 conformance score. Resolve required entities from the preserved local collection with network access disabled. Report unsupported cases explicitly rather than calling them passes.
+The current runner selects XML 1.0 fifth-edition binary tests, with namespaces enabled unless `NAMESPACE="no"`, using a nonvalidating parser without an external entity loader. It selects **1,727 cases per build** and reports the remaining **858 cases as skipped** with reasons. XML 1.1, other editions, required external entities, and optional-error cases are excluded from that profile. Per-case parser results and strict failure status are recorded separately from skipped cases. Canonical output comparisons and external entity coverage remain future work; any future entity loader should resolve only preserved local suite dependencies with network access disabled.
 
 ## Student work and completion criteria
 

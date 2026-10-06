@@ -1,5 +1,5 @@
 note
-	description: "Simple benchmark harness for the Phase 1 parser."
+	description: "Benchmark and single-document conformance harness for the Phase 1 parser."
 
 class
 	XP_BENCHMARK_ROOT
@@ -13,6 +13,74 @@ create
 feature {NONE} -- Initialization
 
 	make
+		do
+			if has_argument ("--conformance-file") or has_argument ("--namespaces") then
+				run_conformance
+			else
+				run_benchmark
+			end
+		end
+
+	run_conformance
+			-- Parse one raw document and report only normal parser outcomes as markers.
+		local
+			l_arguments: ARGUMENTS
+			l_path: detachable STRING_8
+			l_namespaces, l_invalid: BOOLEAN
+			l_handler: XP_NULL_EVENT_HANDLER
+			l_parser: XP_PARSER
+			i: INTEGER
+		do
+			create l_arguments
+			from
+				i := 1
+			invariant
+				index_in_bounds: i >= 1 and i <= l_arguments.argument_count + 1
+			until
+				i > l_arguments.argument_count or l_invalid
+			loop
+				if l_arguments.argument (i).same_string ("--conformance-file") then
+					if l_path = Void and then i < l_arguments.argument_count and then not l_arguments.argument (i + 1).is_empty then
+						create l_path.make_from_string (l_arguments.argument (i + 1))
+						i := i + 2
+					else
+						l_invalid := True
+					end
+				elseif l_arguments.argument (i).same_string ("--namespaces") and then not l_namespaces then
+					l_namespaces := True
+					i := i + 1
+				else
+					l_invalid := True
+				end
+			variant
+				l_arguments.argument_count - i + 2 - l_invalid.to_integer
+			end
+			if l_invalid or l_path = Void then
+				io.error.put_string ("usage: --conformance-file PATH [--namespaces]%N")
+				exit_with_code (2)
+			elseif attached l_path as l_file_path then
+				if attached raw_file_bytes (l_file_path) as l_input then
+					create l_handler.make
+					create l_parser.make (l_handler)
+					if l_namespaces then
+						l_parser.set_namespace_mode ('|')
+					end
+					if l_parser.parse (l_input) then
+						io.put_string ("XPACT_CONFORMANCE%TACCEPT%N")
+					else
+						io.put_string ("XPACT_CONFORMANCE%TREJECT%N")
+						io.put_string (single_line_diagnostic (l_parser.last_error))
+						io.put_new_line
+						exit_with_code (1)
+					end
+				else
+					io.error.put_string ("conformance cannot read XML file%N")
+					exit_with_code (2)
+				end
+			end
+		end
+
+	run_benchmark
 		local
 			l_handler: XP_NULL_EVENT_HANDLER
 			l_parser: XP_PARSER
@@ -43,6 +111,7 @@ feature {NONE} -- Initialization
 					io.put_string ("benchmark parse failed: ")
 					io.put_string (l_parser.last_error)
 					io.put_new_line
+					exit_with_code (1)
 					i := l_iterations + 1
 				else
 					i := i + 1
@@ -58,6 +127,78 @@ feature {NONE} -- Initialization
 		end
 
 feature {NONE} -- Data
+
+	has_argument (a_name: READABLE_STRING_8): BOOLEAN
+			-- Does the command line include `a_name'?
+		local
+			l_arguments: ARGUMENTS
+			i: INTEGER
+		do
+			create l_arguments
+			from
+				i := 1
+			invariant
+				index_in_bounds: i >= 1 and i <= l_arguments.argument_count + 1
+			until
+				i > l_arguments.argument_count or Result
+			loop
+				Result := l_arguments.argument (i).same_string (a_name)
+				i := i + 1
+			variant
+				l_arguments.argument_count - i + 1
+			end
+		end
+
+	raw_file_bytes (a_path: READABLE_STRING_8): detachable STRING_8
+			-- File contents without newline or encoding conversion.
+		require
+			path_not_empty: not a_path.is_empty
+		local
+			l_file: RAW_FILE
+		do
+			create l_file.make_with_name (a_path)
+			if l_file.exists and then l_file.is_plain and then l_file.is_readable then
+				l_file.open_read
+				create Result.make_empty
+				from
+				until
+					l_file.end_of_file
+				loop
+					l_file.read_stream (65536)
+					Result.append (l_file.last_string)
+				end
+				l_file.close
+			end
+		rescue
+			io.error.put_string ("conformance file read failed%N")
+			exit_with_code (2)
+		end
+
+	single_line_diagnostic (a_message: READABLE_STRING_8): STRING_8
+			-- ASCII diagnostic without control characters or additional marker lines.
+		local
+			i: INTEGER
+			l_character: CHARACTER_8
+		do
+			create Result.make (a_message.count)
+			from
+				i := 1
+			invariant
+				index_in_bounds: i >= 1 and i <= a_message.count + 1
+			until
+				i > a_message.count
+			loop
+				l_character := a_message.item (i)
+				if l_character.code >= 32 and l_character.code <= 126 then
+					Result.append_character (l_character)
+				else
+					Result.append_character (' ')
+				end
+				i := i + 1
+			variant
+				a_message.count - i + 1
+			end
+		end
 
 	Default_iterations: INTEGER = 1000
 

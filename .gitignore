@@ -12,3 +12,5 @@ dist/
 *.ilk
 *.log
 *.rc
+__pycache__/
+*.py[cod]
