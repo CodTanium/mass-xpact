@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE note [
+  <!ENTITY who "World">
+]>
+<!-- a comment -->
+<note lang="en" priority="2">
+  <?app hint?>
+  <to>&who;</to>
+  <body><![CDATA[1 < 2 & 3 > 2]]></body>
+  <empty/>
+</note>

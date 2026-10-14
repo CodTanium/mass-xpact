@@ -1,0 +1,28 @@
+﻿# tool versions, settings and source fingerprint
+# started 2026-10-14T16:22:38
+
+date:            2026-10-14 16:22:38 +02:00
+os:              Microsoft Windows 11 Home 10.0.26300 64-bit
+powershell:      5.1.26100.9711
+ec:              ISE EiffelStudio version 25.12.9.8922 - win64
+ec path:         C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard\studio\spec\win64\bin\ec.exe
+python:          Python 3.10.6
+ISE_EIFFEL:      
+ISE_C_COMPILER:  '' (empty = mingw default)
+visual studio:   Visual Studio Community 2026 18.10.12224.181
+msvc toolsets:   14.51.36231
+precompiles:     win64\EIFGENs\base-safe, win64\EIFGENs\base-safe.broken-20261013
+
+assertion settings (ECF targets used below):
+  tests\xpact_tests.ecf                         xpact_tests                          pre=false post=false check=false invariant=false
+  tests\xpact_tests.ecf                         xpact_tests_assertions               pre=true post=true check=true invariant=true
+  tests\xpact_native_runtime.ecf                xpact_native_runtime                 pre=true post=true check=true invariant=true
+  tests\xpact_native_runtime.ecf                xpact_native_runtime_no_assertions   pre=false post=false check=false invariant=false
+  tests\xpact_native_library.ecf                xpact_native_library                 pre=false post=false check=false invariant=false
+  tests\xpact_native_library.ecf                xpact_native_library_assertions      pre=true post=true check=true invariant=true
+  xpact.ecf                                     xpact                                pre=true post=true check=true invariant=true
+  Assertion enabled tests\event-trace\xp_event_trace.ecf xpact_event_trace                    pre=true post=true check=true invariant=true
+
+source files:    119 (*.e, *.ecf, *.c, *.h, *.ps1; list in logs\sources.sha256)
+source sha256:   e2c5eafe68445b8ba3c79feaa921b2af72fef4ec9a5d9ca6e2497a0067fbd981
+# exit code 0 after 1 s

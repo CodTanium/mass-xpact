@@ -1,0 +1,957 @@
+﻿# .\scripts\run_xmlconf_conformance.ps1   (xpact.exe, assertions on)
+# started 2026-10-14T16:20:24
+
+== xmlconf: building xpact workbench target ==
+Eiffel Compilation Manager
+Version 25.12.9.8922 - win64
+System.Management.Automation.RemoteException
+Degree 6: Examining System
+System Recompiled.
+Eiffel C/C++ Compilation Tool - Version: 25.12
+Copyright Eiffel Software 1996-2024. All Rights Reserved.
+
+Preparing C compilation using already configured mingw C compiler...
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/cp" "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/config/win64/templates/emain.template" "E1/emain.c"
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eparents.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" einit.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" emain.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" ececil.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" evisib.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" enames.o  ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `eparents.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eskelet.o  ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `einit.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c emain.c
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eplug.o  ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `ececil.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" ecall.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" efrozen.o  ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `evisib.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `enames.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" epattern.o  ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `eskelet.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eoption.o  ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `eplug.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+cd C1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" Cobj1.o ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `ecall.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/windres" --preprocessor='"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/cpp.exe"' -I../../.. ../../../xpact.rc -O coff -o xpact.res
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `efrozen.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `epattern.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: `eoption.o' is up to date.
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact/W_code/E1'
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:859: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:859: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:859: digit exceeds base
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/rm" -f xpact.exe
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc"  -mconsole -o xpact.exe E1/emain.o "c:\users\masou\documents\eiffel user files\25.12\precomp\spec\win64\EIFGENs\base-safe\W_code/mingw/precomp.lib" xpact.res E1/eparents.o  E1/einit.o  E1/ececil.o  E1/evisib.o  E1/enames.o  E1/eskelet.o  E1/eplug.o  E1/ecall.o  E1/efrozen.o  E1/epattern.o  E1/eoption.o  C1/Cobj1.o   "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/lib/mingw/wkbench.a" -luser32 -lws2_32 -ladvapi32 -lgdi32 -lshell32 -lmsimg32 -lcomdlg32 -luuid -lole32 -loleaut32 -lcomctl32 -lmpr -lshlwapi -lwinspool -lstdc++ 
+echo done > completed.eif
+C compilation completed
+xpact executable: C:\Users\masou\Desktop\xpact-student-test\EIFGENs\xpact\W_code\xpact.exe
+xmlconf descriptors: 17
+xmlconf cases selected: 2168
+
+xpact XML conformance run
+suite:      C:\Users\masou\Desktop\xpact-student-test\build\validation-corpora\w3c-xml-20130923\xmlconf
+source:     https://www.w3.org/XML/Test/xmlts20130923.zip (sha256 f9510b3532926e1b4c2e54855b021e4b8a66ec98a5337dcf4ff07e8a41968deb)
+catalog:    C:\Users\masou\Desktop\xpact-student-test\build\validation-corpora\w3c-xml-20130923\xmlconf\xmlconf.xml
+executable: C:\Users\masou\Desktop\xpact-student-test\EIFGENs\xpact\W_code\xpact.exe
+types:      valid, invalid, not-wf, error
+profiles:   All
+
+total:      2168
+pass:       1314
+fail:       854
+missing:    0
+
+by expected type:
+  valid    499
+  invalid  213
+  not-wf   1427
+  error    29
+
+mismatches:
+  rmt-e2e-2a                   expected=reject  observed=accept  E2a.xml
+  rmt-e2e-2b                   expected=reject  observed=accept  E2b.xml
+  rmt-e2e-9b                   expected=reject  observed=accept  E9b.xml
+  rmt-e2e-14                   expected=reject  observed=accept  E14.xml
+  rmt-e2e-15a                  expected=reject  observed=accept  E15a.xml
+  rmt-e2e-15b                  expected=reject  observed=accept  E15b.xml
+  rmt-e2e-15c                  expected=reject  observed=accept  E15c.xml
+  rmt-e2e-15d                  expected=reject  observed=accept  E15d.xml
+  rmt-e2e-15g                  expected=reject  observed=accept  E15g.xml
+  rmt-e2e-15h                  expected=reject  observed=accept  E15h.xml
+  rmt-e2e-18                   expected=accept  observed=reject  E18.xml
+  rmt-e2e-20                   expected=reject  observed=accept  E20.xml
+  rmt-e2e-27                   expected=reject  observed=accept  E27.xml
+  rmt-e2e-50                   expected=accept  observed=reject  E50.xml
+  rmt-e2e-60                   expected=accept  observed=reject  E60.xml
+  rmt-e2e-61                   expected=reject  observed=accept  E61.xml
+  rmt-ns10-009                 expected=reject  observed=accept  009.xml
+  rmt-ns10-010                 expected=reject  observed=accept  010.xml
+  rmt-ns10-011                 expected=reject  observed=accept  011.xml
+  rmt-ns10-012                 expected=reject  observed=accept  012.xml
+  rmt-ns10-013                 expected=reject  observed=accept  013.xml
+  rmt-ns10-014                 expected=reject  observed=accept  014.xml
+  rmt-ns10-015                 expected=reject  observed=accept  015.xml
+  rmt-ns10-016                 expected=reject  observed=accept  016.xml
+  rmt-ns10-017                 expected=reject  observed=accept  017.xml
+  rmt-ns10-018                 expected=reject  observed=accept  018.xml
+  rmt-ns10-019                 expected=reject  observed=accept  019.xml
+  rmt-ns10-020                 expected=reject  observed=accept  020.xml
+  rmt-ns10-021                 expected=reject  observed=accept  021.xml
+  rmt-ns10-022                 expected=reject  observed=accept  022.xml
+  rmt-ns10-023                 expected=reject  observed=accept  023.xml
+  rmt-ns10-024                 expected=reject  observed=accept  024.xml
+  rmt-ns10-025                 expected=reject  observed=accept  025.xml
+  rmt-ns10-026                 expected=reject  observed=accept  026.xml
+  rmt-ns10-027                 expected=reject  observed=accept  027.xml
+  rmt-ns10-028                 expected=reject  observed=accept  028.xml
+  rmt-ns10-029                 expected=reject  observed=accept  029.xml
+  rmt-ns10-030                 expected=reject  observed=accept  030.xml
+  rmt-ns10-031                 expected=reject  observed=accept  031.xml
+  rmt-ns10-032                 expected=reject  observed=accept  032.xml
+  rmt-ns10-033                 expected=reject  observed=accept  033.xml
+  rmt-ns10-034                 expected=reject  observed=accept  034.xml
+  rmt-ns10-036                 expected=reject  observed=accept  036.xml
+  rmt-ns10-037                 expected=reject  observed=accept  037.xml
+  rmt-ns10-038                 expected=reject  observed=accept  038.xml
+  rmt-ns10-039                 expected=reject  observed=accept  039.xml
+  rmt-ns10-040                 expected=reject  observed=accept  040.xml
+  rmt-ns10-041                 expected=reject  observed=accept  041.xml
+  rmt-ns10-042                 expected=reject  observed=accept  042.xml
+  rmt-ns10-043                 expected=reject  observed=accept  043.xml
+  rmt-ns10-044                 expected=reject  observed=accept  044.xml
+  rmt-ns10-045                 expected=reject  observed=accept  045.xml
+  rmt-ns10-046                 expected=reject  observed=accept  046.xml
+  rmt-ns11-001                 expected=accept  observed=reject  001.xml
+  rmt-ns11-002                 expected=accept  observed=reject  002.xml
+  rmt-ns11-003                 expected=accept  observed=reject  003.xml
+  rmt-ns11-004                 expected=accept  observed=reject  004.xml
+  rmt-ns11-006                 expected=accept  observed=reject  006.xml
+  rmt-001                      expected=reject  observed=accept  001.xml
+  rmt-006                      expected=accept  observed=reject  006.xml
+  rmt-007                      expected=accept  observed=reject  007.xml
+  rmt-008                      expected=accept  observed=reject  008.xml
+  rmt-009                      expected=accept  observed=reject  009.xml
+  rmt-014                      expected=reject  observed=accept  014.xml
+  rmt-016                      expected=reject  observed=accept  016.xml
+  rmt-019                      expected=reject  observed=accept  019.xml
+  rmt-020                      expected=reject  observed=accept  020.xml
+  rmt-023                      expected=accept  observed=reject  023.xml
+  rmt-025                      expected=accept  observed=reject  025.xml
+  rmt-026                      expected=accept  observed=reject  026.xml
+  rmt-027                      expected=accept  observed=reject  027.xml
+  rmt-028                      expected=accept  observed=reject  028.xml
+  rmt-029                      expected=accept  observed=reject  029.xml
+  rmt-030                      expected=reject  observed=accept  030.xml
+  rmt-031                      expected=accept  observed=reject  031.xml
+  rmt-032                      expected=reject  observed=accept  032.xml
+  rmt-033                      expected=accept  observed=reject  033.xml
+  rmt-035                      expected=accept  observed=reject  035.xml
+  rmt-036                      expected=reject  observed=accept  036.xml
+  rmt-043                      expected=accept  observed=reject  043.xml
+  rmt-045                      expected=accept  observed=reject  045.xml
+  rmt-046                      expected=reject  observed=accept  046.xml
+  rmt-047                      expected=accept  observed=reject  047.xml
+  rmt-048                      expected=reject  observed=accept  048.xml
+  rmt-049                      expected=accept  observed=reject  049.xml
+  rmt-051                      expected=accept  observed=reject  051.xml
+  rmt-052                      expected=reject  observed=accept  052.xml
+  rmt-054                      expected=accept  observed=reject  054.xml
+  rmt-055                      expected=accept  observed=reject  055.xml
+  rmt-056                      expected=accept  observed=reject  056.xml
+  rmt-057                      expected=accept  observed=reject  057.xml
+  ibm-invalid-P32-ibm32i01.xml expected=reject  observed=accept  invalid/P32/ibm32i01.xml
+  ibm-invalid-P32-ibm32i03.xml expected=reject  observed=accept  invalid/P32/ibm32i03.xml
+  ibm-invalid-P32-ibm32i04.xml expected=reject  observed=accept  invalid/P32/ibm32i04.xml
+  ibm-invalid-P39-ibm39i01.xml expected=reject  observed=accept  invalid/P39/ibm39i01.xml
+  ibm-invalid-P39-ibm39i02.xml expected=reject  observed=accept  invalid/P39/ibm39i02.xml
+  ibm-invalid-P39-ibm39i03.xml expected=reject  observed=accept  invalid/P39/ibm39i03.xml
+  ibm-invalid-P39-ibm39i04.xml expected=reject  observed=accept  invalid/P39/ibm39i04.xml
+  ibm-invalid-P41-ibm41i01.xml expected=reject  observed=accept  invalid/P41/ibm41i01.xml
+  ibm-invalid-P41-ibm41i02.xml expected=reject  observed=accept  invalid/P41/ibm41i02.xml
+  ibm-invalid-P45-ibm45i01.xml expected=reject  observed=accept  invalid/P45/ibm45i01.xml
+  ibm-invalid-P49-ibm49i01.xml expected=reject  observed=accept  invalid/P49/ibm49i01.xml
+  ibm-invalid-P50-ibm50i01.xml expected=reject  observed=accept  invalid/P50/ibm50i01.xml
+  ibm-invalid-P51-ibm51i01.xml expected=reject  observed=accept  invalid/P51/ibm51i01.xml
+  ibm-invalid-P51-ibm51i03.xml expected=reject  observed=accept  invalid/P51/ibm51i03.xml
+  ibm-invalid-P56-ibm56i01.xml expected=reject  observed=accept  invalid/P56/ibm56i01.xml
+  ibm-invalid-P56-ibm56i02.xml expected=reject  observed=accept  invalid/P56/ibm56i02.xml
+  ibm-invalid-P56-ibm56i03.xml expected=reject  observed=accept  invalid/P56/ibm56i03.xml
+  ibm-invalid-P56-ibm56i05.xml expected=reject  observed=accept  invalid/P56/ibm56i05.xml
+  ibm-invalid-P56-ibm56i06.xml expected=reject  observed=accept  invalid/P56/ibm56i06.xml
+  ibm-invalid-P56-ibm56i07.xml expected=reject  observed=accept  invalid/P56/ibm56i07.xml
+  ibm-invalid-P56-ibm56i08.xml expected=reject  observed=accept  invalid/P56/ibm56i08.xml
+  ibm-invalid-P56-ibm56i09.xml expected=reject  observed=accept  invalid/P56/ibm56i09.xml
+  ibm-invalid-P56-ibm56i10.xml expected=reject  observed=accept  invalid/P56/ibm56i10.xml
+  ibm-invalid-P56-ibm56i11.xml expected=reject  observed=accept  invalid/P56/ibm56i11.xml
+  ibm-invalid-P56-ibm56i12.xml expected=reject  observed=accept  invalid/P56/ibm56i12.xml
+  ibm-invalid-P56-ibm56i13.xml expected=reject  observed=accept  invalid/P56/ibm56i13.xml
+  ibm-invalid-P56-ibm56i14.xml expected=reject  observed=accept  invalid/P56/ibm56i14.xml
+  ibm-invalid-P56-ibm56i15.xml expected=reject  observed=accept  invalid/P56/ibm56i15.xml
+  ibm-invalid-P56-ibm56i16.xml expected=reject  observed=accept  invalid/P56/ibm56i16.xml
+  ibm-invalid-P56-ibm56i17.xml expected=reject  observed=accept  invalid/P56/ibm56i17.xml
+  ibm-invalid-P56-ibm56i18.xml expected=reject  observed=accept  invalid/P56/ibm56i18.xml
+  ibm-invalid-P58-ibm58i01.xml expected=reject  observed=accept  invalid/P58/ibm58i01.xml
+  ibm-invalid-P58-ibm58i02.xml expected=reject  observed=accept  invalid/P58/ibm58i02.xml
+  ibm-invalid-P59-ibm59i01.xml expected=reject  observed=accept  invalid/P59/ibm59i01.xml
+  ibm-invalid-P60-ibm60i01.xml expected=reject  observed=accept  invalid/P60/ibm60i01.xml
+  ibm-invalid-P60-ibm60i02.xml expected=reject  observed=accept  invalid/P60/ibm60i02.xml
+  ibm-invalid-P60-ibm60i03.xml expected=reject  observed=accept  invalid/P60/ibm60i03.xml
+  ibm-invalid-P60-ibm60i04.xml expected=reject  observed=accept  invalid/P60/ibm60i04.xml
+  ibm-invalid-P68-ibm68i03.xml expected=accept  observed=reject  invalid/P68/ibm68i03.xml
+  ibm-invalid-P68-ibm68i04.xml expected=accept  observed=reject  invalid/P68/ibm68i04.xml
+  ibm-invalid-P69-ibm69i03.xml expected=accept  observed=reject  invalid/P69/ibm69i03.xml
+  ibm-invalid-P69-ibm69i04.xml expected=accept  observed=reject  invalid/P69/ibm69i04.xml
+  ibm-invalid-P76-ibm76i01.xml expected=reject  observed=accept  invalid/P76/ibm76i01.xml
+  ibm-not-wf-P02-ibm02n30.xml  expected=reject  observed=accept  not-wf/P02/ibm02n30.xml
+  ibm-not-wf-P02-ibm02n31.xml  expected=reject  observed=accept  not-wf/P02/ibm02n31.xml
+  ibm-not-wf-P02-ibm02n32.xml  expected=reject  observed=accept  not-wf/P02/ibm02n32.xml
+  ibm-not-wf-P02-ibm02n33.xml  expected=reject  observed=accept  not-wf/P02/ibm02n33.xml
+  ibm-not-wf-P23-ibm23n04.xml  expected=reject  observed=accept  not-wf/P23/ibm23n04.xml
+  ibm-not-wf-P24-ibm24n02.xml  expected=reject  observed=accept  not-wf/P24/ibm24n02.xml
+  ibm-not-wf-p28a-ibm28an01.xml expected=reject  observed=accept  not-wf/p28a/ibm28an01.xml
+  ibm-not-wf-P29-ibm29n04.xml  expected=reject  observed=accept  not-wf/P29/ibm29n04.xml
+  ibm-not-wf-P30-ibm30n01.xml  expected=reject  observed=accept  not-wf/P30/ibm30n01.xml
+  ibm-not-wf-P31-ibm31n01.xml  expected=reject  observed=accept  not-wf/P31/ibm31n01.xml
+  ibm-not-wf-P45-ibm45n02.xml  expected=reject  observed=accept  not-wf/P45/ibm45n02.xml
+  ibm-not-wf-P52-ibm52n02.xml  expected=reject  observed=accept  not-wf/P52/ibm52n02.xml
+  ibm-not-wf-P53-ibm53n02.xml  expected=reject  observed=accept  not-wf/P53/ibm53n02.xml
+  ibm-not-wf-P53-ibm53n04.xml  expected=reject  observed=accept  not-wf/P53/ibm53n04.xml
+  ibm-not-wf-P54-ibm54n01.xml  expected=reject  observed=accept  not-wf/P54/ibm54n01.xml
+  ibm-not-wf-P54-ibm54n02.xml  expected=reject  observed=accept  not-wf/P54/ibm54n02.xml
+  ibm-not-wf-P55-ibm55n01.xml  expected=reject  observed=accept  not-wf/P55/ibm55n01.xml
+  ibm-not-wf-P55-ibm55n03.xml  expected=reject  observed=accept  not-wf/P55/ibm55n03.xml
+  ibm-not-wf-P56-ibm56n01.xml  expected=reject  observed=accept  not-wf/P56/ibm56n01.xml
+  ibm-not-wf-P56-ibm56n02.xml  expected=reject  observed=accept  not-wf/P56/ibm56n02.xml
+  ibm-not-wf-P56-ibm56n03.xml  expected=reject  observed=accept  not-wf/P56/ibm56n03.xml
+  ibm-not-wf-P56-ibm56n04.xml  expected=reject  observed=accept  not-wf/P56/ibm56n04.xml
+  ibm-not-wf-P56-ibm56n05.xml  expected=reject  observed=accept  not-wf/P56/ibm56n05.xml
+  ibm-not-wf-P56-ibm56n06.xml  expected=reject  observed=accept  not-wf/P56/ibm56n06.xml
+  ibm-not-wf-P58-ibm58n03.xml  expected=reject  observed=accept  not-wf/P58/ibm58n03.xml
+  ibm-not-wf-P58-ibm58n06.xml  expected=reject  observed=accept  not-wf/P58/ibm58n06.xml
+  ibm-not-wf-P58-ibm58n07.xml  expected=reject  observed=accept  not-wf/P58/ibm58n07.xml
+  ibm-not-wf-P58-ibm58n08.xml  expected=reject  observed=accept  not-wf/P58/ibm58n08.xml
+  ibm-not-wf-P59-ibm59n01.xml  expected=reject  observed=accept  not-wf/P59/ibm59n01.xml
+  ibm-not-wf-P59-ibm59n03.xml  expected=reject  observed=accept  not-wf/P59/ibm59n03.xml
+  ibm-not-wf-P59-ibm59n04.xml  expected=reject  observed=accept  not-wf/P59/ibm59n04.xml
+  ibm-not-wf-P60-ibm60n05.xml  expected=reject  observed=accept  not-wf/P60/ibm60n05.xml
+  ibm-not-wf-P61-ibm61n01.xml  expected=reject  observed=accept  not-wf/P61/ibm61n01.xml
+  ibm-not-wf-P62-ibm62n01.xml  expected=reject  observed=accept  not-wf/P62/ibm62n01.xml
+  ibm-not-wf-P62-ibm62n02.xml  expected=reject  observed=accept  not-wf/P62/ibm62n02.xml
+  ibm-not-wf-P62-ibm62n03.xml  expected=reject  observed=accept  not-wf/P62/ibm62n03.xml
+  ibm-not-wf-P62-ibm62n04.xml  expected=reject  observed=accept  not-wf/P62/ibm62n04.xml
+  ibm-not-wf-P62-ibm62n05.xml  expected=reject  observed=accept  not-wf/P62/ibm62n05.xml
+  ibm-not-wf-P62-ibm62n06.xml  expected=reject  observed=accept  not-wf/P62/ibm62n06.xml
+  ibm-not-wf-P62-ibm62n07.xml  expected=reject  observed=accept  not-wf/P62/ibm62n07.xml
+  ibm-not-wf-P62-ibm62n08.xml  expected=reject  observed=accept  not-wf/P62/ibm62n08.xml
+  ibm-not-wf-P63-ibm63n01.xml  expected=reject  observed=accept  not-wf/P63/ibm63n01.xml
+  ibm-not-wf-P63-ibm63n02.xml  expected=reject  observed=accept  not-wf/P63/ibm63n02.xml
+  ibm-not-wf-P63-ibm63n03.xml  expected=reject  observed=accept  not-wf/P63/ibm63n03.xml
+  ibm-not-wf-P63-ibm63n04.xml  expected=reject  observed=accept  not-wf/P63/ibm63n04.xml
+  ibm-not-wf-P63-ibm63n05.xml  expected=reject  observed=accept  not-wf/P63/ibm63n05.xml
+  ibm-not-wf-P63-ibm63n06.xml  expected=reject  observed=accept  not-wf/P63/ibm63n06.xml
+  ibm-not-wf-P63-ibm63n07.xml  expected=reject  observed=accept  not-wf/P63/ibm63n07.xml
+  ibm-not-wf-P64-ibm64n01.xml  expected=reject  observed=accept  not-wf/P64/ibm64n01.xml
+  ibm-not-wf-P64-ibm64n02.xml  expected=reject  observed=accept  not-wf/P64/ibm64n02.xml
+  ibm-not-wf-P64-ibm64n03.xml  expected=reject  observed=accept  not-wf/P64/ibm64n03.xml
+  ibm-not-wf-P65-ibm65n01.xml  expected=reject  observed=accept  not-wf/P65/ibm65n01.xml
+  ibm-not-wf-P65-ibm65n02.xml  expected=reject  observed=accept  not-wf/P65/ibm65n02.xml
+  ibm-not-wf-P69-ibm69n06.xml  expected=reject  observed=accept  not-wf/P69/ibm69n06.xml
+  ibm-not-wf-P69-ibm69n07.xml  expected=reject  observed=accept  not-wf/P69/ibm69n07.xml
+  ibm-not-wf-P71-ibm71n01.xml  expected=reject  observed=accept  not-wf/P71/ibm71n01.xml
+  ibm-not-wf-P71-ibm71n02.xml  expected=reject  observed=accept  not-wf/P71/ibm71n02.xml
+  ibm-not-wf-P72-ibm72n01.xml  expected=reject  observed=accept  not-wf/P72/ibm72n01.xml
+  ibm-not-wf-P72-ibm72n03.xml  expected=reject  observed=accept  not-wf/P72/ibm72n03.xml
+  ibm-not-wf-P72-ibm72n09.xml  expected=reject  observed=accept  not-wf/P72/ibm72n09.xml
+  ibm-not-wf-P75-ibm75n05.xml  expected=reject  observed=accept  not-wf/P75/ibm75n05.xml
+  ibm-not-wf-P75-ibm75n07.xml  expected=reject  observed=accept  not-wf/P75/ibm75n07.xml
+  ibm-not-wf-P75-ibm75n09.xml  expected=reject  observed=accept  not-wf/P75/ibm75n09.xml
+  ibm-not-wf-P75-ibm75n12.xml  expected=reject  observed=accept  not-wf/P75/ibm75n12.xml
+  ibm-not-wf-P76-ibm76n03.xml  expected=reject  observed=accept  not-wf/P76/ibm76n03.xml
+  ibm-not-wf-P81-ibm81n01.xml  expected=reject  observed=accept  not-wf/P81/ibm81n01.xml
+  ibm-not-wf-P81-ibm81n02.xml  expected=reject  observed=accept  not-wf/P81/ibm81n02.xml
+  ibm-not-wf-P81-ibm81n03.xml  expected=reject  observed=accept  not-wf/P81/ibm81n03.xml
+  ibm-not-wf-P81-ibm81n04.xml  expected=reject  observed=accept  not-wf/P81/ibm81n04.xml
+  ibm-not-wf-P81-ibm81n05.xml  expected=reject  observed=accept  not-wf/P81/ibm81n05.xml
+  ibm-not-wf-P81-ibm81n06.xml  expected=reject  observed=accept  not-wf/P81/ibm81n06.xml
+  ibm-not-wf-P81-ibm81n07.xml  expected=reject  observed=accept  not-wf/P81/ibm81n07.xml
+  ibm-not-wf-P81-ibm81n08.xml  expected=reject  observed=accept  not-wf/P81/ibm81n08.xml
+  ibm-not-wf-P81-ibm81n09.xml  expected=reject  observed=accept  not-wf/P81/ibm81n09.xml
+  ibm-not-wf-P82-ibm82n01.xml  expected=reject  observed=accept  not-wf/P82/ibm82n01.xml
+  ibm-not-wf-P83-ibm83n04.xml  expected=reject  observed=accept  not-wf/P83/ibm83n04.xml
+  ibm-not-wf-P85-ibm85n01.xml  expected=reject  observed=accept  not-wf/P85/ibm85n01.xml
+  ibm-not-wf-P85-ibm85n02.xml  expected=reject  observed=accept  not-wf/P85/ibm85n02.xml
+  ibm-not-wf-P85-ibm85n03.xml  expected=reject  observed=accept  not-wf/P85/ibm85n03.xml
+  ibm-not-wf-P85-ibm85n04.xml  expected=reject  observed=accept  not-wf/P85/ibm85n04.xml
+  ibm-not-wf-P85-ibm85n05.xml  expected=reject  observed=accept  not-wf/P85/ibm85n05.xml
+  ibm-not-wf-P85-ibm85n06.xml  expected=reject  observed=accept  not-wf/P85/ibm85n06.xml
+  ibm-not-wf-P85-ibm85n07.xml  expected=reject  observed=accept  not-wf/P85/ibm85n07.xml
+  ibm-not-wf-P85-ibm85n08.xml  expected=reject  observed=accept  not-wf/P85/ibm85n08.xml
+  ibm-not-wf-P85-ibm85n09.xml  expected=reject  observed=accept  not-wf/P85/ibm85n09.xml
+  ibm-not-wf-P85-ibm85n10.xml  expected=reject  observed=accept  not-wf/P85/ibm85n10.xml
+  ibm-not-wf-P85-ibm85n100.xml expected=reject  observed=accept  not-wf/P85/ibm85n100.xml
+  ibm-not-wf-P85-ibm85n101.xml expected=reject  observed=accept  not-wf/P85/ibm85n101.xml
+  ibm-not-wf-P85-ibm85n102.xml expected=reject  observed=accept  not-wf/P85/ibm85n102.xml
+  ibm-not-wf-P85-ibm85n103.xml expected=reject  observed=accept  not-wf/P85/ibm85n103.xml
+  ibm-not-wf-P85-ibm85n104.xml expected=reject  observed=accept  not-wf/P85/ibm85n104.xml
+  ibm-not-wf-P85-ibm85n105.xml expected=reject  observed=accept  not-wf/P85/ibm85n105.xml
+  ibm-not-wf-P85-ibm85n106.xml expected=reject  observed=accept  not-wf/P85/ibm85n106.xml
+  ibm-not-wf-P85-ibm85n107.xml expected=reject  observed=accept  not-wf/P85/ibm85n107.xml
+  ibm-not-wf-P85-ibm85n108.xml expected=reject  observed=accept  not-wf/P85/ibm85n108.xml
+  ibm-not-wf-P85-ibm85n109.xml expected=reject  observed=accept  not-wf/P85/ibm85n109.xml
+  ibm-not-wf-P85-ibm85n11.xml  expected=reject  observed=accept  not-wf/P85/ibm85n11.xml
+  ibm-not-wf-P85-ibm85n110.xml expected=reject  observed=accept  not-wf/P85/ibm85n110.xml
+  ibm-not-wf-P85-ibm85n111.xml expected=reject  observed=accept  not-wf/P85/ibm85n111.xml
+  ibm-not-wf-P85-ibm85n112.xml expected=reject  observed=accept  not-wf/P85/ibm85n112.xml
+  ibm-not-wf-P85-ibm85n113.xml expected=reject  observed=accept  not-wf/P85/ibm85n113.xml
+  ibm-not-wf-P85-ibm85n114.xml expected=reject  observed=accept  not-wf/P85/ibm85n114.xml
+  ibm-not-wf-P85-ibm85n115.xml expected=reject  observed=accept  not-wf/P85/ibm85n115.xml
+  ibm-not-wf-P85-ibm85n116.xml expected=reject  observed=accept  not-wf/P85/ibm85n116.xml
+  ibm-not-wf-P85-ibm85n117.xml expected=reject  observed=accept  not-wf/P85/ibm85n117.xml
+  ibm-not-wf-P85-ibm85n118.xml expected=reject  observed=accept  not-wf/P85/ibm85n118.xml
+  ibm-not-wf-P85-ibm85n119.xml expected=reject  observed=accept  not-wf/P85/ibm85n119.xml
+  ibm-not-wf-P85-ibm85n12.xml  expected=reject  observed=accept  not-wf/P85/ibm85n12.xml
+  ibm-not-wf-P85-ibm85n120.xml expected=reject  observed=accept  not-wf/P85/ibm85n120.xml
+  ibm-not-wf-P85-ibm85n121.xml expected=reject  observed=accept  not-wf/P85/ibm85n121.xml
+  ibm-not-wf-P85-ibm85n122.xml expected=reject  observed=accept  not-wf/P85/ibm85n122.xml
+  ibm-not-wf-P85-ibm85n123.xml expected=reject  observed=accept  not-wf/P85/ibm85n123.xml
+  ibm-not-wf-P85-ibm85n124.xml expected=reject  observed=accept  not-wf/P85/ibm85n124.xml
+  ibm-not-wf-P85-ibm85n125.xml expected=reject  observed=accept  not-wf/P85/ibm85n125.xml
+  ibm-not-wf-P85-ibm85n126.xml expected=reject  observed=accept  not-wf/P85/ibm85n126.xml
+  ibm-not-wf-P85-ibm85n127.xml expected=reject  observed=accept  not-wf/P85/ibm85n127.xml
+  ibm-not-wf-P85-ibm85n128.xml expected=reject  observed=accept  not-wf/P85/ibm85n128.xml
+  ibm-not-wf-P85-ibm85n129.xml expected=reject  observed=accept  not-wf/P85/ibm85n129.xml
+  ibm-not-wf-P85-ibm85n13.xml  expected=reject  observed=accept  not-wf/P85/ibm85n13.xml
+  ibm-not-wf-P85-ibm85n130.xml expected=reject  observed=accept  not-wf/P85/ibm85n130.xml
+  ibm-not-wf-P85-ibm85n131.xml expected=reject  observed=accept  not-wf/P85/ibm85n131.xml
+  ibm-not-wf-P85-ibm85n132.xml expected=reject  observed=accept  not-wf/P85/ibm85n132.xml
+  ibm-not-wf-P85-ibm85n133.xml expected=reject  observed=accept  not-wf/P85/ibm85n133.xml
+  ibm-not-wf-P85-ibm85n134.xml expected=reject  observed=accept  not-wf/P85/ibm85n134.xml
+  ibm-not-wf-P85-ibm85n135.xml expected=reject  observed=accept  not-wf/P85/ibm85n135.xml
+  ibm-not-wf-P85-ibm85n136.xml expected=reject  observed=accept  not-wf/P85/ibm85n136.xml
+  ibm-not-wf-P85-ibm85n137.xml expected=reject  observed=accept  not-wf/P85/ibm85n137.xml
+  ibm-not-wf-P85-ibm85n138.xml expected=reject  observed=accept  not-wf/P85/ibm85n138.xml
+  ibm-not-wf-P85-ibm85n139.xml expected=reject  observed=accept  not-wf/P85/ibm85n139.xml
+  ibm-not-wf-P85-ibm85n14.xml  expected=reject  observed=accept  not-wf/P85/ibm85n14.xml
+  ibm-not-wf-P85-ibm85n140.xml expected=reject  observed=accept  not-wf/P85/ibm85n140.xml
+  ibm-not-wf-P85-ibm85n141.xml expected=reject  observed=accept  not-wf/P85/ibm85n141.xml
+  ibm-not-wf-P85-ibm85n142.xml expected=reject  observed=accept  not-wf/P85/ibm85n142.xml
+  ibm-not-wf-P85-ibm85n143.xml expected=reject  observed=accept  not-wf/P85/ibm85n143.xml
+  ibm-not-wf-P85-ibm85n144.xml expected=reject  observed=accept  not-wf/P85/ibm85n144.xml
+  ibm-not-wf-P85-ibm85n145.xml expected=reject  observed=accept  not-wf/P85/ibm85n145.xml
+  ibm-not-wf-P85-ibm85n146.xml expected=reject  observed=accept  not-wf/P85/ibm85n146.xml
+  ibm-not-wf-P85-ibm85n147.xml expected=reject  observed=accept  not-wf/P85/ibm85n147.xml
+  ibm-not-wf-P85-ibm85n148.xml expected=reject  observed=accept  not-wf/P85/ibm85n148.xml
+  ibm-not-wf-P85-ibm85n149.xml expected=reject  observed=accept  not-wf/P85/ibm85n149.xml
+  ibm-not-wf-P85-ibm85n15.xml  expected=reject  observed=accept  not-wf/P85/ibm85n15.xml
+  ibm-not-wf-P85-ibm85n150.xml expected=reject  observed=accept  not-wf/P85/ibm85n150.xml
+  ibm-not-wf-P85-ibm85n151.xml expected=reject  observed=accept  not-wf/P85/ibm85n151.xml
+  ibm-not-wf-P85-ibm85n152.xml expected=reject  observed=accept  not-wf/P85/ibm85n152.xml
+  ibm-not-wf-P85-ibm85n153.xml expected=reject  observed=accept  not-wf/P85/ibm85n153.xml
+  ibm-not-wf-P85-ibm85n154.xml expected=reject  observed=accept  not-wf/P85/ibm85n154.xml
+  ibm-not-wf-P85-ibm85n155.xml expected=reject  observed=accept  not-wf/P85/ibm85n155.xml
+  ibm-not-wf-P85-ibm85n156.xml expected=reject  observed=accept  not-wf/P85/ibm85n156.xml
+  ibm-not-wf-P85-ibm85n157.xml expected=reject  observed=accept  not-wf/P85/ibm85n157.xml
+  ibm-not-wf-P85-ibm85n158.xml expected=reject  observed=accept  not-wf/P85/ibm85n158.xml
+  ibm-not-wf-P85-ibm85n159.xml expected=reject  observed=accept  not-wf/P85/ibm85n159.xml
+  ibm-not-wf-P85-ibm85n16.xml  expected=reject  observed=accept  not-wf/P85/ibm85n16.xml
+  ibm-not-wf-P85-ibm85n160.xml expected=reject  observed=accept  not-wf/P85/ibm85n160.xml
+  ibm-not-wf-P85-ibm85n161.xml expected=reject  observed=accept  not-wf/P85/ibm85n161.xml
+  ibm-not-wf-P85-ibm85n162.xml expected=reject  observed=accept  not-wf/P85/ibm85n162.xml
+  ibm-not-wf-P85-ibm85n163.xml expected=reject  observed=accept  not-wf/P85/ibm85n163.xml
+  ibm-not-wf-P85-ibm85n164.xml expected=reject  observed=accept  not-wf/P85/ibm85n164.xml
+  ibm-not-wf-P85-ibm85n165.xml expected=reject  observed=accept  not-wf/P85/ibm85n165.xml
+  ibm-not-wf-P85-ibm85n166.xml expected=reject  observed=accept  not-wf/P85/ibm85n166.xml
+  ibm-not-wf-P85-ibm85n167.xml expected=reject  observed=accept  not-wf/P85/ibm85n167.xml
+  ibm-not-wf-P85-ibm85n168.xml expected=reject  observed=accept  not-wf/P85/ibm85n168.xml
+  ibm-not-wf-P85-ibm85n169.xml expected=reject  observed=accept  not-wf/P85/ibm85n169.xml
+  ibm-not-wf-P85-ibm85n17.xml  expected=reject  observed=accept  not-wf/P85/ibm85n17.xml
+  ibm-not-wf-P85-ibm85n170.xml expected=reject  observed=accept  not-wf/P85/ibm85n170.xml
+  ibm-not-wf-P85-ibm85n171.xml expected=reject  observed=accept  not-wf/P85/ibm85n171.xml
+  ibm-not-wf-P85-ibm85n172.xml expected=reject  observed=accept  not-wf/P85/ibm85n172.xml
+  ibm-not-wf-P85-ibm85n173.xml expected=reject  observed=accept  not-wf/P85/ibm85n173.xml
+  ibm-not-wf-P85-ibm85n174.xml expected=reject  observed=accept  not-wf/P85/ibm85n174.xml
+  ibm-not-wf-P85-ibm85n175.xml expected=reject  observed=accept  not-wf/P85/ibm85n175.xml
+  ibm-not-wf-P85-ibm85n176.xml expected=reject  observed=accept  not-wf/P85/ibm85n176.xml
+  ibm-not-wf-P85-ibm85n177.xml expected=reject  observed=accept  not-wf/P85/ibm85n177.xml
+  ibm-not-wf-P85-ibm85n178.xml expected=reject  observed=accept  not-wf/P85/ibm85n178.xml
+  ibm-not-wf-P85-ibm85n179.xml expected=reject  observed=accept  not-wf/P85/ibm85n179.xml
+  ibm-not-wf-P85-ibm85n18.xml  expected=reject  observed=accept  not-wf/P85/ibm85n18.xml
+  ibm-not-wf-P85-ibm85n180.xml expected=reject  observed=accept  not-wf/P85/ibm85n180.xml
+  ibm-not-wf-P85-ibm85n181.xml expected=reject  observed=accept  not-wf/P85/ibm85n181.xml
+  ibm-not-wf-P85-ibm85n182.xml expected=reject  observed=accept  not-wf/P85/ibm85n182.xml
+  ibm-not-wf-P85-ibm85n183.xml expected=reject  observed=accept  not-wf/P85/ibm85n183.xml
+  ibm-not-wf-P85-ibm85n184.xml expected=reject  observed=accept  not-wf/P85/ibm85n184.xml
+  ibm-not-wf-P85-ibm85n185.xml expected=reject  observed=accept  not-wf/P85/ibm85n185.xml
+  ibm-not-wf-P85-ibm85n186.xml expected=reject  observed=accept  not-wf/P85/ibm85n186.xml
+  ibm-not-wf-P85-ibm85n187.xml expected=reject  observed=accept  not-wf/P85/ibm85n187.xml
+  ibm-not-wf-P85-ibm85n188.xml expected=reject  observed=accept  not-wf/P85/ibm85n188.xml
+  ibm-not-wf-P85-ibm85n189.xml expected=reject  observed=accept  not-wf/P85/ibm85n189.xml
+  ibm-not-wf-P85-ibm85n19.xml  expected=reject  observed=accept  not-wf/P85/ibm85n19.xml
+  ibm-not-wf-P85-ibm85n190.xml expected=reject  observed=accept  not-wf/P85/ibm85n190.xml
+  ibm-not-wf-P85-ibm85n191.xml expected=reject  observed=accept  not-wf/P85/ibm85n191.xml
+  ibm-not-wf-P85-ibm85n192.xml expected=reject  observed=accept  not-wf/P85/ibm85n192.xml
+  ibm-not-wf-P85-ibm85n193.xml expected=reject  observed=accept  not-wf/P85/ibm85n193.xml
+  ibm-not-wf-P85-ibm85n194.xml expected=reject  observed=accept  not-wf/P85/ibm85n194.xml
+  ibm-not-wf-P85-ibm85n195.xml expected=reject  observed=accept  not-wf/P85/ibm85n195.xml
+  ibm-not-wf-P85-ibm85n196.xml expected=reject  observed=accept  not-wf/P85/ibm85n196.xml
+  ibm-not-wf-P85-ibm85n197.xml expected=reject  observed=accept  not-wf/P85/ibm85n197.xml
+  ibm-not-wf-P85-ibm85n198.xml expected=reject  observed=accept  not-wf/P85/ibm85n198.xml
+  ibm-not-wf-P85-ibm85n20.xml  expected=reject  observed=accept  not-wf/P85/ibm85n20.xml
+  ibm-not-wf-P85-ibm85n21.xml  expected=reject  observed=accept  not-wf/P85/ibm85n21.xml
+  ibm-not-wf-P85-ibm85n22.xml  expected=reject  observed=accept  not-wf/P85/ibm85n22.xml
+  ibm-not-wf-P85-ibm85n23.xml  expected=reject  observed=accept  not-wf/P85/ibm85n23.xml
+  ibm-not-wf-P85-ibm85n24.xml  expected=reject  observed=accept  not-wf/P85/ibm85n24.xml
+  ibm-not-wf-P85-ibm85n25.xml  expected=reject  observed=accept  not-wf/P85/ibm85n25.xml
+  ibm-not-wf-P85-ibm85n26.xml  expected=reject  observed=accept  not-wf/P85/ibm85n26.xml
+  ibm-not-wf-P85-ibm85n27.xml  expected=reject  observed=accept  not-wf/P85/ibm85n27.xml
+  ibm-not-wf-P85-ibm85n28.xml  expected=reject  observed=accept  not-wf/P85/ibm85n28.xml
+  ibm-not-wf-P85-ibm85n29.xml  expected=reject  observed=accept  not-wf/P85/ibm85n29.xml
+  ibm-not-wf-P85-ibm85n30.xml  expected=reject  observed=accept  not-wf/P85/ibm85n30.xml
+  ibm-not-wf-P85-ibm85n31.xml  expected=reject  observed=accept  not-wf/P85/ibm85n31.xml
+  ibm-not-wf-P85-ibm85n32.xml  expected=reject  observed=accept  not-wf/P85/ibm85n32.xml
+  ibm-not-wf-P85-ibm85n33.xml  expected=reject  observed=accept  not-wf/P85/ibm85n33.xml
+  ibm-not-wf-P85-ibm85n34.xml  expected=reject  observed=accept  not-wf/P85/ibm85n34.xml
+  ibm-not-wf-P85-ibm85n35.xml  expected=reject  observed=accept  not-wf/P85/ibm85n35.xml
+  ibm-not-wf-P85-ibm85n36.xml  expected=reject  observed=accept  not-wf/P85/ibm85n36.xml
+  ibm-not-wf-P85-ibm85n37.xml  expected=reject  observed=accept  not-wf/P85/ibm85n37.xml
+  ibm-not-wf-P85-ibm85n38.xml  expected=reject  observed=accept  not-wf/P85/ibm85n38.xml
+  ibm-not-wf-P85-ibm85n39.xml  expected=reject  observed=accept  not-wf/P85/ibm85n39.xml
+  ibm-not-wf-P85-ibm85n40.xml  expected=reject  observed=accept  not-wf/P85/ibm85n40.xml
+  ibm-not-wf-P85-ibm85n41.xml  expected=reject  observed=accept  not-wf/P85/ibm85n41.xml
+  ibm-not-wf-P85-ibm85n42.xml  expected=reject  observed=accept  not-wf/P85/ibm85n42.xml
+  ibm-not-wf-P85-ibm85n43.xml  expected=reject  observed=accept  not-wf/P85/ibm85n43.xml
+  ibm-not-wf-P85-ibm85n44.xml  expected=reject  observed=accept  not-wf/P85/ibm85n44.xml
+  ibm-not-wf-P85-ibm85n45.xml  expected=reject  observed=accept  not-wf/P85/ibm85n45.xml
+  ibm-not-wf-P85-ibm85n46.xml  expected=reject  observed=accept  not-wf/P85/ibm85n46.xml
+  ibm-not-wf-P85-ibm85n47.xml  expected=reject  observed=accept  not-wf/P85/ibm85n47.xml
+  ibm-not-wf-P85-ibm85n48.xml  expected=reject  observed=accept  not-wf/P85/ibm85n48.xml
+  ibm-not-wf-P85-ibm85n49.xml  expected=reject  observed=accept  not-wf/P85/ibm85n49.xml
+  ibm-not-wf-P85-ibm85n50.xml  expected=reject  observed=accept  not-wf/P85/ibm85n50.xml
+  ibm-not-wf-P85-ibm85n51.xml  expected=reject  observed=accept  not-wf/P85/ibm85n51.xml
+  ibm-not-wf-P85-ibm85n52.xml  expected=reject  observed=accept  not-wf/P85/ibm85n52.xml
+  ibm-not-wf-P85-ibm85n53.xml  expected=reject  observed=accept  not-wf/P85/ibm85n53.xml
+  ibm-not-wf-P85-ibm85n54.xml  expected=reject  observed=accept  not-wf/P85/ibm85n54.xml
+  ibm-not-wf-P85-ibm85n55.xml  expected=reject  observed=accept  not-wf/P85/ibm85n55.xml
+  ibm-not-wf-P85-ibm85n56.xml  expected=reject  observed=accept  not-wf/P85/ibm85n56.xml
+  ibm-not-wf-P85-ibm85n57.xml  expected=reject  observed=accept  not-wf/P85/ibm85n57.xml
+  ibm-not-wf-P85-ibm85n58.xml  expected=reject  observed=accept  not-wf/P85/ibm85n58.xml
+  ibm-not-wf-P85-ibm85n59.xml  expected=reject  observed=accept  not-wf/P85/ibm85n59.xml
+  ibm-not-wf-P85-ibm85n60.xml  expected=reject  observed=accept  not-wf/P85/ibm85n60.xml
+  ibm-not-wf-P85-ibm85n61.xml  expected=reject  observed=accept  not-wf/P85/ibm85n61.xml
+  ibm-not-wf-P85-ibm85n62.xml  expected=reject  observed=accept  not-wf/P85/ibm85n62.xml
+  ibm-not-wf-P85-ibm85n63.xml  expected=reject  observed=accept  not-wf/P85/ibm85n63.xml
+  ibm-not-wf-P85-ibm85n64.xml  expected=reject  observed=accept  not-wf/P85/ibm85n64.xml
+  ibm-not-wf-P85-ibm85n65.xml  expected=reject  observed=accept  not-wf/P85/ibm85n65.xml
+  ibm-not-wf-P85-ibm85n66.xml  expected=reject  observed=accept  not-wf/P85/ibm85n66.xml
+  ibm-not-wf-P85-ibm85n67.xml  expected=reject  observed=accept  not-wf/P85/ibm85n67.xml
+  ibm-not-wf-P85-ibm85n68.xml  expected=reject  observed=accept  not-wf/P85/ibm85n68.xml
+  ibm-not-wf-P85-ibm85n69.xml  expected=reject  observed=accept  not-wf/P85/ibm85n69.xml
+  ibm-not-wf-P85-ibm85n70.xml  expected=reject  observed=accept  not-wf/P85/ibm85n70.xml
+  ibm-not-wf-P85-ibm85n71.xml  expected=reject  observed=accept  not-wf/P85/ibm85n71.xml
+  ibm-not-wf-P85-ibm85n72.xml  expected=reject  observed=accept  not-wf/P85/ibm85n72.xml
+  ibm-not-wf-P85-ibm85n73.xml  expected=reject  observed=accept  not-wf/P85/ibm85n73.xml
+  ibm-not-wf-P85-ibm85n74.xml  expected=reject  observed=accept  not-wf/P85/ibm85n74.xml
+  ibm-not-wf-P85-ibm85n75.xml  expected=reject  observed=accept  not-wf/P85/ibm85n75.xml
+  ibm-not-wf-P85-ibm85n76.xml  expected=reject  observed=accept  not-wf/P85/ibm85n76.xml
+  ibm-not-wf-P85-ibm85n77.xml  expected=reject  observed=accept  not-wf/P85/ibm85n77.xml
+  ibm-not-wf-P85-ibm85n78.xml  expected=reject  observed=accept  not-wf/P85/ibm85n78.xml
+  ibm-not-wf-P85-ibm85n79.xml  expected=reject  observed=accept  not-wf/P85/ibm85n79.xml
+  ibm-not-wf-P85-ibm85n80.xml  expected=reject  observed=accept  not-wf/P85/ibm85n80.xml
+  ibm-not-wf-P85-ibm85n81.xml  expected=reject  observed=accept  not-wf/P85/ibm85n81.xml
+  ibm-not-wf-P85-ibm85n82.xml  expected=reject  observed=accept  not-wf/P85/ibm85n82.xml
+  ibm-not-wf-P85-ibm85n83.xml  expected=reject  observed=accept  not-wf/P85/ibm85n83.xml
+  ibm-not-wf-P85-ibm85n84.xml  expected=reject  observed=accept  not-wf/P85/ibm85n84.xml
+  ibm-not-wf-P85-ibm85n85.xml  expected=reject  observed=accept  not-wf/P85/ibm85n85.xml
+  ibm-not-wf-P85-ibm85n86.xml  expected=reject  observed=accept  not-wf/P85/ibm85n86.xml
+  ibm-not-wf-P85-ibm85n87.xml  expected=reject  observed=accept  not-wf/P85/ibm85n87.xml
+  ibm-not-wf-P85-ibm85n88.xml  expected=reject  observed=accept  not-wf/P85/ibm85n88.xml
+  ibm-not-wf-P85-ibm85n89.xml  expected=reject  observed=accept  not-wf/P85/ibm85n89.xml
+  ibm-not-wf-P85-ibm85n90.xml  expected=reject  observed=accept  not-wf/P85/ibm85n90.xml
+  ibm-not-wf-P85-ibm85n91.xml  expected=reject  observed=accept  not-wf/P85/ibm85n91.xml
+  ibm-not-wf-P85-ibm85n92.xml  expected=reject  observed=accept  not-wf/P85/ibm85n92.xml
+  ibm-not-wf-P85-ibm85n93.xml  expected=reject  observed=accept  not-wf/P85/ibm85n93.xml
+  ibm-not-wf-P85-ibm85n94.xml  expected=reject  observed=accept  not-wf/P85/ibm85n94.xml
+  ibm-not-wf-P85-ibm85n95.xml  expected=reject  observed=accept  not-wf/P85/ibm85n95.xml
+  ibm-not-wf-P85-ibm85n96.xml  expected=reject  observed=accept  not-wf/P85/ibm85n96.xml
+  ibm-not-wf-P85-ibm85n97.xml  expected=reject  observed=accept  not-wf/P85/ibm85n97.xml
+  ibm-not-wf-P85-ibm85n98.xml  expected=reject  observed=accept  not-wf/P85/ibm85n98.xml
+  ibm-not-wf-P85-ibm85n99.xml  expected=reject  observed=accept  not-wf/P85/ibm85n99.xml
+  ibm-not-wf-P86-ibm86n01.xml  expected=reject  observed=accept  not-wf/P86/ibm86n01.xml
+  ibm-not-wf-P86-ibm86n02.xml  expected=reject  observed=accept  not-wf/P86/ibm86n02.xml
+  ibm-not-wf-P86-ibm86n03.xml  expected=reject  observed=accept  not-wf/P86/ibm86n03.xml
+  ibm-not-wf-P86-ibm86n04.xml  expected=reject  observed=accept  not-wf/P86/ibm86n04.xml
+  ibm-not-wf-P87-ibm87n01.xml  expected=reject  observed=accept  not-wf/P87/ibm87n01.xml
+  ibm-not-wf-P87-ibm87n02.xml  expected=reject  observed=accept  not-wf/P87/ibm87n02.xml
+  ibm-not-wf-P87-ibm87n03.xml  expected=reject  observed=accept  not-wf/P87/ibm87n03.xml
+  ibm-not-wf-P87-ibm87n04.xml  expected=reject  observed=accept  not-wf/P87/ibm87n04.xml
+  ibm-not-wf-P87-ibm87n05.xml  expected=reject  observed=accept  not-wf/P87/ibm87n05.xml
+  ibm-not-wf-P87-ibm87n06.xml  expected=reject  observed=accept  not-wf/P87/ibm87n06.xml
+  ibm-not-wf-P87-ibm87n07.xml  expected=reject  observed=accept  not-wf/P87/ibm87n07.xml
+  ibm-not-wf-P87-ibm87n08.xml  expected=reject  observed=accept  not-wf/P87/ibm87n08.xml
+  ibm-not-wf-P87-ibm87n09.xml  expected=reject  observed=accept  not-wf/P87/ibm87n09.xml
+  ibm-not-wf-P87-ibm87n10.xml  expected=reject  observed=accept  not-wf/P87/ibm87n10.xml
+  ibm-not-wf-P87-ibm87n11.xml  expected=reject  observed=accept  not-wf/P87/ibm87n11.xml
+  ibm-not-wf-P87-ibm87n12.xml  expected=reject  observed=accept  not-wf/P87/ibm87n12.xml
+  ibm-not-wf-P87-ibm87n13.xml  expected=reject  observed=accept  not-wf/P87/ibm87n13.xml
+  ibm-not-wf-P87-ibm87n14.xml  expected=reject  observed=accept  not-wf/P87/ibm87n14.xml
+  ibm-not-wf-P87-ibm87n15.xml  expected=reject  observed=accept  not-wf/P87/ibm87n15.xml
+  ibm-not-wf-P87-ibm87n16.xml  expected=reject  observed=accept  not-wf/P87/ibm87n16.xml
+  ibm-not-wf-P87-ibm87n17.xml  expected=reject  observed=accept  not-wf/P87/ibm87n17.xml
+  ibm-not-wf-P87-ibm87n18.xml  expected=reject  observed=accept  not-wf/P87/ibm87n18.xml
+  ibm-not-wf-P87-ibm87n19.xml  expected=reject  observed=accept  not-wf/P87/ibm87n19.xml
+  ibm-not-wf-P87-ibm87n20.xml  expected=reject  observed=accept  not-wf/P87/ibm87n20.xml
+  ibm-not-wf-P87-ibm87n21.xml  expected=reject  observed=accept  not-wf/P87/ibm87n21.xml
+  ibm-not-wf-P87-ibm87n22.xml  expected=reject  observed=accept  not-wf/P87/ibm87n22.xml
+  ibm-not-wf-P87-ibm87n23.xml  expected=reject  observed=accept  not-wf/P87/ibm87n23.xml
+  ibm-not-wf-P87-ibm87n24.xml  expected=reject  observed=accept  not-wf/P87/ibm87n24.xml
+  ibm-not-wf-P87-ibm87n25.xml  expected=reject  observed=accept  not-wf/P87/ibm87n25.xml
+  ibm-not-wf-P87-ibm87n26.xml  expected=reject  observed=accept  not-wf/P87/ibm87n26.xml
+  ibm-not-wf-P87-ibm87n27.xml  expected=reject  observed=accept  not-wf/P87/ibm87n27.xml
+  ibm-not-wf-P87-ibm87n28.xml  expected=reject  observed=accept  not-wf/P87/ibm87n28.xml
+  ibm-not-wf-P87-ibm87n29.xml  expected=reject  observed=accept  not-wf/P87/ibm87n29.xml
+  ibm-not-wf-P87-ibm87n30.xml  expected=reject  observed=accept  not-wf/P87/ibm87n30.xml
+  ibm-not-wf-P87-ibm87n31.xml  expected=reject  observed=accept  not-wf/P87/ibm87n31.xml
+  ibm-not-wf-P87-ibm87n32.xml  expected=reject  observed=accept  not-wf/P87/ibm87n32.xml
+  ibm-not-wf-P87-ibm87n33.xml  expected=reject  observed=accept  not-wf/P87/ibm87n33.xml
+  ibm-not-wf-P87-ibm87n34.xml  expected=reject  observed=accept  not-wf/P87/ibm87n34.xml
+  ibm-not-wf-P87-ibm87n35.xml  expected=reject  observed=accept  not-wf/P87/ibm87n35.xml
+  ibm-not-wf-P87-ibm87n36.xml  expected=reject  observed=accept  not-wf/P87/ibm87n36.xml
+  ibm-not-wf-P87-ibm87n37.xml  expected=reject  observed=accept  not-wf/P87/ibm87n37.xml
+  ibm-not-wf-P87-ibm87n38.xml  expected=reject  observed=accept  not-wf/P87/ibm87n38.xml
+  ibm-not-wf-P87-ibm87n39.xml  expected=reject  observed=accept  not-wf/P87/ibm87n39.xml
+  ibm-not-wf-P87-ibm87n40.xml  expected=reject  observed=accept  not-wf/P87/ibm87n40.xml
+  ibm-not-wf-P87-ibm87n41.xml  expected=reject  observed=accept  not-wf/P87/ibm87n41.xml
+  ibm-not-wf-P87-ibm87n42.xml  expected=reject  observed=accept  not-wf/P87/ibm87n42.xml
+  ibm-not-wf-P87-ibm87n43.xml  expected=reject  observed=accept  not-wf/P87/ibm87n43.xml
+  ibm-not-wf-P87-ibm87n44.xml  expected=reject  observed=accept  not-wf/P87/ibm87n44.xml
+  ibm-not-wf-P87-ibm87n45.xml  expected=reject  observed=accept  not-wf/P87/ibm87n45.xml
+  ibm-not-wf-P87-ibm87n46.xml  expected=reject  observed=accept  not-wf/P87/ibm87n46.xml
+  ibm-not-wf-P87-ibm87n47.xml  expected=reject  observed=accept  not-wf/P87/ibm87n47.xml
+  ibm-not-wf-P87-ibm87n48.xml  expected=reject  observed=accept  not-wf/P87/ibm87n48.xml
+  ibm-not-wf-P87-ibm87n49.xml  expected=reject  observed=accept  not-wf/P87/ibm87n49.xml
+  ibm-not-wf-P87-ibm87n50.xml  expected=reject  observed=accept  not-wf/P87/ibm87n50.xml
+  ibm-not-wf-P87-ibm87n51.xml  expected=reject  observed=accept  not-wf/P87/ibm87n51.xml
+  ibm-not-wf-P87-ibm87n52.xml  expected=reject  observed=accept  not-wf/P87/ibm87n52.xml
+  ibm-not-wf-P87-ibm87n53.xml  expected=reject  observed=accept  not-wf/P87/ibm87n53.xml
+  ibm-not-wf-P87-ibm87n54.xml  expected=reject  observed=accept  not-wf/P87/ibm87n54.xml
+  ibm-not-wf-P87-ibm87n55.xml  expected=reject  observed=accept  not-wf/P87/ibm87n55.xml
+  ibm-not-wf-P87-ibm87n56.xml  expected=reject  observed=accept  not-wf/P87/ibm87n56.xml
+  ibm-not-wf-P87-ibm87n57.xml  expected=reject  observed=accept  not-wf/P87/ibm87n57.xml
+  ibm-not-wf-P87-ibm87n58.xml  expected=reject  observed=accept  not-wf/P87/ibm87n58.xml
+  ibm-not-wf-P87-ibm87n59.xml  expected=reject  observed=accept  not-wf/P87/ibm87n59.xml
+  ibm-not-wf-P87-ibm87n60.xml  expected=reject  observed=accept  not-wf/P87/ibm87n60.xml
+  ibm-not-wf-P87-ibm87n61.xml  expected=reject  observed=accept  not-wf/P87/ibm87n61.xml
+  ibm-not-wf-P87-ibm87n62.xml  expected=reject  observed=accept  not-wf/P87/ibm87n62.xml
+  ibm-not-wf-P87-ibm87n63.xml  expected=reject  observed=accept  not-wf/P87/ibm87n63.xml
+  ibm-not-wf-P87-ibm87n64.xml  expected=reject  observed=accept  not-wf/P87/ibm87n64.xml
+  ibm-not-wf-P87-ibm87n66.xml  expected=reject  observed=accept  not-wf/P87/ibm87n66.xml
+  ibm-not-wf-P87-ibm87n67.xml  expected=reject  observed=accept  not-wf/P87/ibm87n67.xml
+  ibm-not-wf-P87-ibm87n68.xml  expected=reject  observed=accept  not-wf/P87/ibm87n68.xml
+  ibm-not-wf-P87-ibm87n69.xml  expected=reject  observed=accept  not-wf/P87/ibm87n69.xml
+  ibm-not-wf-P87-ibm87n70.xml  expected=reject  observed=accept  not-wf/P87/ibm87n70.xml
+  ibm-not-wf-P87-ibm87n71.xml  expected=reject  observed=accept  not-wf/P87/ibm87n71.xml
+  ibm-not-wf-P87-ibm87n72.xml  expected=reject  observed=accept  not-wf/P87/ibm87n72.xml
+  ibm-not-wf-P87-ibm87n73.xml  expected=reject  observed=accept  not-wf/P87/ibm87n73.xml
+  ibm-not-wf-P87-ibm87n74.xml  expected=reject  observed=accept  not-wf/P87/ibm87n74.xml
+  ibm-not-wf-P87-ibm87n75.xml  expected=reject  observed=accept  not-wf/P87/ibm87n75.xml
+  ibm-not-wf-P87-ibm87n76.xml  expected=reject  observed=accept  not-wf/P87/ibm87n76.xml
+  ibm-not-wf-P87-ibm87n77.xml  expected=reject  observed=accept  not-wf/P87/ibm87n77.xml
+  ibm-not-wf-P87-ibm87n78.xml  expected=reject  observed=accept  not-wf/P87/ibm87n78.xml
+  ibm-not-wf-P87-ibm87n79.xml  expected=reject  observed=accept  not-wf/P87/ibm87n79.xml
+  ibm-not-wf-P87-ibm87n80.xml  expected=reject  observed=accept  not-wf/P87/ibm87n80.xml
+  ibm-not-wf-P87-ibm87n81.xml  expected=reject  observed=accept  not-wf/P87/ibm87n81.xml
+  ibm-not-wf-P87-ibm87n82.xml  expected=reject  observed=accept  not-wf/P87/ibm87n82.xml
+  ibm-not-wf-P87-ibm87n83.xml  expected=reject  observed=accept  not-wf/P87/ibm87n83.xml
+  ibm-not-wf-P87-ibm87n84.xml  expected=reject  observed=accept  not-wf/P87/ibm87n84.xml
+  ibm-not-wf-P87-ibm87n85.xml  expected=reject  observed=accept  not-wf/P87/ibm87n85.xml
+  ibm-not-wf-P88-ibm88n01.xml  expected=reject  observed=accept  not-wf/P88/ibm88n01.xml
+  ibm-not-wf-P88-ibm88n02.xml  expected=reject  observed=accept  not-wf/P88/ibm88n02.xml
+  ibm-not-wf-P88-ibm88n03.xml  expected=reject  observed=accept  not-wf/P88/ibm88n03.xml
+  ibm-not-wf-P88-ibm88n04.xml  expected=reject  observed=accept  not-wf/P88/ibm88n04.xml
+  ibm-not-wf-P88-ibm88n05.xml  expected=reject  observed=accept  not-wf/P88/ibm88n05.xml
+  ibm-not-wf-P88-ibm88n06.xml  expected=reject  observed=accept  not-wf/P88/ibm88n06.xml
+  ibm-not-wf-P88-ibm88n08.xml  expected=reject  observed=accept  not-wf/P88/ibm88n08.xml
+  ibm-not-wf-P88-ibm88n09.xml  expected=reject  observed=accept  not-wf/P88/ibm88n09.xml
+  ibm-not-wf-P88-ibm88n10.xml  expected=reject  observed=accept  not-wf/P88/ibm88n10.xml
+  ibm-not-wf-P88-ibm88n11.xml  expected=reject  observed=accept  not-wf/P88/ibm88n11.xml
+  ibm-not-wf-P88-ibm88n12.xml  expected=reject  observed=accept  not-wf/P88/ibm88n12.xml
+  ibm-not-wf-P88-ibm88n13.xml  expected=reject  observed=accept  not-wf/P88/ibm88n13.xml
+  ibm-not-wf-P88-ibm88n14.xml  expected=reject  observed=accept  not-wf/P88/ibm88n14.xml
+  ibm-not-wf-P88-ibm88n15.xml  expected=reject  observed=accept  not-wf/P88/ibm88n15.xml
+  ibm-not-wf-P88-ibm88n16.xml  expected=reject  observed=accept  not-wf/P88/ibm88n16.xml
+  ibm-not-wf-P89-ibm89n01.xml  expected=reject  observed=accept  not-wf/P89/ibm89n01.xml
+  ibm-not-wf-P89-ibm89n02.xml  expected=reject  observed=accept  not-wf/P89/ibm89n02.xml
+  ibm-not-wf-P89-ibm89n03.xml  expected=reject  observed=accept  not-wf/P89/ibm89n03.xml
+  ibm-not-wf-P89-ibm89n04.xml  expected=reject  observed=accept  not-wf/P89/ibm89n04.xml
+  ibm-not-wf-P89-ibm89n05.xml  expected=reject  observed=accept  not-wf/P89/ibm89n05.xml
+  ibm-valid-P03-ibm03v01.xml   expected=accept  observed=reject  valid/P03/ibm03v01.xml
+  ibm-valid-P11-ibm11v01.xml   expected=accept  observed=reject  valid/P11/ibm11v01.xml
+  ibm-valid-P11-ibm11v02.xml   expected=accept  observed=reject  valid/P11/ibm11v02.xml
+  ibm-valid-P68-ibm68v02.xml   expected=accept  observed=reject  valid/P68/ibm68v02.xml
+  ibm-valid-P69-ibm69v02.xml   expected=accept  observed=reject  valid/P69/ibm69v02.xml
+  ibm-valid-P70-ibm70v01.xml   expected=accept  observed=reject  valid/P70/ibm70v01.xml
+  ibm-valid-P78-ibm78v01.xml   expected=accept  observed=reject  valid/P78/ibm78v01.xml
+  ibm-valid-P79-ibm79v01.xml   expected=accept  observed=reject  valid/P79/ibm79v01.xml
+  ibm-1-1-not-wf-P77-ibm77n13.xml expected=reject  observed=accept  not-wf/P77/ibm77n13.xml
+  ibm-1-1-valid-P02-ibm02v01.xml expected=accept  observed=reject  valid/P02/ibm02v01.xml
+  ibm-1-1-valid-P02-ibm02v02.xml expected=accept  observed=reject  valid/P02/ibm02v02.xml
+  ibm-1-1-valid-P02-ibm02v03.xml expected=accept  observed=reject  valid/P02/ibm02v03.xml
+  ibm-1-1-valid-P02-ibm02v04.xml expected=accept  observed=reject  valid/P02/ibm02v04.xml
+  ibm-1-1-valid-P02-ibm02v05.xml expected=accept  observed=reject  valid/P02/ibm02v05.xml
+  ibm-1-1-valid-P02-ibm02v06.xml expected=accept  observed=reject  valid/P02/ibm02v06.xml
+  ibm-1-1-valid-P03-ibm03v01.xml expected=accept  observed=reject  valid/P03/ibm03v01.xml
+  ibm-1-1-valid-P03-ibm03v02.xml expected=accept  observed=reject  valid/P03/ibm03v02.xml
+  ibm-1-1-valid-P03-ibm03v03.xml expected=accept  observed=reject  valid/P03/ibm03v03.xml
+  ibm-1-1-valid-P03-ibm03v04.xml expected=accept  observed=reject  valid/P03/ibm03v04.xml
+  ibm-1-1-valid-P03-ibm03v05.xml expected=accept  observed=reject  valid/P03/ibm03v05.xml
+  ibm-1-1-valid-P03-ibm03v06.xml expected=accept  observed=reject  valid/P03/ibm03v06.xml
+  ibm-1-1-valid-P03-ibm03v07.xml expected=accept  observed=reject  valid/P03/ibm03v07.xml
+  ibm-1-1-valid-P03-ibm03v08.xml expected=accept  observed=reject  valid/P03/ibm03v08.xml
+  ibm-1-1-valid-P03-ibm03v09.xml expected=accept  observed=reject  valid/P03/ibm03v09.xml
+  ibm-1-1-valid-P04-ibm04v01.xml expected=accept  observed=reject  valid/P04/ibm04v01.xml
+  ibm-1-1-valid-P04-ibm04av01.xml expected=accept  observed=reject  valid/P04a/ibm04av01.xml
+  ibm-1-1-valid-P05-ibm05v01.xml expected=accept  observed=reject  valid/P05/ibm05v01.xml
+  ibm-1-1-valid-P05-ibm05v02.xml expected=accept  observed=reject  valid/P05/ibm05v02.xml
+  ibm-1-1-valid-P05-ibm05v03.xml expected=accept  observed=reject  valid/P05/ibm05v03.xml
+  ibm-1-1-valid-P05-ibm05v04.xml expected=accept  observed=reject  valid/P05/ibm05v04.xml
+  ibm-1-1-valid-P05-ibm05v05.xml expected=accept  observed=reject  valid/P05/ibm05v05.xml
+  ibm-1-1-valid-P047-ibm07v01.xml expected=accept  observed=reject  valid/P07/ibm07v01.xml
+  ibm-1-1-valid-P77-ibm77v01.xml expected=accept  observed=reject  valid/P77/ibm77v01.xml
+  ibm-1-1-valid-P77-ibm77v02.xml expected=accept  observed=reject  valid/P77/ibm77v02.xml
+  ibm-1-1-valid-P77-ibm77v03.xml expected=accept  observed=reject  valid/P77/ibm77v03.xml
+  ibm-1-1-valid-P77-ibm77v04.xml expected=accept  observed=reject  valid/P77/ibm77v04.xml
+  ibm-1-1-valid-P77-ibm77v05.xml expected=accept  observed=reject  valid/P77/ibm77v05.xml
+  ibm-1-1-valid-P77-ibm77v06.xml expected=accept  observed=reject  valid/P77/ibm77v06.xml
+  ibm-1-1-valid-P77-ibm77v07.xml expected=accept  observed=reject  valid/P77/ibm77v07.xml
+  ibm-1-1-valid-P77-ibm77v08.xml expected=accept  observed=reject  valid/P77/ibm77v08.xml
+  ibm-1-1-valid-P77-ibm77v09.xml expected=accept  observed=reject  valid/P77/ibm77v09.xml
+  ibm-1-1-valid-P77-ibm77v10.xml expected=accept  observed=reject  valid/P77/ibm77v10.xml
+  ibm-1-1-valid-P77-ibm77v11.xml expected=accept  observed=reject  valid/P77/ibm77v11.xml
+  ibm-1-1-valid-P77-ibm77v12.xml expected=accept  observed=reject  valid/P77/ibm77v12.xml
+  ibm-1-1-valid-P77-ibm77v13.xml expected=accept  observed=reject  valid/P77/ibm77v13.xml
+  ibm-1-1-valid-P77-ibm77v14.xml expected=accept  observed=reject  valid/P77/ibm77v14.xml
+  ibm-1-1-valid-P77-ibm77v15.xml expected=accept  observed=reject  valid/P77/ibm77v15.xml
+  ibm-1-1-valid-P77-ibm77v16.xml expected=accept  observed=reject  valid/P77/ibm77v16.xml
+  ibm-1-1-valid-P77-ibm77v17.xml expected=accept  observed=reject  valid/P77/ibm77v17.xml
+  ibm-1-1-valid-P77-ibm77v18.xml expected=accept  observed=reject  valid/P77/ibm77v18.xml
+  ibm-1-1-valid-P77-ibm77v19.xml expected=accept  observed=reject  valid/P77/ibm77v19.xml
+  ibm-1-1-valid-P77-ibm77v20.xml expected=accept  observed=reject  valid/P77/ibm77v20.xml
+  ibm-1-1-valid-P77-ibm77v21.xml expected=accept  observed=reject  valid/P77/ibm77v21.xml
+  ibm-1-1-valid-P77-ibm77v22.xml expected=accept  observed=reject  valid/P77/ibm77v22.xml
+  ibm-1-1-valid-P77-ibm77v23.xml expected=accept  observed=reject  valid/P77/ibm77v23.xml
+  ibm-1-1-valid-P77-ibm77v24.xml expected=accept  observed=reject  valid/P77/ibm77v24.xml
+  ibm-1-1-valid-P77-ibm77v25.xml expected=accept  observed=reject  valid/P77/ibm77v25.xml
+  ibm-1-1-valid-P77-ibm77v26.xml expected=accept  observed=reject  valid/P77/ibm77v26.xml
+  ibm-1-1-valid-P77-ibm77v27.xml expected=accept  observed=reject  valid/P77/ibm77v27.xml
+  ibm-1-1-valid-P77-ibm77v28.xml expected=accept  observed=reject  valid/P77/ibm77v28.xml
+  ibm-1-1-valid-P77-ibm77v29.xml expected=accept  observed=reject  valid/P77/ibm77v29.xml
+  ibm-1-1-valid-P77-ibm77v30.xml expected=accept  observed=reject  valid/P77/ibm77v30.xml
+  pr-xml-euc-jp                expected=accept  observed=reject  pr-xml-euc-jp.xml
+  pr-xml-iso-2022-jp           expected=accept  observed=reject  pr-xml-iso-2022-jp.xml
+  pr-xml-little                expected=accept  observed=reject  pr-xml-little-endian.xml
+  pr-xml-shift_jis             expected=accept  observed=reject  pr-xml-shift_jis.xml
+  pr-xml-utf-16                expected=accept  observed=reject  pr-xml-utf-16.xml
+  weekly-euc-jp                expected=accept  observed=reject  weekly-euc-jp.xml
+  weekly-iso-2022-jp           expected=accept  observed=reject  weekly-iso-2022-jp.xml
+  weekly-little                expected=accept  observed=reject  weekly-little-endian.xml
+  weekly-shift_jis             expected=accept  observed=reject  weekly-shift_jis.xml
+  weekly-utf-16                expected=accept  observed=reject  weekly-utf-16.xml
+  o-p49pass1                   expected=accept  observed=reject  p49pass1.xml
+  o-p50pass1                   expected=accept  observed=reject  p50pass1.xml
+  o-p01pass1                   expected=reject  observed=accept  p01pass1.xml
+  o-p01pass3                   expected=reject  observed=accept  p01pass3.xml
+  o-p03pass1                   expected=reject  observed=accept  p03pass1.xml
+  o-p04pass1                   expected=reject  observed=accept  p04pass1.xml
+  o-p05pass1                   expected=reject  observed=accept  p05pass1.xml
+  o-p06fail1                   expected=reject  observed=accept  p06fail1.xml
+  o-p08fail1                   expected=reject  observed=accept  p08fail1.xml
+  o-p08fail2                   expected=reject  observed=accept  p08fail2.xml
+  o-p10pass1                   expected=reject  observed=accept  p10pass1.xml
+  o-p14pass1                   expected=reject  observed=accept  p14pass1.xml
+  o-p15pass1                   expected=reject  observed=accept  p15pass1.xml
+  o-p16pass1                   expected=reject  observed=accept  p16pass1.xml
+  o-p16pass2                   expected=reject  observed=accept  p16pass2.xml
+  o-p16pass3                   expected=reject  observed=accept  p16pass3.xml
+  o-p18pass1                   expected=reject  observed=accept  p18pass1.xml
+  o-p22pass1                   expected=reject  observed=accept  p22pass1.xml
+  o-p22pass2                   expected=reject  observed=accept  p22pass2.xml
+  o-p22pass3                   expected=reject  observed=accept  p22pass3.xml
+  o-p23pass1                   expected=reject  observed=accept  p23pass1.xml
+  o-p23pass2                   expected=reject  observed=accept  p23pass2.xml
+  o-p23pass3                   expected=reject  observed=accept  p23pass3.xml
+  o-p23pass4                   expected=reject  observed=accept  p23pass4.xml
+  o-p24pass1                   expected=reject  observed=accept  p24pass1.xml
+  o-p24pass2                   expected=reject  observed=accept  p24pass2.xml
+  o-p24pass3                   expected=reject  observed=accept  p24pass3.xml
+  o-p24pass4                   expected=reject  observed=accept  p24pass4.xml
+  o-p25pass1                   expected=reject  observed=accept  p25pass1.xml
+  o-p25pass2                   expected=reject  observed=accept  p25pass2.xml
+  o-p26pass1                   expected=reject  observed=accept  p26pass1.xml
+  o-p27pass1                   expected=reject  observed=accept  p27pass1.xml
+  o-p27pass2                   expected=reject  observed=accept  p27pass2.xml
+  o-p27pass3                   expected=reject  observed=accept  p27pass3.xml
+  o-p27pass4                   expected=reject  observed=accept  p27pass4.xml
+  o-p32pass1                   expected=reject  observed=accept  p32pass1.xml
+  o-p32pass2                   expected=reject  observed=accept  p32pass2.xml
+  o-p39pass1                   expected=reject  observed=accept  p39pass1.xml
+  o-p39pass2                   expected=reject  observed=accept  p39pass2.xml
+  o-p40pass1                   expected=reject  observed=accept  p40pass1.xml
+  o-p40pass2                   expected=reject  observed=accept  p40pass2.xml
+  o-p40pass3                   expected=reject  observed=accept  p40pass3.xml
+  o-p40pass4                   expected=reject  observed=accept  p40pass4.xml
+  o-p41pass1                   expected=reject  observed=accept  p41pass1.xml
+  o-p41pass2                   expected=reject  observed=accept  p41pass2.xml
+  o-p42pass1                   expected=reject  observed=accept  p42pass1.xml
+  o-p42pass2                   expected=reject  observed=accept  p42pass2.xml
+  o-p44pass1                   expected=reject  observed=accept  p44pass1.xml
+  o-p44pass2                   expected=reject  observed=accept  p44pass2.xml
+  o-p44pass3                   expected=reject  observed=accept  p44pass3.xml
+  o-p44pass4                   expected=reject  observed=accept  p44pass4.xml
+  o-p44pass5                   expected=reject  observed=accept  p44pass5.xml
+  o-p66pass1                   expected=reject  observed=accept  p66pass1.xml
+  o-p74pass1                   expected=reject  observed=accept  p74pass1.xml
+  o-p75pass1                   expected=reject  observed=accept  p75pass1.xml
+  o-p05fail4                   expected=reject  observed=accept  p05fail4.xml
+  o-p05fail5                   expected=reject  observed=accept  p05fail5.xml
+  o-p09fail1                   expected=reject  observed=accept  p09fail1.xml
+  o-p09fail2                   expected=reject  observed=accept  p09fail2.xml
+  o-p15fail1                   expected=reject  observed=accept  p15fail1.xml
+  o-p16fail3                   expected=reject  observed=accept  p16fail3.xml
+  o-p23fail1                   expected=reject  observed=accept  p23fail1.xml
+  o-p30fail1                   expected=reject  observed=accept  p30fail1.xml
+  o-p31fail1                   expected=reject  observed=accept  p31fail1.xml
+  o-p40fail1                   expected=reject  observed=accept  p40fail1.xml
+  o-p44fail4                   expected=reject  observed=accept  p44fail4.xml
+  o-p45fail2                   expected=reject  observed=accept  p45fail2.xml
+  o-p51fail1                   expected=reject  observed=accept  p51fail1.xml
+  o-p51fail2                   expected=reject  observed=accept  p51fail2.xml
+  o-p51fail4                   expected=reject  observed=accept  p51fail4.xml
+  o-p53fail1                   expected=reject  observed=accept  p53fail1.xml
+  o-p53fail2                   expected=reject  observed=accept  p53fail2.xml
+  o-p54fail1                   expected=reject  observed=accept  p54fail1.xml
+  o-p55fail1                   expected=reject  observed=accept  p55fail1.xml
+  o-p56fail1                   expected=reject  observed=accept  p56fail1.xml
+  o-p56fail2                   expected=reject  observed=accept  p56fail2.xml
+  o-p56fail3                   expected=reject  observed=accept  p56fail3.xml
+  o-p56fail4                   expected=reject  observed=accept  p56fail4.xml
+  o-p56fail5                   expected=reject  observed=accept  p56fail5.xml
+  o-p58fail1                   expected=reject  observed=accept  p58fail1.xml
+  o-p58fail2                   expected=reject  observed=accept  p58fail2.xml
+  o-p58fail5                   expected=reject  observed=accept  p58fail5.xml
+  o-p58fail8                   expected=reject  observed=accept  p58fail8.xml
+  o-p59fail1                   expected=reject  observed=accept  p59fail1.xml
+  o-p59fail2                   expected=reject  observed=accept  p59fail2.xml
+  o-p59fail3                   expected=reject  observed=accept  p59fail3.xml
+  o-p60fail2                   expected=reject  observed=accept  p60fail2.xml
+  o-p61fail1                   expected=reject  observed=accept  p61fail1.xml
+  o-p62fail1                   expected=reject  observed=accept  p62fail1.xml
+  o-p62fail2                   expected=reject  observed=accept  p62fail2.xml
+  o-p63fail1                   expected=reject  observed=accept  p63fail1.xml
+  o-p63fail2                   expected=reject  observed=accept  p63fail2.xml
+  o-p64fail1                   expected=reject  observed=accept  p64fail1.xml
+  o-p64fail2                   expected=reject  observed=accept  p64fail2.xml
+  o-p71fail1                   expected=reject  observed=accept  p71fail1.xml
+  o-p71fail4                   expected=reject  observed=accept  p71fail4.xml
+  o-p72fail1                   expected=reject  observed=accept  p72fail1.xml
+  o-p72fail2                   expected=reject  observed=accept  p72fail2.xml
+  o-p72fail3                   expected=reject  observed=accept  p72fail3.xml
+  o-p73fail2                   expected=reject  observed=accept  p73fail2.xml
+  o-p73fail3                   expected=reject  observed=accept  p73fail3.xml
+  o-p74fail3                   expected=reject  observed=accept  p74fail3.xml
+  o-p75fail1                   expected=reject  observed=accept  p75fail1.xml
+  o-p75fail2                   expected=reject  observed=accept  p75fail2.xml
+  o-p75fail3                   expected=reject  observed=accept  p75fail3.xml
+  o-p76fail1                   expected=reject  observed=accept  p76fail1.xml
+  inv-dtd02                    expected=reject  observed=accept  invalid/dtd02.xml
+  el01                         expected=reject  observed=accept  invalid/el01.xml
+  el02                         expected=reject  observed=accept  invalid/el02.xml
+  el03                         expected=reject  observed=accept  invalid/el03.xml
+  el04                         expected=reject  observed=accept  invalid/el04.xml
+  el05                         expected=reject  observed=accept  invalid/el05.xml
+  el06                         expected=reject  observed=accept  invalid/el06.xml
+  id01                         expected=reject  observed=accept  invalid/id01.xml
+  id02                         expected=reject  observed=accept  invalid/id02.xml
+  id03                         expected=reject  observed=accept  invalid/id03.xml
+  id04                         expected=reject  observed=accept  invalid/id04.xml
+  id05                         expected=reject  observed=accept  invalid/id05.xml
+  id06                         expected=reject  observed=accept  invalid/id06.xml
+  id07                         expected=reject  observed=accept  invalid/id07.xml
+  id08                         expected=reject  observed=accept  invalid/id08.xml
+  id09                         expected=reject  observed=accept  invalid/id09.xml
+  inv-not-sa01                 expected=reject  observed=accept  invalid/not-sa01.xml
+  inv-not-sa02                 expected=reject  observed=accept  invalid/not-sa02.xml
+  inv-not-sa04                 expected=reject  observed=accept  invalid/not-sa04.xml
+  inv-not-sa05                 expected=reject  observed=accept  invalid/not-sa05.xml
+  inv-not-sa06                 expected=reject  observed=accept  invalid/not-sa06.xml
+  inv-not-sa07                 expected=reject  observed=accept  invalid/not-sa07.xml
+  inv-not-sa08                 expected=reject  observed=accept  invalid/not-sa08.xml
+  inv-not-sa09                 expected=reject  observed=accept  invalid/not-sa09.xml
+  inv-not-sa10                 expected=reject  observed=accept  invalid/not-sa10.xml
+  inv-not-sa11                 expected=reject  observed=accept  invalid/not-sa11.xml
+  inv-not-sa12                 expected=reject  observed=accept  invalid/not-sa12.xml
+  inv-not-sa13                 expected=reject  observed=accept  invalid/not-sa13.xml
+  inv-not-sa14                 expected=reject  observed=accept  invalid/not-sa14.xml
+  optional01                   expected=reject  observed=accept  invalid/optional01.xml
+  optional02                   expected=reject  observed=accept  invalid/optional02.xml
+  optional03                   expected=reject  observed=accept  invalid/optional03.xml
+  optional04                   expected=reject  observed=accept  invalid/optional04.xml
+  optional05                   expected=reject  observed=accept  invalid/optional05.xml
+  optional06                   expected=reject  observed=accept  invalid/optional06.xml
+  optional07                   expected=reject  observed=accept  invalid/optional07.xml
+  optional08                   expected=reject  observed=accept  invalid/optional08.xml
+  optional09                   expected=reject  observed=accept  invalid/optional09.xml
+  optional10                   expected=reject  observed=accept  invalid/optional10.xml
+  optional11                   expected=reject  observed=accept  invalid/optional11.xml
+  optional12                   expected=reject  observed=accept  invalid/optional12.xml
+  optional13                   expected=reject  observed=accept  invalid/optional13.xml
+  optional14                   expected=reject  observed=accept  invalid/optional14.xml
+  optional20                   expected=reject  observed=accept  invalid/optional20.xml
+  optional21                   expected=reject  observed=accept  invalid/optional21.xml
+  optional22                   expected=reject  observed=accept  invalid/optional22.xml
+  optional23                   expected=reject  observed=accept  invalid/optional23.xml
+  optional24                   expected=reject  observed=accept  invalid/optional24.xml
+  optional25                   expected=reject  observed=accept  invalid/optional25.xml
+  inv-required00               expected=reject  observed=accept  invalid/required00.xml
+  inv-required01               expected=reject  observed=accept  invalid/required01.xml
+  inv-required02               expected=reject  observed=accept  invalid/required02.xml
+  attr01                       expected=reject  observed=accept  invalid/attr01.xml
+  attr02                       expected=reject  observed=accept  invalid/attr02.xml
+  attr03                       expected=reject  observed=accept  invalid/attr03.xml
+  attr04                       expected=reject  observed=accept  invalid/attr04.xml
+  attr07                       expected=reject  observed=accept  invalid/attr07.xml
+  attr08                       expected=reject  observed=accept  invalid/attr08.xml
+  attr09                       expected=reject  observed=accept  invalid/attr09.xml
+  attr10                       expected=reject  observed=accept  invalid/attr10.xml
+  attr11                       expected=reject  observed=accept  invalid/attr11.xml
+  attr12                       expected=reject  observed=accept  invalid/attr12.xml
+  attr13                       expected=reject  observed=accept  invalid/attr13.xml
+  attr14                       expected=reject  observed=accept  invalid/attr14.xml
+  attr15                       expected=reject  observed=accept  invalid/attr15.xml
+  attr16                       expected=reject  observed=accept  invalid/attr16.xml
+  empty                        expected=reject  observed=accept  invalid/empty.xml
+  attlist01                    expected=reject  observed=accept  not-wf/attlist01.xml
+  attlist02                    expected=reject  observed=accept  not-wf/attlist02.xml
+  attlist03                    expected=reject  observed=accept  not-wf/attlist03.xml
+  attlist04                    expected=reject  observed=accept  not-wf/attlist04.xml
+  attlist05                    expected=reject  observed=accept  not-wf/attlist05.xml
+  attlist06                    expected=reject  observed=accept  not-wf/attlist06.xml
+  attlist07                    expected=reject  observed=accept  not-wf/attlist07.xml
+  attlist10                    expected=reject  observed=accept  not-wf/attlist10.xml
+  attlist11                    expected=reject  observed=accept  not-wf/attlist11.xml
+  cond01                       expected=reject  observed=accept  not-wf/cond01.xml
+  cond02                       expected=reject  observed=accept  not-wf/cond02.xml
+  dtd07                        expected=reject  observed=accept  not-wf/dtd07.xml
+  encoding01                   expected=reject  observed=accept  not-wf/encoding01.xml
+  encoding02                   expected=reject  observed=accept  not-wf/encoding02.xml
+  encoding03                   expected=reject  observed=accept  not-wf/encoding03.xml
+  encoding04                   expected=reject  observed=accept  not-wf/encoding04.xml
+  encoding05                   expected=reject  observed=accept  not-wf/encoding05.xml
+  encoding06                   expected=reject  observed=accept  not-wf/encoding06.xml
+  pi                           expected=reject  observed=accept  not-wf/pi.xml
+  ext01                        expected=accept  observed=reject  valid/ext01.xml
+  ext02                        expected=accept  observed=reject  valid/ext02.xml
+  not-sa03                     expected=accept  observed=reject  valid/not-sa03.xml
+  not-wf-sa-057                expected=reject  observed=accept  not-wf/sa/057.xml
+  not-wf-sa-058                expected=reject  observed=accept  not-wf/sa/058.xml
+  not-wf-sa-060                expected=reject  observed=accept  not-wf/sa/060.xml
+  not-wf-sa-061                expected=reject  observed=accept  not-wf/sa/061.xml
+  not-wf-sa-062                expected=reject  observed=accept  not-wf/sa/062.xml
+  not-wf-sa-064                expected=reject  observed=accept  not-wf/sa/064.xml
+  not-wf-sa-065                expected=reject  observed=accept  not-wf/sa/065.xml
+  not-wf-sa-066                expected=reject  observed=accept  not-wf/sa/066.xml
+  not-wf-sa-067                expected=reject  observed=accept  not-wf/sa/067.xml
+  not-wf-sa-068                expected=reject  observed=accept  not-wf/sa/068.xml
+  not-wf-sa-069                expected=reject  observed=accept  not-wf/sa/069.xml
+  not-wf-sa-070                expected=reject  observed=accept  not-wf/sa/070.xml
+  not-wf-sa-074                expected=reject  observed=accept  not-wf/sa/074.xml
+  not-wf-sa-093                expected=reject  observed=accept  not-wf/sa/093.xml
+  not-wf-sa-101                expected=reject  observed=accept  not-wf/sa/101.xml
+  not-wf-sa-125                expected=reject  observed=accept  not-wf/sa/125.xml
+  not-wf-sa-126                expected=reject  observed=accept  not-wf/sa/126.xml
+  not-wf-sa-127                expected=reject  observed=accept  not-wf/sa/127.xml
+  not-wf-sa-137                expected=reject  observed=accept  not-wf/sa/137.xml
+  not-wf-sa-140                expected=reject  observed=accept  not-wf/sa/140.xml
+  not-wf-sa-141                expected=reject  observed=accept  not-wf/sa/141.xml
+  not-wf-sa-154                expected=reject  observed=accept  not-wf/sa/154.xml
+  not-wf-sa-155                expected=reject  observed=accept  not-wf/sa/155.xml
+  not-wf-sa-160                expected=reject  observed=accept  not-wf/sa/160.xml
+  not-wf-sa-162                expected=reject  observed=accept  not-wf/sa/162.xml
+  not-wf-sa-164                expected=reject  observed=accept  not-wf/sa/164.xml
+  not-wf-sa-165                expected=reject  observed=accept  not-wf/sa/165.xml
+  not-wf-sa-166                expected=reject  observed=accept  not-wf/sa/166.xml
+  not-wf-sa-167                expected=reject  observed=accept  not-wf/sa/167.xml
+  not-wf-sa-168                expected=reject  observed=accept  not-wf/sa/168.xml
+  not-wf-sa-169                expected=reject  observed=accept  not-wf/sa/169.xml
+  not-wf-sa-170                expected=reject  observed=accept  not-wf/sa/170.xml
+  not-wf-sa-171                expected=reject  observed=accept  not-wf/sa/171.xml
+  not-wf-sa-172                expected=reject  observed=accept  not-wf/sa/172.xml
+  not-wf-sa-173                expected=reject  observed=accept  not-wf/sa/173.xml
+  not-wf-sa-174                expected=reject  observed=accept  not-wf/sa/174.xml
+  not-wf-sa-175                expected=reject  observed=accept  not-wf/sa/175.xml
+  not-wf-sa-177                expected=reject  observed=accept  not-wf/sa/177.xml
+  not-wf-sa-186                expected=reject  observed=accept  not-wf/sa/186.xml
+  not-wf-not-sa-001            expected=reject  observed=accept  not-wf/not-sa/001.xml
+  not-wf-not-sa-002            expected=reject  observed=accept  not-wf/not-sa/002.xml
+  not-wf-not-sa-003            expected=reject  observed=accept  not-wf/not-sa/003.xml
+  not-wf-not-sa-004            expected=reject  observed=accept  not-wf/not-sa/004.xml
+  not-wf-not-sa-006            expected=reject  observed=accept  not-wf/not-sa/006.xml
+  not-wf-not-sa-007            expected=reject  observed=accept  not-wf/not-sa/007.xml
+  not-wf-not-sa-008            expected=reject  observed=accept  not-wf/not-sa/008.xml
+  not-wf-not-sa-009            expected=reject  observed=accept  not-wf/not-sa/009.xml
+  invalid--002                 expected=reject  observed=accept  invalid/002.xml
+  invalid--005                 expected=reject  observed=accept  invalid/005.xml
+  invalid--006                 expected=reject  observed=accept  invalid/006.xml
+  invalid-not-sa-022           expected=reject  observed=accept  invalid/not-sa/022.xml
+  valid-sa-049                 expected=accept  observed=reject  valid/sa/049.xml
+  valid-sa-050                 expected=accept  observed=reject  valid/sa/050.xml
+  valid-sa-051                 expected=accept  observed=reject  valid/sa/051.xml
+  valid-sa-097                 expected=accept  observed=reject  valid/sa/097.xml
+  valid-not-sa-011             expected=accept  observed=reject  valid/not-sa/011.xml
+  valid-not-sa-012             expected=accept  observed=reject  valid/not-sa/012.xml
+  valid-not-sa-026             expected=accept  observed=reject  valid/not-sa/026.xml
+  valid-ext-sa-001             expected=accept  observed=reject  valid/ext-sa/001.xml
+  valid-ext-sa-002             expected=accept  observed=reject  valid/ext-sa/002.xml
+  valid-ext-sa-003             expected=accept  observed=reject  valid/ext-sa/003.xml
+  valid-ext-sa-004             expected=accept  observed=reject  valid/ext-sa/004.xml
+  valid-ext-sa-005             expected=accept  observed=reject  valid/ext-sa/005.xml
+  valid-ext-sa-006             expected=accept  observed=reject  valid/ext-sa/006.xml
+  valid-ext-sa-007             expected=accept  observed=reject  valid/ext-sa/007.xml
+  valid-ext-sa-008             expected=accept  observed=reject  valid/ext-sa/008.xml
+  valid-ext-sa-009             expected=accept  observed=reject  valid/ext-sa/009.xml
+  valid-ext-sa-011             expected=accept  observed=reject  valid/ext-sa/011.xml
+  valid-ext-sa-012             expected=accept  observed=reject  valid/ext-sa/012.xml
+  valid-ext-sa-013             expected=accept  observed=reject  valid/ext-sa/013.xml
+  valid-ext-sa-014             expected=accept  observed=reject  valid/ext-sa/014.xml
+
+xmlconf results: C:\Users\masou\Desktop\xpact-student-test\build\xmlconf-conformance\xmlconf-results.tsv
+xmlconf summary: C:\Users\masou\Desktop\xpact-student-test\build\xmlconf-conformance\xmlconf-summary.txt
+# exit code 0 after 123 s

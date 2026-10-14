@@ -14,6 +14,7 @@ Every test runs. Failures are counted and reported at the end.
 In the baseline from 2026-10-14, the run stopped at the B03 contract violation, so the tests after it did not run in the assertions-on lanes. Their status is unknown.
 
 ## Logs
+Original logs: `student/baseline/logs/matrix-workbench.log`, `matrix-finalized-keep.log`.
 Attach the list of tests that ran and the list of tests that exist.
 
 ## Notes

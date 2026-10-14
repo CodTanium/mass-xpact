@@ -1,0 +1,15 @@
+﻿step	started	seconds	exit_code	command	log
+event-trace	2026-10-14T16:19:13	5	0	ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log
+matrix-workbench	2026-10-14T16:19:18	8	1	.\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Workbench	logs\matrix-workbench.log
+matrix-finalized	2026-10-14T16:19:26	13	0	.\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Finalized	logs\matrix-finalized.log
+native-runtime-smoke	2026-10-14T16:19:39	18	0	.\scripts\run_native_runtime_smoke.ps1 -AssertionMode On	logs\native-runtime-smoke.log
+assertions-dll	2026-10-14T16:19:56	28	1	.\scripts\build_native_eiffel.ps1 -BuildTier Assertions   (with smoke, no -SkipSmoke)	logs\assertions-dll.log
+xmlconf	2026-10-14T16:20:24	123	0	.\scripts\run_xmlconf_conformance.ps1   (xpact.exe, assertions on)	logs\xmlconf.log
+environment	2026-10-14T16:22:38	1	0	tool versions, settings and source fingerprint	logs\environment.log
+matrix-finalized-keep	2026-10-14T16:22:40	27	1	ec -batch -clean -finalize -keep -config tests\xpact_tests.ecf -target xpact_tests_assertions; finish_freezing; xpact_tests.exe	logs\matrix-finalized-keep.log
+event-trace	2026-10-14T23:35:22	5	0	ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log
+event-trace	2026-10-14T23:40:16	4	0	ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log
+event-trace	2026-10-14T23:41:01	4	0	ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log
+event-trace	2026-10-14T23:54:50	4	0	ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log
+event-trace	2026-10-15T00:01:03	4	0	ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log
+event-trace	2026-10-15T00:05:31	4	0	ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log

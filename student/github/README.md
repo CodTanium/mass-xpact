@@ -7,15 +7,15 @@ issues and a project board.
 |---|---|
 | `labels.json` | 14 labels: group (A, B, C, F, G), difficulty (D1–D4), priority (P0, P1), type (task, finding, blocker) |
 | `milestones.json` | One milestone per review point, weeks 2, 3, 4, 5, 7 and 10. Due dates assume that week 1 started on 2026-10-05. Change them if that is wrong. |
-| `issues/*.md` | 20 issue drafts: the guide's suggested selection plus the week 2 findings. Edit or delete drafts before running the script. |
+| `issues/*.md` | 23 issue drafts: the guide's suggested selection, the week 2 findings, and 3 from the weeks 1–2 history (21–23). Edit or delete drafts before running the script. |
 | `setup-github.ps1` | Creates all of the above on GitHub. Safe to run again. |
 
 ## Milestones and issues
 
 | Milestone | Issues |
 |---|---|
-| Week 2 - Baseline | A01, A02 · findings: finalized lane without `-keep`, B03 postcondition, runner stops at the first failure, DLL crash code, Python 3.10 harness |
-| Week 3 - Failure reporting | B01, B02 |
+| Week 2 - Baseline | A01, A02 · findings: finalized lane without `-keep`, B03 postcondition, runner stops at the first failure, DLL crash code, Python 3.10 harness, 53 xmlconf crashes · blocker: build fixes not in `main` |
+| Week 3 - Failure reporting | B01, B02 · finding: Jenkins precompile prompt |
 | Week 4 - Input matrix | G01, xmlconf verdict rules |
 | Week 5 - Regressions | C02, C03, C10 (part) |
 | Week 7 - Comparison | A04, G03 |

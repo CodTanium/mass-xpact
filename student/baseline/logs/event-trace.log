@@ -1,0 +1,161 @@
+﻿# ec -batch -clean -config "Assertion enabled tests\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml
+# started 2026-10-15T00:05:31
+
+Eiffel Compilation Manager
+Version 25.12.9.8922 - win64
+
+Degree 6: Examining System
+Degree 5: Parsing Classes
+Degree 4: Analyzing Inheritance
+Degree 3: Checking Types
+Degree 2: Generating Byte Code
+Freezing System Changes
+Degree -1: Generating Code
+System Recompiled.
+You must now run "finish_freezing" in:
+	C:\Users\masou\Desktop\xpact-student-test\EIFGENs\xpact_event_trace\W_code
+Eiffel C/C++ Compilation Tool - Version: 25.12
+Copyright Eiffel Software 1996-2024. All Rights Reserved.
+
+Preparing C compilation using already configured mingw C compiler...
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/cp" "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/config/win64/templates/emain.template" "E1/emain.c"
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eparents.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" einit.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" ececil.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" evisib.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" enames.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eskelet.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eplug.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" ecall.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" efrozen.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" epattern.o  ; fi  && cd ..
+make.exe": stat:E1/eoption.o: Bad file number
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" emain.o  ; fi  && cd ..
+cd E1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" eoption.o  ; fi  && cd ..
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c einit.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c eparents.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c ececil.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c evisib.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c eskelet.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c enames.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c eplug.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c ecall.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c epattern.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c efrozen.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c emain.c
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c eoption.c
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+cd C1 && if [ ! -f finished ] ; then  "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/make.exe" Cobj1.o ; fi  && cd ..
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/windres" --preprocessor='"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/cpp.exe"' -I../../.. ../../../xpact_event_trace.rc -O coff -o xpact_event_trace.res
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Entering directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/C1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc" -O0 -pipe -imacros eif_config.mingw.h -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -DWORKBENCH -I"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/include" -I.  -c big_file_C1_c.c
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:92: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:859: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:859: digit exceeds base
+c:\\program files\\eiffel software\\eiffelstudio 25.12 standard\\gcc\\win64\\mingw\\bin\\../lib/gcc/x86_64-w64-mingw32/4.4.5/include/xmmintrin.h:859: digit exceeds base
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/E1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/rm" -f Cobj1.o
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/ld" -r -o Cobj1.o big_file_C1_c.o 
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/touch" finished
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/rm" -f big_file_C1_c.o 
+make.exe[1]: Leaving directory `/c/Users/masou/Desktop/xpact-student-test/EIFGENs/xpact_event_trace/W_code/C1'
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/msys/1.0/bin/rm" -f xpact_event_trace.exe
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/gcc/win64/mingw/bin/gcc"  -mconsole -o xpact_event_trace.exe E1/emain.o "c:\users\masou\documents\eiffel user files\25.12\precomp\spec\win64\EIFGENs\base-safe\W_code/mingw/precomp.lib" xpact_event_trace.res E1/eparents.o  E1/einit.o  E1/ececil.o  E1/evisib.o  E1/enames.o  E1/eskelet.o  E1/eplug.o  E1/ecall.o  E1/efrozen.o  E1/epattern.o  E1/eoption.o  C1/Cobj1.o   "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard/studio/spec/win64/lib/mingw/wkbench.a" -luser32 -lws2_32 -ladvapi32 -lgdi32 -lshell32 -lmsimg32 -lcomdlg32 -luuid -lole32 -loleaut32 -lcomctl32 -lmpr -lshlwapi -lwinspool -lstdc++ 
+echo done > completed.eif
+C compilation completed
+== Assertion enabled tests\event-trace\inputs\01-book.xml
+bytes: 40
+  1. start-element  book id="7"
+  2. start-element  title
+  3. text           "Hello"
+  4. end-element    title
+  5. end-element    book
+result: ACCEPT (5 events)
+
+== Assertion enabled tests\event-trace\inputs\02-empty-root.xml
+bytes: 7
+  1. start-element  root
+  2. end-element    root
+result: ACCEPT (2 events)
+
+== Assertion enabled tests\event-trace\inputs\03-incomplete.xml
+bytes: 6
+  1. start-element  root
+result: REJECT at line 1, column 6: unclosed element
+note: 1 event(s) were delivered before the error was detected
+
+== Assertion enabled tests\event-trace\inputs\04-mismatched.xml
+bytes: 20
+  1. start-element  root
+  2. start-element  child
+result: REJECT at line 1, column 15: mismatched end tag
+note: 2 event(s) were delivered before the error was detected
+
+== Assertion enabled tests\event-trace\inputs\05-book-mismatched.xml
+bytes: 25
+  1. start-element  book
+  2. start-element  title
+  3. text           "Hello"
+result: REJECT at line 1, column 20: mismatched end tag
+note: 3 event(s) were delivered before the error was detected
+
+== Assertion enabled tests\event-trace\inputs\06-bad-utf8.xml
+bytes: 9
+  1. start-element  r
+  2. text           "├("
+  3. end-element    r
+result: ACCEPT (3 events)
+
+== Assertion enabled tests\event-trace\inputs\07-rich.xml
+bytes: 224
+  1. xml-decl       version="1.0" encoding="UTF-8" standalone=-1
+  2. start-doctype  note system=none public=none internal-subset=True
+  3. entity-decl    who parameter=False value="World" system=none
+  4. end-doctype
+  5. comment        " a comment "
+  6. start-element  note lang="en" priority="2"
+  7. text           "\n  "
+  8. pi             app "hint"
+  9. text           "\n  "
+  10. start-element  to
+  11. text           "World"
+  12. end-element    to
+  13. text           "\n  "
+  14. start-element  body
+  15. start-cdata
+  16. text           "1 < 2 & 3 > 2"
+  17. end-cdata
+  18. end-element    body
+  19. text           "\n  "
+  20. start-element  empty
+  21. end-element    empty
+  22. text           "\n"
+  23. end-element    note
+result: ACCEPT (23 events)
+
+# exit code 0 after 4 s

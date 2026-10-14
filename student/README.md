@@ -5,12 +5,14 @@ folder, so it stays separate from the parser code. The plan, the task register
 (A01–H06) and the suggested task selection come from
 [`docs/xpact-student-introduction.md`](../docs/xpact-student-introduction.md).
 
-**Start here: [PLAN.md](PLAN.md)**, the week-by-week plan and the list of things to do.
+**Start here: [PLAN2.md](PLAN2.md)**: the 10-week plan with everything done, tested and found so far. [PLAN.md](PLAN.md) is the empty version.
 
 ## Layout
 
 | Path | What goes there |
 |---|---|
+| [`history/`](history/) | Weeks 1–2 before this repository: error reports, build fix notes, and your fixes as patches |
+| [`baseline/`](baseline/) | The week 2 assertions-enabled baseline: script, event trace, logs, BASELINE.md |
 | [`results/`](results/) | One folder per issue with its evidence: logs, inputs, before/after output |
 | [`notes/weekly/`](notes/weekly/) | Half-page weekly notes, one file per week |
 | [`report/`](report/) | The university report, demonstration notes and handover guide (weeks 8–10) |

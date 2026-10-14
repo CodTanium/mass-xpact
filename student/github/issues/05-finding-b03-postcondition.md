@@ -13,6 +13,7 @@ All tests pass with assertions on.
 In the baseline from 2026-10-14: `XP_NATIVE_PARSER.parse @10 final_finished_or_suspended: Postcondition violated`, raised from `XP_TEST_ROOT.test_garbage_collection_suspension`. It fails in workbench **and** in finalized-with-`-keep`.
 
 ## Logs
+Original log: `student/baseline/logs/matrix-workbench.log`. Also seen 4 times in `student/results/xmlconf-crashes-2026-10-14/exception_trace.log`, and before the baseline (error report, section 5.1).
 Attach `matrix-workbench.log` from a rerun in this checkout.
 
 ## Notes

@@ -14,6 +14,7 @@ Both runs check assertions and give the same result.
 In the baseline from 2026-10-14, step 1 reported "ok" (exit 0). Step 2, with `-keep`, failed with the same postcondition violation as the workbench lane. `run_eiffel_test_matrix.ps1` calls `ec -finalize` **without `-keep`**, so the finalized binary has no assertions compiled in. The green result is misleading, also in CI.
 
 ## Logs
+Original logs: `student/baseline/logs/matrix-finalized.log`, `matrix-finalized-keep.log`.
 Attach `matrix-finalized.log` and `matrix-finalized-keep.log` from a rerun in this checkout.
 
 ## Proposed next step

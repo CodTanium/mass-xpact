@@ -1,0 +1,611 @@
+diff --git a/scripts/build_native_eiffel.ps1 b/scripts/build_native_eiffel.ps1
+index eb205cf..f022067 100644
+--- a/scripts/build_native_eiffel.ps1
++++ b/scripts/build_native_eiffel.ps1
+@@ -39,7 +39,7 @@ function Get-IseInclude {
+ 			return $Candidate
+ 		}
+ 	}
+-	$Fallback = "C:\El2502E\studio\spec\win64\include"
++	$Fallback = "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard\studio\spec\win64\include"
+ 	if (Test-Path -LiteralPath $Fallback -PathType Container) {
+ 		return $Fallback
+ 	}
+@@ -49,8 +49,14 @@ function Get-IseInclude {
+ function Invoke-VcCommand {
+ 	param([string] $Command)
+ 	$VcVars = Get-VcVars
+-	$Output = cmd.exe /c "`"$VcVars`" >nul && $Command" 2>&1
+-	$ExitCode = $LASTEXITCODE
++	$SavedErrorActionPreference = $ErrorActionPreference
++	$ErrorActionPreference = "Continue"
++	try {
++		$Output = cmd.exe /c "`"$VcVars`" >nul && $Command" 2>&1
++		$ExitCode = $LASTEXITCODE
++	} finally {
++		$ErrorActionPreference = $SavedErrorActionPreference
++	}
+ 	foreach ($Line in $Output) {
+ 		Write-Host $Line
+ 	}
+@@ -104,20 +110,44 @@ Compile-CObject (Join-Path $RepoRoot "native\xpact_native.c") $NativeObj -Buildi
+ Compile-CObject (Join-Path $RepoRoot "native\xpact_eiffel_runtime_bridge.c") $RuntimeObj -BuildingDll
+ Compile-CObject (Join-Path $RepoRoot "native\xpact_eiffel_dllmain.c") $DllMainObj
+ 
+-ec -batch -clean -finalize -keep -config tests\xpact_native_library.ecf -target $EiffelTarget
+-if ($LASTEXITCODE -ne 0) {
+-	throw "Eiffel native library target compilation failed for $BuildTier."
+-}
+-
+-$FinalCode = Join-Path $RepoRoot "EIFGENs\$EiffelTarget\F_code"
+-Push-Location $FinalCode
++# The link step below consumes the MSVC response file (`<target>.lnk`) that the
++# Eiffel finalizer emits only when the target is compiled with an MSVC backend.
++# Select the backend that matches the installed Visual Studio C++ tools; the
++# mingw backend emits no `.lnk` and its objects cannot be linked by `link.exe`.
++$OldCompiler = $env:ISE_C_COMPILER
++$env:ISE_C_COMPILER = "msc_vc140"
+ try {
+-	finish_freezing
++	$SavedErrorActionPreference = $ErrorActionPreference
++	$ErrorActionPreference = "Continue"
++	try {
++		ec -batch -clean -finalize -keep -config tests\xpact_native_library.ecf -target $EiffelTarget
++		$EiffelExitCode = $LASTEXITCODE
++	} finally {
++		$ErrorActionPreference = $SavedErrorActionPreference
++	}
++	if ($EiffelExitCode -ne 0) {
++		throw "Eiffel native library target compilation failed for $BuildTier."
++	}
++
++	$FinalCode = Join-Path $RepoRoot "EIFGENs\$EiffelTarget\F_code"
++	Push-Location $FinalCode
++	try {
++		$SavedErrorActionPreference = $ErrorActionPreference
++		$ErrorActionPreference = "Continue"
++		try {
++			finish_freezing
++			$FinishExitCode = $LASTEXITCODE
++		} finally {
++			$ErrorActionPreference = $SavedErrorActionPreference
++		}
++	} finally {
++		Pop-Location
++	}
++	if ($FinishExitCode -ne 0) {
++		throw "finish_freezing failed for native library target $EiffelTarget."
++	}
+ } finally {
+-	Pop-Location
+-}
+-if ($LASTEXITCODE -ne 0) {
+-	throw "finish_freezing failed for native library target $EiffelTarget."
++	$env:ISE_C_COMPILER = $OldCompiler
+ }
+ 
+ $OriginalLink = Get-LinkResponseFile $FinalCode $EiffelTarget
+@@ -153,8 +183,14 @@ if (-not $SkipSmoke) {
+ 	$OldPath = $env:Path
+ 	try {
+ 		$env:Path = "$OutputRoot;$OldPath"
+-		$SmokeOutput = & $SmokeExe 2>&1
+-		$SmokeExitCode = $LASTEXITCODE
++		$SavedErrorActionPreference = $ErrorActionPreference
++		$ErrorActionPreference = "Continue"
++		try {
++			$SmokeOutput = & $SmokeExe 2>&1
++			$SmokeExitCode = $LASTEXITCODE
++		} finally {
++			$ErrorActionPreference = $SavedErrorActionPreference
++		}
+ 		foreach ($Line in $SmokeOutput) {
+ 			Write-Host $Line
+ 		}
+diff --git a/scripts/import_msvc_environment.ps1 b/scripts/import_msvc_environment.ps1
+index 04a84f2..af75787 100644
+--- a/scripts/import_msvc_environment.ps1
++++ b/scripts/import_msvc_environment.ps1
+@@ -19,8 +19,15 @@ if (-not (Test-Path -LiteralPath $VcVars -PathType Leaf)) {
+ 	throw "vcvars64.bat not found: $VcVars"
+ }
+ 
+-$EnvironmentLines = & cmd.exe /s /c "`"$VcVars`" >nul && set"
+-if ($LASTEXITCODE -ne 0) {
++$SavedErrorActionPreference = $ErrorActionPreference
++$ErrorActionPreference = "Continue"
++try {
++	$EnvironmentLines = & cmd.exe /s /c "`"$VcVars`" >nul && set" 2>$null
++	$VcExitCode = $LASTEXITCODE
++} finally {
++	$ErrorActionPreference = $SavedErrorActionPreference
++}
++if ($VcExitCode -ne 0) {
+ 	throw "Failed to import Visual Studio C++ environment from $VcVars"
+ }
+ 
+diff --git a/scripts/run_native_runtime_smoke.ps1 b/scripts/run_native_runtime_smoke.ps1
+index 02cb68e..468c3a8 100644
+--- a/scripts/run_native_runtime_smoke.ps1
++++ b/scripts/run_native_runtime_smoke.ps1
+@@ -37,13 +37,28 @@ function Get-IseInclude {
+ 			return $Candidate
+ 		}
+ 	}
+-	$Fallback = "C:\El2502E\studio\spec\win64\include"
++	$Fallback = "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard\studio\spec\win64\include"
+ 	if (Test-Path -LiteralPath $Fallback -PathType Container) {
+ 		return $Fallback
+ 	}
+ 	throw "Cannot find Eiffel runtime include directory."
+ }
+ 
++# Runs a native command without letting harmless stderr output (such as the
++# vcvars "'vswhere.exe' is not recognized" message) become a terminating error
++# under $ErrorActionPreference = "Stop". Returns the command's exit code.
++function Invoke-NativeCommand {
++	param([scriptblock] $Block)
++	$SavedErrorActionPreference = $ErrorActionPreference
++	$ErrorActionPreference = "Continue"
++	try {
++		& $Block | Out-Host
++		return $LASTEXITCODE
++	} finally {
++		$ErrorActionPreference = $SavedErrorActionPreference
++	}
++}
++
+ function Compile-CObject {
+ 	param(
+ 		[string] $Source,
+@@ -54,8 +69,8 @@ function Compile-CObject {
+ 	$Include = Join-Path $RepoRoot "include"
+ 	$Native = Join-Path $RepoRoot "native"
+ 	$Command = "`"$VcVars`" >nul && cl /nologo /c /I`"$Include`" /I`"$Native`" /I`"$IseInclude`" `"$Source`" /Fo:`"$Object`""
+-	cmd.exe /c $Command
+-	if ($LASTEXITCODE -ne 0) {
++	$CompileExitCode = Invoke-NativeCommand { cmd.exe /c $Command }
++	if ($CompileExitCode -ne 0) {
+ 		throw "C object build failed: $Source"
+ 	}
+ }
+@@ -78,28 +93,39 @@ function Selected-RuntimeTargets {
+ 	}
+ }
+ 
+-foreach ($RuntimeTarget in Selected-RuntimeTargets) {
+-	Write-Host "== native runtime smoke: $($RuntimeTarget.Label) =="
+-	ec -batch -clean -config tests\xpact_native_runtime.ecf -target $RuntimeTarget.Target
+-	if ($LASTEXITCODE -ne 0) {
+-		throw "Eiffel native runtime target compilation failed for $($RuntimeTarget.Label)."
+-	}
+-	$WorkCode = Join-Path $RepoRoot "EIFGENs\$($RuntimeTarget.Target)\W_code"
+-	if (Test-Path -LiteralPath (Join-Path $WorkCode "Makefile.SH") -PathType Leaf) {
+-		Push-Location $WorkCode
+-		try {
+-			finish_freezing
+-		} finally {
+-			Pop-Location
++# The external objects above are compiled with MSVC `cl`, so they reference
++# MSVC CRT symbols (`__security_check_cookie`, `__GSHandlerCheck`) and carry
++# `/DEFAULTLIB:LIBCMT` directives. The Eiffel C code must therefore be built and
++# linked with the MSVC backend too; the machine's default mingw backend links
++# with gcc/ld, which cannot resolve those symbols.
++$OldCompiler = $env:ISE_C_COMPILER
++$env:ISE_C_COMPILER = "msc_vc140"
++try {
++	foreach ($RuntimeTarget in Selected-RuntimeTargets) {
++		Write-Host "== native runtime smoke: $($RuntimeTarget.Label) =="
++		$EiffelExitCode = Invoke-NativeCommand { ec -batch -clean -config tests\xpact_native_runtime.ecf -target $RuntimeTarget.Target }
++		if ($EiffelExitCode -ne 0) {
++			throw "Eiffel native runtime target compilation failed for $($RuntimeTarget.Label)."
+ 		}
+-		if ($LASTEXITCODE -ne 0) {
+-			throw "finish_freezing failed for native runtime target $($RuntimeTarget.Label)."
++		$WorkCode = Join-Path $RepoRoot "EIFGENs\$($RuntimeTarget.Target)\W_code"
++		if (Test-Path -LiteralPath (Join-Path $WorkCode "Makefile.SH") -PathType Leaf) {
++			Push-Location $WorkCode
++			try {
++				$FinishExitCode = Invoke-NativeCommand { finish_freezing }
++			} finally {
++				Pop-Location
++			}
++			if ($FinishExitCode -ne 0) {
++				throw "finish_freezing failed for native runtime target $($RuntimeTarget.Label)."
++			}
+ 		}
+-	}
+ 
+-	$Exe = Join-Path $WorkCode "xpact_native_runtime.exe"
+-	& $Exe
+-	if ($LASTEXITCODE -ne 0) {
+-		throw "Native runtime smoke failed for $($RuntimeTarget.Label)."
++		$Exe = Join-Path $WorkCode "xpact_native_runtime.exe"
++		$SmokeExitCode = Invoke-NativeCommand { & $Exe }
++		if ($SmokeExitCode -ne 0) {
++			throw "Native runtime smoke failed for $($RuntimeTarget.Label)."
++		}
+ 	}
++} finally {
++	$env:ISE_C_COMPILER = $OldCompiler
+ }
+diff --git a/scripts/run_xmlconf_conformance.ps1 b/scripts/run_xmlconf_conformance.ps1
+new file mode 100644
+index 0000000..875f52f
+--- /dev/null
++++ b/scripts/run_xmlconf_conformance.ps1
+@@ -0,0 +1,334 @@
++[CmdletBinding()]
++param(
++	[string] $SuiteDir = "xmlTests\xmlconf20130923",
++	[string] $Catalog = "xmlconf.xml",
++	[string] $OutputDir = "build\xmlconf-conformance",
++	[ValidateSet("All", "xmltest", "sun", "oasis", "ibm", "eduni", "japanese")]
++	[string[]] $SuiteProfile = @("All"),
++	[ValidateSet("valid", "invalid", "not-wf", "error")]
++	[string[]] $Type = @("valid", "invalid", "not-wf", "error"),
++	[string] $XpactExe,
++	[switch] $SkipXpactBuild,
++	[switch] $FailOnMismatch,
++	[int] $Limit = 0
++)
++
++Set-StrictMode -Version Latest
++$ErrorActionPreference = "Stop"
++
++# ---------------------------------------------------------------------------
++# XML Conformance Test Suite runner for xpact.
++#
++# Reads the OASIS/NIST descriptor files (xmlconf.xml -> per-vendor *.xml),
++# resolves every <TEST URI=...> relative to the descriptor's xml:base, runs
++# xpact --parse-file over each case, and compares the observed accept/reject
++# with the expected TYPE (valid / invalid / not-wf / error).
++#
++# It does NOT need the EiffelStudio DLL chain: it drives the plain
++# EIFGENs\xpact\W_code\xpact.exe CLI, exactly like run_libexpat_adapter.ps1
++# does in Corpus mode. That means build_native_eiffel.ps1 and its .lnk problem
++# are irrelevant here.
++# ---------------------------------------------------------------------------
++
++$RepoRoot = Split-Path -Parent $PSScriptRoot
++
++# The four XML 1.0 conformance outcomes. "valid" and "error" mean the parser
++# should ACCEPT; "not-wf" and "invalid" mean it should REJECT.
++$AcceptTypes = @("valid", "error")
++$RejectTypes = @("not-wf", "invalid")
++
++function Resolve-SuiteRoot {
++	param([string] $Path)
++	$ResolvedPath = if ([System.IO.Path]::IsPathRooted($Path)) { $Path } else { Join-Path $RepoRoot $Path }
++	if (-not (Test-Path -LiteralPath $ResolvedPath -PathType Container)) {
++		throw "XML conformance suite directory not found: $ResolvedPath"
++	}
++	(Resolve-Path -LiteralPath $ResolvedPath).Path
++}
++
++function Get-XpactExecutable {
++	param([string] $Path)
++	if (-not [string]::IsNullOrWhiteSpace($Path)) {
++		$ResolvedPath = if ([System.IO.Path]::IsPathRooted($Path)) { $Path } else { Join-Path $RepoRoot $Path }
++		if (-not (Test-Path -LiteralPath $ResolvedPath -PathType Leaf)) {
++			throw "xpact executable not found: $ResolvedPath"
++		}
++		return (Resolve-Path -LiteralPath $ResolvedPath).Path
++	}
++	Join-Path $RepoRoot "EIFGENs\xpact\W_code\xpact.exe"
++}
++
++# ---------------------------------------------------------------------------
++# Minimal, namespace-agnostic descriptor reader.
++#
++# The descriptors are flat: <TEST TYPE=.. ENTITIES=.. ID=.. URI=.. SECTIONS=..>
++# with a text description body. A regex scan is sufficient and avoids taking a
++# hard dependency on XML parsing to read the thing we are testing.
++# ---------------------------------------------------------------------------
++function Read-Descriptor {
++	param(
++		[string] $Path,
++		[string] $SuiteRoot
++	)
++	if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
++		throw "Test descriptor not found: $Path"
++	}
++	$Text = Get-Content -LiteralPath $Path -Raw
++
++	# The suite uses xml:base inconsistently, so derive the base directory from
++	# the DESCRIPTOR'S OWN FOLDER and only treat xml:base as a hint:
++	#
++	#   xmlconf\xmltest\xmltest.xml   xml:base="xmltest/"  URIs: not-wf/sa/001.xml
++	#       -> xmlconf\xmltest\not-wf\sa\001.xml
++	#   xmlconf\oasis\oasis.xml      xml:base="oasis/"     URIs: p01pass2.xml
++	#       -> xmlconf\oasis\p01pass2.xml
++	#   xmlconf\sun\sun-valid.xml    (no xml:base)         URIs: valid/pe01.xml
++	#       -> xmlconf\sun\valid\pe01.xml
++	#
++	# In every case the correct answer is "the folder the descriptor lives in".
++	# A declared xml:base is honoured only when it names a DIFFERENT subfolder
++	# that actually exists, which keeps multi-base descriptors working.
++	$DescriptorDirectory = Split-Path -Parent $Path
++	$Base = $DescriptorDirectory
++	$BaseMatch = [regex]::Match($Text, '<TESTCASES\b[^>]*xml:base\s*=\s*([\x22''])(.*?)\1')
++	if ($BaseMatch.Success) {
++		$Declared = $BaseMatch.Groups[2].Value
++		$Declared = $Declared.TrimEnd('/', '\')
++		if (-not [string]::IsNullOrWhiteSpace($Declared) -and -not [System.IO.Path]::IsPathRooted($Declared)) {
++			$Candidate = Join-Path $DescriptorDirectory $Declared
++			if (Test-Path -LiteralPath $Candidate -PathType Container) {
++				$Base = $Candidate
++			}
++		}
++	}
++
++	$Rows = New-Object System.Collections.Generic.List[object]
++	$Pattern = '(?s)<TEST\b([^>]*?)>(.*?)</TEST>'
++	foreach ($Match in [regex]::Matches($Text, $Pattern)) {
++		$Attributes = $Match.Groups[1].Value
++		$Description = $Match.Groups[2].Value.Trim() -replace '\s+', ' '
++
++		# Attribute values in this suite are single-quoted in some descriptors
++		# (oasis/, japanese/) and double-quoted in others (xmltest/, sun/, ibm/).
++		# Accept either delimiter.
++		$Get = {
++			param([string] $Name)
++			$AttributeMatch = [regex]::Match($Attributes, '(?:^|\s)' + $Name + '\s*=\s*([\x22''])(.*?)\1')
++			if (-not $AttributeMatch.Success) { return $null }
++			$AttributeMatch.Groups[2].Value
++		}
++
++		# NOTE: do not name these $Type / $Uri. PowerShell functions can write
++		# through to variables in the enclosing scope, and $Type is a script
++		# parameter used to filter cases below; assigning it here silently
++		# replaced the filter with the last parsed value.
++		$CaseType = & $Get "TYPE"
++		$CaseUri = & $Get "URI"
++		if ([string]::IsNullOrWhiteSpace($CaseType) -or [string]::IsNullOrWhiteSpace($CaseUri)) {
++			continue
++		}
++
++		$Rows.Add([pscustomobject]@{
++				Id          = & $Get "ID"
++				Type        = $CaseType
++				Entities    = & $Get "ENTITIES"
++				Sections    = & $Get "SECTIONS"
++				Uri         = $CaseUri
++				FilePath    = ([System.IO.Path]::GetFullPath((Join-Path $Base $CaseUri)))
++				Description = $Description
++			})
++	}
++	$Rows
++}
++
++function Get-DescriptorFiles {
++	param([string] $SuiteRoot, [string[]] $DescriptorProfiles)
++	$All = @(Get-ChildItem -LiteralPath $SuiteRoot -Recurse -Filter "*.xml" -File |
++		Where-Object {
++			# Descriptor files are the per-vendor catalogs; skip test documents.
++			$_.Name -match '(xmltest|japanese|oasis|sun-(valid|invalid|not-wf|error)|ibm_oasis_(valid|invalid|not-wf)|ibm_(valid|invalid|not-wf)|errata2e|xml11|rmt-ns1[01])\.xml$'
++		} |
++		Sort-Object FullName)
++
++	if ($DescriptorProfiles -contains "All") {
++		return $All
++	}
++	$All | Where-Object {
++		$Path = $_.FullName
++		$Keep = $false
++		foreach ($Profile in $DescriptorProfiles) {
++			if ($Path -match ("[\\/]" + [regex]::Escape($Profile) + "[\\/]")) {
++				$Keep = $true
++				break
++			}
++		}
++		$Keep
++	}
++}
++
++function Invoke-ConformanceRun {
++	param(
++		[object[]] $Cases,
++		[string] $Exe,
++		[string] $ResultsPath,
++		[int] $Limit
++	)
++	"id`ttype`tentities`tsections`texpected`tobserved`tresult`turi`tmessage" |
++	Set-Content -LiteralPath $ResultsPath -Encoding UTF8
++
++	$Stats = [ordered]@{
++		Total    = 0
++		Pass     = 0
++		Fail     = 0
++		Missing  = 0
++		valid    = 0
++		invalid  = 0
++		"not-wf" = 0
++		error    = 0
++	}
++	$Failures = New-Object System.Collections.Generic.List[object]
++
++	foreach ($Case in $Cases) {
++		if ($Limit -gt 0 -and $Stats.Total -ge $Limit) { break }
++		$Stats.Total += 1
++		$Stats[$Case.Type] = $Stats[$Case.Type] + 1
++
++		if (-not (Test-Path -LiteralPath $Case.FilePath -PathType Leaf)) {
++			$Stats.Missing += 1
++			"$($Case.Id)`t$($Case.Type)`t$($Case.Entities)`t$($Case.Sections)`t-`tmissing-file`tmissing`t$($Case.Uri)`t$($Case.FilePath)" |
++			Add-Content -LiteralPath $ResultsPath -Encoding UTF8
++			continue
++		}
++
++		# xpact writes its diagnostic to stdout on rejection, but capture both
++		# streams without letting PowerShell promote stderr to a terminating
++		# error under $ErrorActionPreference = "Stop".
++		$PreviousErrorActionPreference = $ErrorActionPreference
++		$ErrorActionPreference = "Continue"
++		try {
++			$Output = & $Exe --parse-file $Case.FilePath 2>&1
++			$ExitCode = $LASTEXITCODE
++		} finally {
++			$ErrorActionPreference = $PreviousErrorActionPreference
++		}
++		$Observed = if ($ExitCode -eq 0) { "accept" } else { "reject" }
++		$Expected = if ($AcceptTypes -contains $Case.Type) { "accept" } else { "reject" }
++		$Result = if ($Observed -eq $Expected) { "pass" } else { "FAIL" }
++
++		if ($Result -eq "pass") {
++			$Stats.Pass += 1
++		}
++		else {
++			$Stats.Fail += 1
++			$Failures.Add([pscustomobject]@{
++					Id          = $Case.Id
++					Type        = $Case.Type
++					Expected    = $Expected
++					Observed    = $Observed
++					Uri         = $Case.Uri
++					Description = $Case.Description
++				})
++		}
++
++		$Message = (($Output | Out-String).Trim() -replace "`t", " " -replace "`r?`n", " ")
++		"$($Case.Id)`t$($Case.Type)`t$($Case.Entities)`t$($Case.Sections)`t$Expected`t$Observed`t$Result`t$($Case.Uri)`t$Message" |
++		Add-Content -LiteralPath $ResultsPath -Encoding UTF8
++	}
++
++	[pscustomobject]@{
++		Stats    = $Stats
++		Failures = $Failures
++	}
++}
++
++# ---------------------------------------------------------------------------
++# Main
++# ---------------------------------------------------------------------------
++$SuiteRoot = Resolve-SuiteRoot $SuiteDir
++$CatalogPath = Join-Path $SuiteRoot $Catalog
++if (-not (Test-Path -LiteralPath $CatalogPath -PathType Leaf)) {
++	throw "Conformance catalog not found: $CatalogPath"
++}
++
++$OutputRoot = Join-Path $RepoRoot $OutputDir
++New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
++
++if (-not $SkipXpactBuild) {
++	Write-Host "== xmlconf: building xpact workbench target =="
++	Push-Location $RepoRoot
++	try {
++		& ec -batch -config xpact.ecf -target xpact
++		if ($LASTEXITCODE -ne 0) {
++			throw "Eiffel compilation failed for the xpact target."
++		}
++	}
++ finally {
++		Pop-Location
++	}
++}
++
++$Xpact = Get-XpactExecutable $XpactExe
++if (-not (Test-Path -LiteralPath $Xpact -PathType Leaf)) {
++	throw "xpact executable not found: $Xpact. Run without -SkipXpactBuild."
++}
++Write-Host "xpact executable: $Xpact"
++
++$Descriptors = @(Get-DescriptorFiles $SuiteRoot $SuiteProfile)
++if ($Descriptors.Count -eq 0) {
++	throw "No descriptor files matched the requested profile(s): $($SuiteProfile -join ', ')"
++}
++Write-Host "xmlconf descriptors: $($Descriptors.Count)"
++
++	$Cases = New-Object System.Collections.Generic.List[object]
++foreach ($Descriptor in $Descriptors) {
++	foreach ($Row in Read-Descriptor $Descriptor.FullName $SuiteRoot) {
++		if ($Type -contains $Row.Type) {
++			$Cases.Add($Row)
++		}
++	}
++}
++if ($Cases.Count -eq 0) {
++	throw "No test cases were discovered for type(s): $($Type -join ', ')"
++}
++Write-Host "xmlconf cases selected: $($Cases.Count)"
++
++$ResultsPath = Join-Path $OutputRoot "xmlconf-results.tsv"
++$Run = Invoke-ConformanceRun -Cases $Cases -Exe $Xpact -ResultsPath $ResultsPath -Limit $Limit
++$Stats = $Run.Stats
++
++$SummaryPath = Join-Path $OutputRoot "xmlconf-summary.txt"
++$Summary = New-Object System.Collections.Generic.List[string]
++$Summary.Add("xpact XML conformance run")
++$Summary.Add("suite:      $SuiteRoot")
++$Summary.Add("catalog:    $CatalogPath")
++$Summary.Add("executable: $Xpact")
++$Summary.Add("types:      $($Type -join ', ')")
++$Summary.Add("profiles:   $($SuiteProfile -join ', ')")
++$Summary.Add("")
++$Summary.Add("total:      $($Stats.Total)")
++$Summary.Add("pass:       $($Stats.Pass)")
++$Summary.Add("fail:       $($Stats.Fail)")
++$Summary.Add("missing:    $($Stats.Missing)")
++$Summary.Add("")
++$Summary.Add("by expected type:")
++foreach ($Name in @("valid", "invalid", "not-wf", "error")) {
++	$Summary.Add(("  {0,-8} {1}" -f $Name, $Stats[$Name]))
++}
++if ($Run.Failures.Count -gt 0) {
++	$Summary.Add("")
++	$Summary.Add("mismatches:")
++	foreach ($Failure in $Run.Failures) {
++		$Summary.Add(("  {0,-28} expected={1,-7} observed={2,-7} {3}" -f $Failure.Id, $Failure.Expected, $Failure.Observed, $Failure.Uri))
++	}
++}
++$Summary | Set-Content -LiteralPath $SummaryPath -Encoding UTF8
++
++Write-Host ""
++$Summary | ForEach-Object { Write-Host $_ }
++Write-Host ""
++Write-Host "xmlconf results: $ResultsPath"
++Write-Host "xmlconf summary: $SummaryPath"
++
++if ($FailOnMismatch -and $Stats.Fail -gt 0) {
++	throw "$($Stats.Fail) of $($Stats.Total) xmlconf cases did not match the expected outcome."
++}
+diff --git a/tests/xpact_native_library.ecf b/tests/xpact_native_library.ecf
+index ffcff96..dfdb2ab 100644
+--- a/tests/xpact_native_library.ecf
++++ b/tests/xpact_native_library.ecf
+@@ -15,7 +15,6 @@
+ 		<external_include location="..\..\..\..\native\"/>
+ 		<external_object location="..\..\..\build\native-eiffel\xpact_native.obj"/>
+ 		<external_object location="..\..\..\build\native-eiffel\xpact_eiffel_runtime_bridge.obj"/>
+-		<precompile name="base_pre" location="$ISE_PRECOMP\base-safe.ecf"/>
+ 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
+ 		<cluster name="src" location="..\src\"/>
+ 	</target>
+@@ -34,7 +33,6 @@
+ 		<external_include location="..\..\..\..\native\"/>
+ 		<external_object location="..\..\..\build\native-eiffel\xpact_native.obj"/>
+ 		<external_object location="..\..\..\build\native-eiffel\xpact_eiffel_runtime_bridge.obj"/>
+-		<precompile name="base_pre" location="$ISE_PRECOMP\base-safe.ecf"/>
+ 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
+ 		<cluster name="src" location="..\src\"/>
+ 	</target>
+diff --git a/tests/xpact_native_runtime.ecf b/tests/xpact_native_runtime.ecf
+index 10a3119..1be912b 100644
+--- a/tests/xpact_native_runtime.ecf
++++ b/tests/xpact_native_runtime.ecf
+@@ -15,7 +15,6 @@
+ 		<external_include location="..\..\..\..\native\"/>
+ 		<external_object location="..\..\..\build\native-runtime\xpact_native.obj"/>
+ 		<external_object location="..\..\..\build\native-runtime\xpact_eiffel_runtime_bridge.obj"/>
+-		<precompile name="base_pre" location="$ISE_PRECOMP\base-safe.ecf"/>
+ 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
+ 		<cluster name="src" location="..\src\"/>
+ 		<cluster name="tests" location=".\"/>
+@@ -35,7 +34,6 @@
+ 		<external_include location="..\..\..\..\native\"/>
+ 		<external_object location="..\..\..\build\native-runtime\xpact_native.obj"/>
+ 		<external_object location="..\..\..\build\native-runtime\xpact_eiffel_runtime_bridge.obj"/>
+-		<precompile name="base_pre" location="$ISE_PRECOMP\base-safe.ecf"/>
+ 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
+ 		<cluster name="src" location="..\src\"/>
+ 		<cluster name="tests" location=".\"/>

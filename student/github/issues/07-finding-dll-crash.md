@@ -13,4 +13,5 @@ The DLL builds and the smoke test passes.
 In the baseline from 2026-10-14, the DLL built, but the smoke test crashed with exit code `-1073741784` = `0xC0000028` STATUS_BAD_STACK. Earlier notes recorded `0xC0000008` STATUS_INVALID_HANDLE, so the crash code is not stable. CI hides this with `-SkipSmoke`.
 
 ## Logs
+Original log: `student/baseline/logs/assertions-dll.log` (0xC0000028). The earlier 0xC0000008 is in `student/history/BUILD_FIX_NOTES.txt` and in the error report, section 4.8.
 Attach `assertions-dll.log` from a rerun in this checkout, and record the exit code of several runs.

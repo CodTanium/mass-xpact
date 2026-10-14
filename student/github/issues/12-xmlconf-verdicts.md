@@ -11,6 +11,11 @@ In the baseline from 2026-10-14, 854 of 2,168 cases mismatched. But the runner e
 
 Breakdown: not-wf 527 (129 need external entities), invalid 197, valid 115 (86 need external entities), error 15.
 
+Earlier observations (error report, sections 6.2, 6.3 and 7.1):
+- The Python runner appeared to pass while this runner reported 852 failures. The verdict rules are the main difference.
+- `rmt-e2e-2a` (duplicate ATTLIST token `(one|one)`) is accepted. It is an *invalid* case, so a non-validating parser is **right** to accept it. With the fixed rules it should pass.
+- 53 cases crash rather than reject, and 45 of them are counted as passes (see the crash finding). The fixed runner must report crashes separately.
+
 ## Done when
 - [ ] `invalid` -> expected ACCEPT; `error` -> no required verdict (reported, not counted as a failure)
 - [ ] Cases that need external entities or XML 1.1 are skipped and counted separately
