@@ -1,0 +1,8 @@
+[
+  { "title": "Week 2 - Baseline",          "due_on": "2026-10-16", "description": "Setup notes, one example parse, assertions-enabled baseline and its findings." },
+  { "title": "Week 3 - Failure reporting", "due_on": "2026-10-23", "description": "A bounded failure-reporting fix or a precise proposal with evidence (B01, B02)." },
+  { "title": "Week 4 - Input matrix",      "due_on": "2026-10-30", "description": "An input matrix with reviewed expected outcomes; 50-100 W3C cases (G01)." },
+  { "title": "Week 5 - Regressions",       "due_on": "2026-11-06", "description": "Repeatable regressions and small bug reproductions (C02, C03, C10). Review what is realistic." },
+  { "title": "Week 7 - Comparison",        "due_on": "2026-11-20", "description": "A table of matches, differences and untested cases, xpact vs Expat (A04, G03)." },
+  { "title": "Week 10 - Handover",         "due_on": "2026-12-11", "description": "Final report, tests, code or proposals, setup guide and follow-up list." }
+]

@@ -1,0 +1,23 @@
+# Runs the W3C harness unit tests, which need no EiffelStudio, on every pull
+# request. The full Eiffel build runs in Jenkins on a Windows PC instead.
+name: Python harness tests
+
+on:
+  pull_request:
+  push:
+    branches: [student-Mass]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # 3.11 or newer: on 3.10 the csv module cannot write NUL (see the Python 3.10 finding).
+          python-version: "3.12"
+      - run: python -m unittest discover -s tests/python -p test_w3c_conformance.py -v

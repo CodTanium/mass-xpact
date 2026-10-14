@@ -1,0 +1,16 @@
+[
+  { "name": "group:A-orientation",      "color": "1d76db", "description": "A - Orientation and assertion policy" },
+  { "name": "group:B-reliable-results", "color": "0e8a16", "description": "B - Reliable test and benchmark results" },
+  { "name": "group:C-correctness",      "color": "d93f0b", "description": "C - Parser correctness and memory safety" },
+  { "name": "group:F-core",             "color": "5319e7", "description": "F - Xpact core investigation and adapters" },
+  { "name": "group:G-verification",     "color": "fbca04", "description": "G - Shared verification and measurement" },
+  { "name": "D1-beginner",              "color": "c2e0c6", "description": "Read, run prepared examples, document and report" },
+  { "name": "D2-guided",                "color": "bfdadc", "description": "Bounded tests, scripts or analyses with review" },
+  { "name": "D3-advanced",              "color": "f9d0c4", "description": "Experienced developer guides closely" },
+  { "name": "D4-expert",                "color": "e99695", "description": "Experienced developer owns the implementation" },
+  { "name": "P0",                       "color": "b60205", "description": "Must be solved first" },
+  { "name": "P1",                       "color": "d4c5f9", "description": "Important, after P0" },
+  { "name": "type:task",                "color": "0075ca", "description": "Planned work from the task register" },
+  { "name": "type:finding",             "color": "d73a4a", "description": "Something observed that is wrong or surprising" },
+  { "name": "type:blocker",             "color": "000000", "description": "Stops other work until resolved" }
+]
