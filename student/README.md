@@ -5,6 +5,8 @@ folder, so it stays separate from the parser code. The plan, the task register
 (A01–H06) and the suggested task selection come from
 [`docs/xpact-student-introduction.md`](../docs/xpact-student-introduction.md).
 
+**Start here: [PLAN.md](PLAN.md)**, the week-by-week plan and the list of things to do.
+
 ## Layout
 
 | Path | What goes there |
