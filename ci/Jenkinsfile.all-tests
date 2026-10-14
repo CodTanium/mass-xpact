@@ -693,7 +693,10 @@ pipeline {
                  description: 'Build and run contributed xpact incremental examples.')
     booleanParam(name: 'RUN_BENCHMARKS',
                  defaultValue: true,
-                 description: 'Run same-machine benchmark publication.')
+                 description: 'Run same-machine benchmarks and W3C XML conformance tests.')
+    string(name: 'W3C_SUITE_DIRECTORY',
+           defaultValue: '',
+           description: 'Optional prepared W3C XML suite directory for offline benchmarks. Leave empty to download the pinned, checksum-verified suite.')
     booleanParam(name: 'RUN_LARGE_XML_BENCHMARKS',
                  defaultValue: false,
                  description: 'Run opt-in large XML benchmark publication.')
@@ -994,13 +997,29 @@ pipeline {
           runWithJenkinsTestResult('xpact benchmarks', 'same-machine benchmark publication') {
             powershell '''
               $ErrorActionPreference = "Stop"
-              .\\scripts\\run_benchmarks.ps1 -EiffelBuild Finalized,FinalizedAssertions
+              foreach ($ReportName in @("junit.xml", "results.tsv", "summary.json", "summary.md")) {
+                $ReportPath = Join-Path "build/benchmarks/w3c-xml-conformance" $ReportName
+                if (Test-Path -LiteralPath $ReportPath -PathType Leaf) {
+                  Remove-Item -LiteralPath $ReportPath -Force
+                }
+              }
+              python -m unittest discover -s tests/python -p test_w3c_conformance.py
+              if ($LASTEXITCODE -ne 0) {
+                throw "W3C conformance runner unit tests failed."
+              }
+              $BenchmarkArguments = @{ EiffelBuild = @("Finalized", "FinalizedAssertions") }
+              if (-not [string]::IsNullOrWhiteSpace($env:W3C_SUITE_DIRECTORY)) {
+                $BenchmarkArguments.W3cSuiteDirectory = $env:W3C_SUITE_DIRECTORY
+              }
+              .\\scripts\\run_benchmarks.ps1 @BenchmarkArguments
             '''
           }
         }
       }
       post {
         always {
+          junit testResults: 'build/benchmarks/w3c-xml-conformance/junit.xml',
+                allowEmptyResults: true
           script {
             writeBenchmarkJUnitReport('build/benchmarks/benchmark-results.tsv',
                                       'xpact same-machine benchmark rows',
@@ -1016,6 +1035,10 @@ pipeline {
             build/benchmarks/*.tsv,
             build/benchmarks/*.csv,
             build/benchmarks/*.html,
+            build/benchmarks/w3c-xml-conformance/*.tsv,
+            build/benchmarks/w3c-xml-conformance/*.json,
+            build/benchmarks/w3c-xml-conformance/*.md,
+            build/benchmarks/w3c-xml-conformance/*.xml,
             docs/benchmarks.md,
             docs/performance-analysis.md
           ''', allowEmptyArchive: true

@@ -45,6 +45,20 @@ incremental shim audit, runs SonarQube analysis using the Jenkins tool named
 optionally runs the upstream libexpat native suite, and optionally publishes
 benchmarks for the production-finalized and assertion-finalized benchmark builds.
 
+Both Jenkins pipelines include the W3C XML conformance suite when
+`RUN_BENCHMARKS` is enabled (the default). The benchmark command runs the suite
+against the selected Eiffel builds, including both finalized assertion modes
+in Jenkins, and fails on unexpected parser results. Runner unit tests execute
+before the benchmarks. Unsupported catalog configurations are reported as
+skipped cases rather than passes.
+
+By default the runner downloads the pinned W3C archive and verifies its SHA-256
+checksum. Set the Jenkins `W3C_SUITE_DIRECTORY` parameter to an existing suite
+directory for offline agents; this directory must be outside workspaces that
+the all-tests pipeline clears before each stage. Both pipelines publish the
+per-case JUnit report even when conformance fails, and archive the detailed
+results and summaries under `build/benchmarks/w3c-xml-conformance/`.
+
 ## Why Both Assertion Modes
 
 The article argues for making contracts visible and useful. The assertion-on

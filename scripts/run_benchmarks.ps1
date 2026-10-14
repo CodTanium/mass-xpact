@@ -7,7 +7,11 @@ param(
 	[string[]] $EiffelBuild = @("Finalized", "FinalizedAssertions"),
 	[switch] $SkipBuild,
 	[switch] $SkipWslC,
-	[switch] $SkipNativeXpactC
+	[switch] $SkipNativeXpactC,
+	[string] $W3cSuiteDirectory = "",
+	[ValidateRange(1, 3600)]
+	[int] $W3cTimeoutSeconds = 10,
+	[switch] $SkipW3cConformance
 )
 
 Set-StrictMode -Version Latest
@@ -23,6 +27,14 @@ if ($Repetitions -le 0) {
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $OutputRoot = Join-Path $RepoRoot $OutputDir
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
+$W3cOutputRoot = Join-Path $OutputRoot "w3c-xml-conformance"
+# Never leave a previous run's verdicts behind when a build fails or the suite is skipped.
+foreach ($ReportName in @("junit.xml", "results.tsv", "summary.json", "summary.md")) {
+	$ReportPath = Join-Path $W3cOutputRoot $ReportName
+	if (Test-Path -LiteralPath $ReportPath -PathType Leaf) {
+		Remove-Item -LiteralPath $ReportPath -Force
+	}
+}
 
 function Get-SampleDocumentBytes {
 	$builder = [System.Text.StringBuilder]::new()
@@ -231,6 +243,9 @@ function Invoke-EiffelBenchmarkBuild {
 	$CompileArgs = @("-batch", "-clean")
 	if ($BuildSpec.Mode -eq "Finalized") {
 		$CompileArgs += "-finalize"
+		if ($BuildSpec.Name -eq "FinalizedAssertions") {
+			$CompileArgs += "-keep"
+		}
 	}
 	$CompileArgs += @("-config", $ConfigPath, "-target", $BuildSpec.Target)
 
@@ -548,6 +563,11 @@ $Markdown.Add("See ``docs/performance-analysis.md`` for the current interpretati
 $Markdown.Add("")
 $Markdown.Add("For opt-in macro-benchmarks against caller-supplied, pre-decompressed real XML")
 $Markdown.Add("corpora, see ``docs/large-xml-benchmarks.md``.")
+$Markdown.Add("")
+$Markdown.Add("W3C XML binary conformance tests run by default for each selected Eiffel build. Per-case verdicts and timings, JUnit XML, and a summary are written under ``$W3cOutputRoot``. See ``docs/w3c-xml-conformance.md`` for the profile, exclusions, and offline setup.")
+if ($SkipW3cConformance) {
+	$Markdown.Add("W3C XML conformance was explicitly skipped for this run (``-SkipW3cConformance``).")
+}
 if (-not [string]::IsNullOrWhiteSpace($ExistingHistory)) {
 	$Markdown.Add("")
 	foreach ($Line in ($ExistingHistory -split "\r?\n")) {
@@ -561,6 +581,21 @@ Write-Host "Benchmark medians written to $MarkdownPath"
 Write-Host "Raw benchmark rows written to $TsvPath"
 foreach ($Row in $MedianRows) {
 	Write-Host "$(Format-MarkdownRow $Row)"
+}
+
+if (-not $SkipW3cConformance) {
+	$W3cArguments = @((Join-Path $PSScriptRoot "run_w3c_conformance.py"), "--output-dir", $W3cOutputRoot, "--timeout", "$W3cTimeoutSeconds")
+	if (-not [string]::IsNullOrWhiteSpace($W3cSuiteDirectory)) {
+		$W3cArguments += @("--suite-dir", $W3cSuiteDirectory)
+	}
+	foreach ($BuildSpec in $SelectedEiffelBuilds) {
+		$XpactExe = Join-Path $RepoRoot "EIFGENs\$($BuildSpec.Target)\$($BuildSpec.CodeDirectory)\xpact_benchmarks.exe"
+		$W3cArguments += @("--engine", "$($BuildSpec.Name)=$XpactExe")
+	}
+	& $Python @W3cArguments
+	if ($LASTEXITCODE -ne 0) {
+		throw "W3C XML conformance failed. See $W3cOutputRoot\summary.md and junit.xml for per-case results."
+	}
 }
 
 # Jenkins' PowerShell wrapper can observe a stale native command exit code

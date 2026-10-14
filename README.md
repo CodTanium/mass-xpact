@@ -35,6 +35,8 @@ Implemented and verified now:
   sizes and can be compiled against xpact or libexpat.
 - An upstream libexpat test-suite adapter with explicit green/red parity rows.
 - Published benchmark, performance-analysis, and parity documentation.
+- W3C XML binary conformance tests in the benchmark lane, with per-case
+  reports for both finalized assertion modes and Jenkins publication.
 - An opt-in large XML benchmark runner for caller-supplied, pre-decompressed
   real corpora.
 
@@ -150,6 +152,16 @@ Package the Windows x64 preview release:
 ```powershell
 .\scripts\package_windows_release.ps1
 ```
+
+Run benchmarks including the W3C XML conformance suite:
+
+```powershell
+.\scripts\run_benchmarks.ps1 -EiffelBuild Finalized,FinalizedAssertions
+```
+
+The suite runs by default in both Jenkins benchmark pipelines. See
+[W3C conformance benchmarks](docs/w3c-xml-conformance.md) for the supported
+profile, offline setup, and detailed reports.
 
 Run opt-in large XML benchmarks with pre-decompressed real XML files:
 

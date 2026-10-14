@@ -111,8 +111,9 @@ Windows package:
 .\scripts\package_windows_release.ps1
 ```
 
-Benchmark publication is useful but should normally run nightly because it is
-more sensitive to machine load:
+Benchmark publication includes the W3C XML conformance suite for the selected
+Eiffel builds. Throughput measurements should normally run nightly because
+they are sensitive to machine load:
 
 ```powershell
 .\scripts\run_benchmarks.ps1 -EiffelBuild Finalized,FinalizedAssertions
@@ -149,7 +150,11 @@ Recommended agent prerequisites:
   `finish_freezing`.
 - Visual Studio 2022 C++ build tools.
 - CMake on `PATH`, or installed at `C:\Program Files\CMake\bin\cmake.exe`.
+- Python 3.10 or later on `PATH` for benchmark baselines and the W3C
+  conformance runner.
 - A prepared Expat 2.8.1 source checkout or release tree.
+- Access to the pinned W3C suite download, or an extracted suite directory
+  outside the Jenkins workspace for offline agents.
 - Optional WSL2 Ubuntu with `gcc` for cross-platform ABI smoke.
 - Optional CPython source checkout for L3 public-application replacement.
 
@@ -158,7 +163,11 @@ Recommended Jenkins parameters:
 - `EXPAT_SOURCE_DIR`
   Path to the upstream Expat source tree.
 - `RUN_BENCHMARKS`
-  Run benchmark publication on nightly builds only.
+  Run benchmark publication and W3C XML conformance tests. Enabled by default
+  in both pipelines; disable it for jobs that should omit the benchmark lane.
+- `W3C_SUITE_DIRECTORY`
+  Optional extracted W3C XML suite directory for offline agents. Leave empty
+  to download the pinned archive and verify its checksum automatically.
 - `RUN_PUBLIC_APP`
   Run CPython replacement experiment.
 - `CPYTHON_SOURCE_DIR`
@@ -252,6 +261,11 @@ Archive these artifacts:
 - `build/chunked-crc/chunked-crc-results.tsv`
 - `build/incremental-shim-audit/incremental-shim-audit.tsv`
 - `docs/benchmarks.md` when benchmarks run
+- `build/benchmarks/w3c-xml-conformance/results.tsv`, `summary.json`,
+  `summary.md` and `junit.xml` when benchmarks run. Both pipelines publish
+  this JUnit report in the benchmark stage's `post { always { ... } }` block,
+  so rejected cases, unsupported cases and unexpected results remain visible
+  when the conformance command fails.
 - `docs/large-xml-benchmarks.md` when large XML benchmarks run
 - `docs/performance-analysis.md` when benchmarks run
 - `build/large-xml-benchmarks/large-xml-benchmark-results.tsv` when large XML
