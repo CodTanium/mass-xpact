@@ -14,7 +14,6 @@ In the baseline from 2026-10-14: `XP_NATIVE_PARSER.parse @10 final_finished_or_s
 
 ## Logs
 Original log: `student/baseline/logs/matrix-workbench.log`. Also seen 4 times in `student/results/xmlconf-crashes-2026-10-14/exception_trace.log`, and before the baseline (error report, section 5.1).
-Seen again on 2026-10-19 (assertions-on / Workbench, via `run_phase1.ps1`): `student/results/error-report-2026-10-19/` (error 2, with `exception_trace.log`).
 Attach `matrix-workbench.log` from a rerun in this checkout.
 
 ## Notes

@@ -15,7 +15,6 @@ Weeks 1–2: "Expected Eiffel link response file not found … xpact_native_libr
 
 ## Logs
 - Fix description: `student/history/BUILD_FIX_NOTES.txt`, `student/history/xpact-error-report.md` (sections 3–4)
-- Seen again on 2026-10-19 with EiffelStudio 25.12 Standard (ISE_EIFFEL not set, so the `C:\El2502E` fallback fails): `student/results/error-report-2026-10-19/` (error 1)
 - Patches: `student/history/patches/01-week1-build-fixes.patch` (from `b930600`) and `02-week2-runner-changes.patch`. Both apply cleanly to `main` @ `fee611a`.
 
 ## Proposed next step
