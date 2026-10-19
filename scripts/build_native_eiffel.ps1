@@ -39,7 +39,7 @@ function Get-IseInclude {
 			return $Candidate
 		}
 	}
-	$Fallback = "C:\El2502E\studio\spec\win64\include"
+	$Fallback = "C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard\studio\spec\win64\include"
 	if (Test-Path -LiteralPath $Fallback -PathType Container) {
 		return $Fallback
 	}
