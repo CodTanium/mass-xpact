@@ -1242,7 +1242,10 @@ feature {NONE} -- Encoding
 						end
 					end
 				variant
-					a_end_index - i
+						-- Some iterations only set `l_valid' to False without
+						-- advancing `i' (for example at the '/' of "<root/>");
+						-- count that as progress so the variant still decreases.
+					a_end_index - i + l_valid.to_integer
 				end
 				if l_valid and then i = a_end_index then
 					Result := l_attributes
