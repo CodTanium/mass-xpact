@@ -11,6 +11,7 @@ test scripts that back it up. The rules are in
 | Issue | Fix | Pull request | Commit on `student-Mass` | Report |
 |---|---|---|---|---|
 | [#2](https://github.com/andersoxie/xpact/issues/2) | Eiffel runtime include fallback path in `build_native_eiffel.ps1` | - (committed before the workflow) | `9eb18bd` | [issue-0002](issue-0002/report.md) |
+| [#3](https://github.com/andersoxie/xpact/issues/3) | B03: fix the loop variant in `direct_start_tag_attributes` (parser change, reviewed before merging) | [#12](https://github.com/andersoxie/xpact/pull/12) | this pull request's squash commit | [issue-0003](issue-0003/report.md) |
 | [#4](https://github.com/andersoxie/xpact/issues/4) | Stop repeated MSVC imports from growing PATH past cmd's limit | [#9](https://github.com/andersoxie/xpact/pull/9) | `3b8a205` | [issue-0004](issue-0004/report.md) |
 | [#5](https://github.com/andersoxie/xpact/issues/5) | Versioning workflow for fixes | [#6](https://github.com/andersoxie/xpact/pull/6) | `cada501` | [issue-0005](issue-0005/report.md) |
 | [#7](https://github.com/andersoxie/xpact/issues/7) | Build the native Eiffel library with the `msc_vc140` C backend | [#8](https://github.com/andersoxie/xpact/pull/8) | `eb6fc5d` | [issue-0007](issue-0007/report.md) |
@@ -19,10 +20,7 @@ test scripts that back it up. The rules are in
 | [#16](https://github.com/andersoxie/xpact/issues/16) | Update `student/PLAN.md` with the week 3 work | [#17](https://github.com/andersoxie/xpact/pull/17) | `b631e15` | [issue-0016](issue-0016/report.md) |
 | [#18](https://github.com/andersoxie/xpact/issues/18) | Mark A01 as done in `student/PLAN.md` | [#19](https://github.com/andersoxie/xpact/pull/19) | see the pull request | [issue-0018](issue-0018/report.md) |
 
-Open: [#3](https://github.com/andersoxie/xpact/issues/3) (B03 loop variant, fix
-in pull request [#12](https://github.com/andersoxie/xpact/pull/12) waiting for
-review by the parser's developer) and
-[#13](https://github.com/andersoxie/xpact/issues/13) (GC critical section
+Open: [#13](https://github.com/andersoxie/xpact/issues/13) (GC critical section
 swallows exceptions).
 
 ## Error reports

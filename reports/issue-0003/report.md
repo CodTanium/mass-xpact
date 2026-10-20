@@ -2,6 +2,8 @@
 
 Issue: [#3](https://github.com/andersoxie/xpact/issues/3)   Branch: `fix/3-start-tag-loop-variant`   Base: `student-Mass` @ `20e6bc3`   Date: 2026-10-20
 
+> **Update 2026-10-20:** `student-Mass` @ `df189d9` was merged into this branch, and this report moved to `reports/issue-0003/` (layout from #14). The merged commits change no code (`git diff 20e6bc3 df189d9 -- src tests scripts` is empty), so the verification below still applies.
+
 > **Parser change: needs review by the parser's developer before merging** (pull request checklist). The pull request is left open for that review.
 
 ## Summary
@@ -56,7 +58,7 @@ Any exception inside `a_action` is caught and dropped. `l_result` keeps `Xml_sta
 
 ### 2. Diagnostic: let the exception through
 
-In a throwaway worktree (not committed), `XP_GC_CRITICAL_SECTION.execute` was changed to `enter; a_action.call (Void); leave` (no rescue). Then the assertions-on / Workbench cell was run again. The real exception appeared ([fix-issue-3-diagnostic-no-rescue.txt](fix-issue-3-diagnostic-no-rescue.txt)):
+In a throwaway worktree (not committed), `XP_GC_CRITICAL_SECTION.execute` was changed to `enter; a_action.call (Void); leave` (no rescue). Then the assertions-on / Workbench cell was run again. The real exception appeared ([diagnostic-no-rescue.txt](diagnostic-no-rescue.txt)):
 
 ```text
 XP_NATIVE_PARSER    direct_start_tag_attributes @11
@@ -73,7 +75,7 @@ XP_TEST_ROOT        test_garbage_collection_suspension @18
 
 ### 3. Diagnostic: it is not about the GC
 
-In the same worktree, the test was also changed to `set_suspend_gc_during_parse (False)`. The same `parse ("<root/>", True)` fails at the same place, now directly from `parse_with_current_gc_policy` ([fix-issue-3-diagnostic-no-gc.txt](fix-issue-3-diagnostic-no-gc.txt)). Both diagnostic changes are in [fix-issue-3-diagnostic.diff.txt](fix-issue-3-diagnostic.diff.txt). The first run used only the `execute` change; the second used both.
+In the same worktree, the test was also changed to `set_suspend_gc_during_parse (False)`. The same `parse ("<root/>", True)` fails at the same place, now directly from `parse_with_current_gc_policy` ([diagnostic-no-gc.txt](diagnostic-no-gc.txt)). Both diagnostic changes are in [diagnostic.diff.txt](diagnostic.diff.txt). The first run used only the `execute` change; the second used both.
 
 ### 4. The loop
 
@@ -145,9 +147,9 @@ Expectations 1 and 2 were met. No other test failed after `test_garbage_collecti
 Not tested: libexpat adapter, W3C conformance, benchmarks.
 
 Logs:
-- Before: [fix-issue-3-before-on-workbench.txt](fix-issue-3-before-on-workbench.txt)
-- Diagnostics: [fix-issue-3-diagnostic-no-rescue.txt](fix-issue-3-diagnostic-no-rescue.txt), [fix-issue-3-diagnostic-no-gc.txt](fix-issue-3-diagnostic-no-gc.txt), [fix-issue-3-diagnostic.diff.txt](fix-issue-3-diagnostic.diff.txt)
-- After: [On-Workbench](fix-issue-3-after-On-Workbench.txt), [On-Finalized](fix-issue-3-after-On-Finalized.txt), [Off-Workbench](fix-issue-3-after-Off-Workbench.txt), [Off-Finalized](fix-issue-3-after-Off-Finalized.txt)
+- Before: [before-on-workbench.txt](before-on-workbench.txt)
+- Diagnostics: [diagnostic-no-rescue.txt](diagnostic-no-rescue.txt), [diagnostic-no-gc.txt](diagnostic-no-gc.txt), [diagnostic.diff.txt](diagnostic.diff.txt)
+- After: [On-Workbench](after-on-workbench.txt), [On-Finalized](after-on-finalized.txt), [Off-Workbench](after-off-workbench.txt), [Off-Finalized](after-off-finalized.txt)
 
 ## How to revert
 
