@@ -232,7 +232,9 @@ class ReportAndCliTests(TemporarySuite):
         self.assertEqual(len(suites[0].findall("testcase/skipped")), 1)
         self.assertEqual(suites[0].find("testcase/failure").text, "wrong?verdict")
         with (self.output / "results.tsv").open(encoding="utf-8", newline="") as source:
-            self.assertEqual(len(list(csv.DictReader(source, delimiter="\t"))), 6)
+            tsv_rows = list(csv.DictReader(source, delimiter="\t"))
+        self.assertEqual(len(tsv_rows), 6)
+        self.assertEqual(tsv_rows[2]["message"], "wrong?verdict")
 
     def test_cli_runs_each_engine_and_fails_on_conformance_mismatch(self):
         self.catalog('<TEST ID="valid" TYPE="valid" URI="a.xml"/>')
