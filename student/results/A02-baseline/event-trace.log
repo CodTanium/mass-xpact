@@ -1,0 +1,123 @@
+﻿# ec -batch -clean -config "student\baseline\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml
+# started 2026-10-22T00:41:02
+
+Eiffel Compilation Manager
+Version 25.12.9.8922 - win64
+
+Degree 6: Examining System
+Degree 5: Parsing Classes
+Degree 4: Analyzing Inheritance
+Degree 3: Checking Types
+Degree 2: Generating Byte Code
+Freezing System Changes
+Degree -1: Generating Code
+System Recompiled.
+You must now run "finish_freezing" in:
+	C:\xpact\xpact-student-Mass\EIFGENs\xpact_event_trace\W_code
+Eiffel C/C++ Compilation Tool - Version: 25.12
+Copyright Eiffel Software 1996-2024. All Rights Reserved.
+
+Preparing C compilation using already configured msc_vc140 C compiler...
+eoption.c
+big_file_C1_c.c
+epattern.c
+efrozen.c
+ecall.c
+eplug.c
+eskelet.c
+enames.c
+evisib.c
+ececil.c
+einit.c
+eparents.c
+        1 file(s) copied.
+emain.c
+        1 file(s) copied.
+Microsoft (R) Windows (R) Resource Compiler Version 10.0.10011.16384
+
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Microsoft (R) Incremental Linker Version 14.51.36244.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+-STACK:5000000 -NODEFAULTLIB:libc -STACK:5000000 -NODEFAULTLIB:libc -SUBSYSTEM:CONSOLE -OUT:xpact_event_trace.exe 
+e1\emain.obj 
+"C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard\studio\spec\win64\lib\msc_vc140\wkbench.lib" 
+USER32.lib WS2_32.lib ADVAPI32.lib GDI32.lib SHELL32.lib MSIMG32.lib COMDLG32.lib UUID.lib OLE32.lib OLEAUT32.lib COMCTL32.lib MPR.LIB SHLWAPI.LIB WINSPOOL.LIB "c:\users\masou\documents\eiffel user files\25.12\precomp\spec\win64\EIFGENs\base-safe\W_code\msc_vc140\precomp.lib" 
+xpact_event_trace.res 
+E1\eparents.obj E1\einit.obj E1\ececil.obj E1\evisib.obj E1\enames.obj 
+E1\eskelet.obj E1\eplug.obj E1\ecall.obj E1\efrozen.obj E1\epattern.obj 
+E1\eoption.obj C1\Cobj1.lib 
+C compilation completed
+== student\baseline\event-trace\inputs\01-book.xml
+bytes: 40
+  1. start-element  book id="7"
+  2. start-element  title
+  3. text           "Hello"
+  4. end-element    title
+  5. end-element    book
+result: ACCEPT (5 events)
+
+== student\baseline\event-trace\inputs\02-empty-root.xml
+bytes: 7
+  1. start-element  root
+  2. end-element    root
+result: ACCEPT (2 events)
+
+== student\baseline\event-trace\inputs\03-incomplete.xml
+bytes: 6
+  1. start-element  root
+result: REJECT at line 1, column 6: unclosed element
+note: 1 event(s) were delivered before the error was detected
+
+== student\baseline\event-trace\inputs\04-mismatched.xml
+bytes: 20
+  1. start-element  root
+  2. start-element  child
+result: REJECT at line 1, column 15: mismatched end tag
+note: 2 event(s) were delivered before the error was detected
+
+== student\baseline\event-trace\inputs\05-book-mismatched.xml
+bytes: 25
+  1. start-element  book
+  2. start-element  title
+  3. text           "Hello"
+result: REJECT at line 1, column 20: mismatched end tag
+note: 3 event(s) were delivered before the error was detected
+
+== student\baseline\event-trace\inputs\06-bad-utf8.xml
+bytes: 9
+  1. start-element  r
+  2. text           "�("
+  3. end-element    r
+result: ACCEPT (3 events)
+
+== student\baseline\event-trace\inputs\07-rich.xml
+bytes: 235
+  1. xml-decl       version="1.0" encoding="UTF-8" standalone=-1
+  2. start-doctype  note system=none public=none internal-subset=True
+  3. entity-decl    who parameter=False value="World" system=none
+  4. end-doctype
+  5. comment        " a comment "
+  6. start-element  note lang="en" priority="2"
+  7. text           "\n  "
+  8. pi             app "hint"
+  9. text           "\n  "
+  10. start-element  to
+  11. text           "World"
+  12. end-element    to
+  13. text           "\n  "
+  14. start-element  body
+  15. start-cdata
+  16. text           "1 < 2 & 3 > 2"
+  17. end-cdata
+  18. end-element    body
+  19. text           "\n  "
+  20. start-element  empty
+  21. end-element    empty
+  22. text           "\n"
+  23. end-element    note
+result: ACCEPT (23 events)
+
+# exit code 0 after 11 s

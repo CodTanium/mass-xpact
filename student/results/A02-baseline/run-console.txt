@@ -1,0 +1,32 @@
+Loaded Visual Studio C++ x64 environment from C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat
+== environment ==
+   tool versions, settings and source fingerprint
+   exit code 0 after 5 s -> logs\environment.log
+== event-trace ==
+   ec -batch -clean -config "student\baseline\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml
+   exit code 0 after 11 s -> logs\event-trace.log
+== matrix-workbench ==
+   .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Workbench
+   exit code 1 after 14 s -> logs\matrix-workbench.log
+== matrix-finalized ==
+   .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Finalized
+   exit code 0 after 24 s -> logs\matrix-finalized.log
+== matrix-finalized-keep ==
+   ec -batch -clean -finalize -keep -config tests\xpact_tests.ecf -target xpact_tests_assertions; finish_freezing; xpact_tests.exe
+   exit code 1 after 57 s -> logs\matrix-finalized-keep.log
+== native-runtime-smoke ==
+   .\scripts\run_native_runtime_smoke.ps1 -AssertionMode On
+   exit code 0 after 57 s -> logs\native-runtime-smoke.log
+== assertions-dll ==
+   .\scripts\build_native_eiffel.ps1 -BuildTier Assertions   (with smoke, no -SkipSmoke)
+   exit code 1 after 80 s -> logs\assertions-dll.log
+
+Results: C:\xpact\xpact-student-Mass\student\results\A02-baseline\results.tsv
+  step	started	seconds	exit_code	command	log
+  environment	2026-10-22T00:40:57	5	0	tool versions, settings and source fingerprint	logs\environment.log
+  event-trace	2026-10-22T00:41:02	11	0	ec -batch -clean -config "student\baseline\event-trace\xp_event_trace.ecf" -target xpact_event_trace; finish_freezing; xpact_event_trace.exe inputs\*.xml	logs\event-trace.log
+  matrix-workbench	2026-10-22T00:41:13	14	1	.\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Workbench	logs\matrix-workbench.log
+  matrix-finalized	2026-10-22T00:41:26	24	0	.\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Finalized	logs\matrix-finalized.log
+  matrix-finalized-keep	2026-10-22T00:41:51	57	1	ec -batch -clean -finalize -keep -config tests\xpact_tests.ecf -target xpact_tests_assertions; finish_freezing; xpact_tests.exe	logs\matrix-finalized-keep.log
+  native-runtime-smoke	2026-10-22T00:42:48	57	0	.\scripts\run_native_runtime_smoke.ps1 -AssertionMode On	logs\native-runtime-smoke.log
+  assertions-dll	2026-10-22T00:43:45	80	1	.\scripts\build_native_eiffel.ps1 -BuildTier Assertions   (with smoke, no -SkipSmoke)	logs\assertions-dll.log
