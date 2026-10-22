@@ -46,6 +46,7 @@ test scripts that back it up. The rules are in
 | [#55](https://github.com/andersoxie/xpact/issues/55) | `run_eiffel_test_matrix.ps1` runs every lane from the repository root, wherever it is started | [#58](https://github.com/andersoxie/xpact/pull/58) | see `git log --grep "(#58)"` | [issue-0055](issue-0055/report.md) |
 | [#64](https://github.com/andersoxie/xpact/issues/64) | Jenkins check of B02 dropped (not pursued); week 3 marked complete in `student/PLAN.md` | (the pull request) | see `git log --grep "Refs #64"` | (the pull request) |
 | [#66](https://github.com/andersoxie/xpact/issues/66) | Items put on hold on 2026-10-22 recorded in `student/PLAN.md` (B03/#12, A04, 47 DTD crashes, #13, #38-#40) | (the pull request) | see `git log --grep "Refs #66"` | (the pull request) |
+| [#70](https://github.com/andersoxie/xpact/issues/70) | Checklist audit of every closed issue (2026-10-22): verified items ticked on GitHub; dates/commits on four pages; `student/github/README.md` issue tables to #70 | (the pull request) | see `git log --grep "Refs #70"` | [issue-0070](issue-0070/report.md) |
 
 #36, #41, #42 and #44 were stacked pull requests, merged in that order on 2026-10-22.
 

@@ -1,5 +1,7 @@
 # GitHub setup
 
+> **Last updated:** 2026-10-22 · describes `student-Mass` @ `76ac272`
+
 How the work is tracked on [andersoxie/xpact](https://github.com/andersoxie/xpact):
 **one issue per problem or task**, labels to sort them, one milestone per
 project week, and a pull request into `student-Mass` for every change
@@ -9,7 +11,7 @@ project week, and a pull request into `student-Mass` for every change
 |---|---|---|
 | ✅ | Labels | 21, listed in [`labels.json`](labels.json); all on GitHub except 6 (see below) |
 | ✅ | Milestones | `Week 1 - Setup` … `Week 10 - Handover`, in [`milestones.json`](milestones.json), all on GitHub |
-| ✅ | Issues | #2-#46 on GitHub, each with a milestone and labels; drafts for the rest in [`issues/`](issues/) |
+| ✅ | Issues | #2-#70 on GitHub, each with a milestone and labels; drafts for the rest in [`issues/`](issues/) |
 | ✅ | Project board | [xpact student work (Mass)](https://github.com/users/CodTanium/projects/3): Todo → In progress → In review → Done, every issue on it ([below](#project-board)) |
 
 ## Labels
@@ -47,9 +49,9 @@ Due on the Friday of each week; week 1 started on 2026-10-05.
 
 | Milestone | Issues on GitHub | Drafts not on GitHub yet |
 |---|---|---|
-| Week 1 - Setup | #2, #4, #7, #10 (build fixes), #18 (A01) | |
-| Week 2 - Baseline | #3 (B03), #13, #33 (A02) | 04 `-keep`, 06 runner stops, 07 DLL crash, 21 xmlconf crashes, 22 build fixes not in `main` |
-| Week 3 - Failure reporting | #5, #14, #16, #20, #22, #24, #26, #34, #35 (workflow) · #28 (CR loop variant), #29 (W3C run), #32 (Python 3.10) · #45 B01, #46 B02 | 23 Jenkins precompile |
+| Week 1 - Setup | #2, #4, #7, #10 (build fixes), #18 (A01), #68 (A01 evidence) | |
+| Week 2 - Baseline | #3 (B03), #13, #33 (A02), #48 (`-keep`) | 04 `-keep`, 06 runner stops, 07 DLL crash, 21 xmlconf crashes, 22 build fixes not in `main` |
+| Week 3 - Failure reporting | #5, #14, #16, #20, #22, #24, #26, #34, #35 (workflow) · #28 (CR loop variant), #29 (W3C run), #32 (Python 3.10) · #45 B01, #46 B02 · #51, #53, #55, #60 (findings) · #56, #64, #66, #70 (workflow) | 23 Jenkins precompile (dropped, #56) |
 | Week 4 - Input matrix | | 11 G01, 12 xmlconf verdicts |
 | Week 5 - Regressions | #37 (DLL test program) · #38 (C01), #39 (UTF-8), #40 (chunk ends with `<`) | 13 C02, 14 C03, 15 C10 (now partly covered by #37) |
 | Week 6 - One improvement | | |
@@ -69,11 +71,12 @@ Every issue's report is indexed in [`reports/README.md`](../../reports/README.md
 | `08-finding-python310.md` | [#32](https://github.com/andersoxie/xpact/issues/32) | Fixed; delete the draft or the script makes a duplicate |
 | `02-A02.md` | [#33](https://github.com/andersoxie/xpact/issues/33) | Done; delete the draft or the script makes a duplicate |
 | `09-B01.md`, `10-B02.md` | [#45](https://github.com/andersoxie/xpact/issues/45), [#46](https://github.com/andersoxie/xpact/issues/46) | Same titles, so the script skips them |
-| `01-A01.md` | (none; A01 was marked done in [#18](https://github.com/andersoxie/xpact/issues/18)) | The script would create an A01 issue for finished work |
+| `01-A01.md` | (none; A01 was marked done in [#18](https://github.com/andersoxie/xpact/issues/18), evidence in [#68](https://github.com/andersoxie/xpact/issues/68)) | The script would create an A01 issue for finished work |
 | `22-blocker-build-fixes.md` | (none) | Partly solved by #2, #7, #10 on `student-Mass`; still not in `main` |
 
-Issues created outside the drafts: #2, #4, #7, #10, #13, #28, #38, #39, #40
-(findings), #5, #14, #16, #18, #20, #22, #24, #26, #29, #34, #35, #37 (tasks).
+Issues created outside the drafts: #2, #4, #7, #10, #13, #28, #38, #39, #40,
+#48, #51, #53, #55, #60 (findings), #5, #14, #16, #18, #20, #22, #24, #26, #29,
+#34, #35, #37, #43, #56, #64, #66, #68, #70 (tasks).
 
 </details>
 
@@ -83,12 +86,12 @@ Issues created outside the drafts: #2, #4, #7, #10, #13, #28, #38, #39, #40
 created 2026-10-22 ([#35](https://github.com/andersoxie/xpact/issues/35)), with
 the columns `CLAUDE.md` asks for:
 
-| Status | Means | On 2026-10-22 |
+| Status | Means | Issues in this state on 2026-10-22 (from the issue state; the board itself was not read, see below) |
 |---|---|---|
-| ⬜ Todo | Not started | #13, #28, #38, #39, #40 (parser repairs), #45 B01, #46 B02 |
+| ⬜ Todo | Not started | #13, #38, #39, #40 (parser repairs, ⏸ on hold) |
 | 🟡 In progress | Being worked on | |
-| 🔵 In review | Pull request open, or waiting for the parser developer | #3 and its draft PR #12 |
-| ✅ Done | Merged **and** the result verified | the 19 closed issues |
+| 🔵 In review | Pull request open, or waiting for the parser developer | #3 and its draft PR #12 (⏸ on hold) · #68 (PR #69) · #70 (this change) |
+| ✅ Done | Merged **and** the result verified | the closed issues; their "Done when" lists were checked on 2026-10-22 ([#70](https://github.com/andersoxie/xpact/issues/70)) |
 
 An issue goes to `Done` only after its result is checked (`CLAUDE.md`: never
 close an issue just because the code changed).
@@ -97,6 +100,9 @@ close an issue just because the code changed).
   `andersoxie/xpact` (GitHub only links a project to a repository of the same
   owner), so it does not show in the repository's Projects tab. Issues of
   the repository can be added to it all the same.
+- The `gh` login on this PC has no `read:project` scope, so the board was
+  not read on 2026-10-22; whether #64, #68 and #70 are on it is **unknown**.
+  `gh auth refresh -s read:project,project` adds the scope.
 - A new issue does not land on the board by itself. Add it with
   `gh project item-add 3 --owner CodTanium --url <issue url>`, or from the
   issue page (**Projects** → *xpact student work (Mass)*).

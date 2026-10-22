@@ -5,8 +5,9 @@ folder, so it stays separate from the parser code. The plan, the task register
 (A01–H06) and the suggested task selection come from
 [`docs/xpact-student-introduction.md`](../docs/xpact-student-introduction.md).
 
-> **Updated 2026-10-22 (week 3).** Week 1-2 ✅ · week 3 🟡 (B01/B02 to do) ·
-> 3 new parser findings (#38, #39, #40).
+> **Updated 2026-10-22 (week 3)** · describes `student-Mass` @ `76ac272`.
+> Weeks 1-3 ✅ · B03 (#3) and parser findings #13, #38, #39, #40 ⏸ on hold ·
+> A01 evidence completed in #68 (pull request #69).
 
 ## Start here
 

@@ -165,6 +165,12 @@ The 2026-10-19 error report is [reports/error-reports/2026-10-19.md](../reports/
 - [x] W3C suite with the Python runner, assertions off and on: [#29](https://github.com/andersoxie/xpact/issues/29), [results/w3c-conformance-2026-10-21/](results/w3c-conformance-2026-10-21/README.md), [error report](../reports/error-reports/2026-10-21.md)
 - [x] Regression test for the CR crash: [#28](https://github.com/andersoxie/xpact/issues/28), `1ea242e`; parser repaired 2026-10-22 (PR [#59](https://github.com/andersoxie/xpact/pull/59))
 - [x] Repository repair and GitHub setup per `CLAUDE.md`: [#34](https://github.com/andersoxie/xpact/issues/34), [#35](https://github.com/andersoxie/xpact/issues/35), [#43](https://github.com/andersoxie/xpact/issues/43) (merged 2026-10-22)
+- [x] Checklist audit (2026-10-22, [#70](https://github.com/andersoxie/xpact/issues/70)): every closed issue's "Done when" list compared with the repository at `76ac272`. 12 issues had unticked boxes; the items that are really done are now ticked on GitHub, each marked "verified 2026-10-22" ([report](../reports/issue-0070/report.md)). Still open from the audit:
+  - [ ] [#35](https://github.com/andersoxie/xpact/issues/35): 6 labels in `labels.json` are not on GitHub (`D1-beginner`, `D4-expert`, `group:A-orientation`, `group:F-core`, `group:G-verification`, `type:blocker`). **Ask the supervisor** before creating them
+  - [ ] [#46](https://github.com/andersoxie/xpact/issues/46): Jenkins stage turns red: dropped ([#64](https://github.com/andersoxie/xpact/issues/64)), not checked
+  - [ ] Project board not read: the `gh` login lacks the `read:project` scope (`gh auth refresh -s read:project,project`)
+  - [x] A01's last three items had no evidence: done in [#68](https://github.com/andersoxie/xpact/issues/68) (PR [#69](https://github.com/andersoxie/xpact/pull/69))
+  - [x] #43 dates on every page and the #35 issue tables: done in [#70](https://github.com/andersoxie/xpact/issues/70)
 
 ## Week 4 – Input matrix
 **Activity:** Design small regressions and select 50–100 applicable W3C XML cases with the supervisor.
