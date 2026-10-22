@@ -110,7 +110,7 @@ From [`notes/next-tests-2026-10-21.txt`](notes/next-tests-2026-10-21.txt):
 **Bring to review:** Setup notes and one successful example parse.
 - [x] Native build working (done outside git in weeks 1-2, see [PLAN2.md](PLAN2.md) week 1; brought into git in week 3, see [Build fixes in git](#build-fixes-and-workflow-in-git-week-3))
 - [x] First error report ([history/](history/)) and setup notes ([week-01.md](notes/weekly/week-01.md))
-- [x] [A01](github/issues/01-A01.md) Learn XML events, contracts, Git and the layout; trace one accepted and one rejected document. Done 2026-10-20 ([#18](https://github.com/andersoxie/xpact/issues/18)). Traces: [walkthrough/trace-output.txt](baseline/walkthrough/trace-output.txt). The notes on the checking tests and the change-and-predict exercise go in `results/A01-orientation/`
+- [x] [A01](github/issues/01-A01.md) Learn XML events, contracts, Git and the layout; trace one accepted and one rejected document. Done 2026-10-20 ([#18](https://github.com/andersoxie/xpact/issues/18)). Traces: [walkthrough/trace-output.txt](baseline/walkthrough/trace-output.txt). Checking tests linked and change-and-predict done 2026-10-22 ([#68](https://github.com/andersoxie/xpact/issues/68)): [results/A01-orientation/](results/A01-orientation/README.md), 2 of 3 predictions right
 
 ## Week 2 – Baseline
 **Activity:** Follow parser events and run the assertions-enabled tests.

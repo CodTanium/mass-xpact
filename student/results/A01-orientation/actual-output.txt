@@ -1,0 +1,51 @@
+﻿# xpact_event_trace.exe (workbench, assertions on) run on 2026-10-22
+# revision: fb72a77853eaead2806373a2a25ae8f5153bd851 (branch fix/68-a01-evidence; the predictions commit fb72a77 is HEAD)
+# command: EIFGENs\xpact_event_trace\W_code\xpact_event_trace.exe student\baseline\walkthrough\ok.xml student\baseline\walkthrough\rejected.xml student\results\A01-orientation\inputs\change-1-duplicate-attribute.xml student\results\A01-orientation\inputs\change-2-entity.xml student\results\A01-orientation\inputs\change-3-no-root-end.xml
+== student\baseline\walkthrough\ok.xml
+bytes: 48
+  1. start-element  root
+  2. start-element  child id="1"
+  3. text           "text"
+  4. end-element    child
+  5. start-element  empty
+  6. end-element    empty
+  7. end-element    root
+result: ACCEPT (7 events)
+
+== student\baseline\walkthrough\rejected.xml
+bytes: 20
+  1. start-element  root
+  2. start-element  child
+result: REJECT at line 1, column 15: mismatched end tag
+note: 2 event(s) were delivered before the error was detected
+
+== student\results\A01-orientation\inputs\change-1-duplicate-attribute.xml
+bytes: 55
+  1. start-element  root
+result: REJECT at line 1, column 6: duplicate attribute
+note: 1 event(s) were delivered before the error was detected
+
+== student\results\A01-orientation\inputs\change-2-entity.xml
+bytes: 53
+  1. start-element  root
+  2. start-element  child id="1"
+  3. text           "a & b"
+  4. end-element    child
+  5. start-element  empty
+  6. end-element    empty
+  7. end-element    root
+result: ACCEPT (7 events)
+
+== student\results\A01-orientation\inputs\change-3-no-root-end.xml
+bytes: 41
+  1. start-element  root
+  2. start-element  child id="1"
+  3. text           "text"
+  4. end-element    child
+  5. start-element  empty
+  6. end-element    empty
+result: REJECT at line 1, column 41: unclosed element
+note: 6 event(s) were delivered before the error was detected
+
+# exit code: 0
+
