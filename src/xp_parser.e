@@ -247,6 +247,15 @@ feature -- Configuration
 			value_set: use_foreign_dtd = a_enabled
 		end
 
+	set_input_is_utf8 (a_enabled: BOOLEAN)
+			-- Declare that callers convert input to UTF-8 themselves, so byte-order marks and
+			-- encoding declarations are not used to convert it again.
+		do
+			input_is_utf8 := a_enabled
+		ensure
+			value_set: input_is_utf8 = a_enabled
+		end
+
 feature {XP_NATIVE_PARSER} -- State
 
 	reset_for_reuse
@@ -825,7 +834,7 @@ feature {NONE} -- Markup parsing
 									else
 										i := parse_attribute (a_input, i, l_attached_attributes)
 										if not has_error then
-											i := skip_spaces (a_input, i)
+											i := skip_spaces_between_attributes (a_input, i)
 										end
 									end
 								variant
@@ -1002,7 +1011,7 @@ feature {NONE} -- Markup parsing
 						end
 						if not has_error then
 							l_count := l_count + 1
-							i := skip_spaces (a_input, i)
+							i := skip_spaces_between_attributes (a_input, i)
 						end
 					end
 				end
@@ -1103,6 +1112,24 @@ feature {NONE} -- Markup parsing
 		ensure
 			unsupported_or_progress_or_error: Result = 0 or else Result > a_start_index or has_error
 			result_in_bounds: Result <= a_input.count + 1
+		end
+
+	skip_spaces_between_attributes (a_input: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
+			-- Index after the spaces following an attribute value; another attribute needs at least one space.
+		require
+			input_attached: a_input /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_input.count + 1
+		do
+			Result := skip_spaces (a_input, a_start_index)
+			if
+				Result = a_start_index and then Result <= a_input.count
+				and then a_input.item (Result) /= '>' and then a_input.item (Result) /= '/'
+			then
+				set_error ("missing space between attributes")
+				Result := a_input.count + 1
+			end
+		ensure
+			result_in_bounds: Result >= a_start_index and Result <= a_input.count + 1
 		end
 
 	has_attribute_name_range (a_input: READABLE_STRING_8; a_name_start, a_name_end: INTEGER; a_name_starts, a_name_ends: ARRAYED_LIST [INTEGER]): BOOLEAN
@@ -1272,8 +1299,9 @@ feature {NONE} -- Markup parsing
 				invariant
 					index_in_bounds: i >= a_start_index + 4 and i <= l_end + 1
 				until
-					i >= l_end - 1 or has_error
+					i >= l_end or has_error
 				loop
+						-- At `l_end - 1' this also rejects a comment ending in '-' ("--->").
 					if has_at (a_input, i, "--") then
 						set_error ("double hyphen in comment")
 						i := l_end
@@ -1382,8 +1410,19 @@ feature {NONE} -- Markup parsing
 					name_start := i
 					i := scan_name (a_input, i)
 					create l_target.make_from_string (a_input.substring (name_start, i - 1))
-					if same_name_case_insensitive (l_target, "xml") and then a_start_index /= 1 then
+					if has_error then
+						Result := a_input.count + 1
+					elseif same_name_case_insensitive (l_target, "xml") and then not l_target.same_string ("xml") then
+						set_error ("reserved processing instruction target")
+						Result := a_input.count + 1
+					elseif l_target.same_string ("xml") and then a_start_index /= 1 then
 						set_error ("misplaced xml declaration")
+						Result := a_input.count + 1
+					elseif i < l_end and then not is_xml_space (a_input.item (i)) then
+						set_error ("missing space after processing instruction target")
+						Result := a_input.count + 1
+					elseif namespace_mode and then l_target.has (':') then
+						set_error ("colon in processing instruction target")
 						Result := a_input.count + 1
 					else
 						create l_data.make_empty
@@ -1487,7 +1526,7 @@ feature {NONE} -- Markup parsing
 										set_error ("invalid xml declaration")
 									elseif l_name.same_string ("version") then
 										l_current_order := 1
-										if l_previous_order /= 0 or else not l_value.same_string ("1.0") then
+										if l_previous_order /= 0 or else not is_valid_version_number (l_value) then
 											set_error ("invalid xml declaration")
 										end
 										l_version.wipe_out
@@ -1497,7 +1536,7 @@ feature {NONE} -- Markup parsing
 										if
 											(not parsing_external_entity and then l_previous_order = 0)
 											or else l_previous_order >= l_current_order
-											or else l_value.is_empty
+											or else not is_valid_encoding_name (l_value)
 										then
 											set_error ("invalid xml declaration")
 										end
@@ -1580,8 +1619,8 @@ feature {NONE} -- Markup parsing
 					set_error ("doctype token exceeds limit")
 					Result := a_input.count + 1
 				else
-					i := skip_spaces (a_input, a_start_index + 9)
-					if i > a_input.count or else not l_attributes.is_name_start_character (a_input.item (i)) then
+					i := skip_required_spaces (a_input, a_start_index + 9, "missing space after DOCTYPE")
+					if has_error or else i > a_input.count or else not l_attributes.is_name_start_character (a_input.item (i)) then
 						set_error ("invalid doctype name")
 						Result := a_input.count + 1
 					else
@@ -1605,24 +1644,27 @@ feature {NONE} -- Markup parsing
 						else
 							l_external_end := l_end
 						end
+						if not has_error and then skip_spaces (a_input, i) < l_external_end and then skip_spaces (a_input, i) = i then
+							set_error ("missing space before doctype external identifier")
+						end
 						i := skip_spaces (a_input, i)
-						if i < l_external_end then
+						if not has_error and then i < l_external_end then
 							if has_keyword_at (a_input, i, "SYSTEM") then
 								l_has_external_subset := True
-								i := skip_spaces (a_input, i + 6)
-								if i < l_external_end and then is_quote (a_input.item (i)) then
+								i := skip_spaces_before_literal (a_input, i + 6, "missing space after SYSTEM")
+								if not has_error and then i < l_external_end and then is_quote (a_input.item (i)) then
 									i := read_quoted_literal (a_input, i, l_external_end, l_system_id)
 								else
 									set_error ("missing external system identifier")
 								end
 							elseif has_keyword_at (a_input, i, "PUBLIC") then
 								l_has_external_subset := True
-								i := skip_spaces (a_input, i + 6)
-								if i < l_external_end and then is_quote (a_input.item (i)) then
+								i := skip_spaces_before_literal (a_input, i + 6, "missing space after PUBLIC")
+								if not has_error and then i < l_external_end and then is_quote (a_input.item (i)) then
 									i := read_public_id_literal (a_input, i, l_external_end, l_public_id)
 									if not has_error then
-										i := skip_spaces (a_input, i)
-										if i < l_external_end and then is_quote (a_input.item (i)) then
+										i := skip_spaces_before_literal (a_input, i, "missing space between public and system identifiers")
+										if not has_error and then i < l_external_end and then is_quote (a_input.item (i)) then
 											i := read_quoted_literal (a_input, i, l_external_end, l_system_id)
 										else
 											set_error ("missing external system identifier")
@@ -1667,6 +1709,8 @@ feature {NONE} -- Markup parsing
 							l_subset_end := find_subset_end (a_input, l_subset_start + 1, l_end)
 							if l_subset_end = 0 then
 								set_error ("unterminated internal subset")
+							elseif skip_spaces (a_input, l_subset_end + 1) /= l_end then
+								set_error ("unexpected content after internal subset")
 							else
 								create l_subset.make_from_string (a_input.substring (l_subset_start + 1, l_subset_end - 1))
 								process_internal_subset (l_subset)
@@ -2103,6 +2147,7 @@ feature {NONE} -- Character data and references
 			valid_name: is_valid_name (a_name)
 		local
 			l_element_depth: INTEGER
+			l_previous_floor: INTEGER
 		do
 			if is_entity_active (a_name) then
 				set_error ("recursive entity reference")
@@ -2112,9 +2157,12 @@ feature {NONE} -- Character data and references
 				note_entity_expansion (l_value.count)
 				if not has_error then
 					l_element_depth := element_stack.count
+					l_previous_floor := entity_element_floor
+					entity_element_floor := l_element_depth
 					push_entity (a_name)
 					parse_entity_content (l_value)
 					pop_entity
+					entity_element_floor := l_previous_floor
 					if not has_error and then element_stack.count /= l_element_depth then
 						note_current_entity_reference_position
 						set_error ("asynchronous entity")
@@ -2122,7 +2170,7 @@ feature {NONE} -- Character data and references
 				end
 			elseif attached external_entity (a_name) as l_external then
 				include_external_entity_in_content (l_external)
-			elseif document_has_external_subset and then xml_standalone /= 1 then
+			elseif (document_has_external_subset or dtd_has_parameter_entity_references) and then xml_standalone /= 1 then
 				-- A non-validating parser may skip externally declared general entities.
 				if handler.reports_skipped_internal_general_entities then
 					handler.on_skipped_entity (a_name, False)
@@ -2153,6 +2201,9 @@ feature {NONE} -- Character data and references
 				end
 			elseif attached external_entity (a_name) as l_external then
 				include_external_entity_in_literal (l_external, a_text)
+			elseif (document_has_external_subset or dtd_has_parameter_entity_references) and then xml_standalone /= 1 then
+					-- As in Expat, the entity may be declared where a non-validating parser does not read;
+					-- the reference contributes nothing to the value.
 			else
 				set_error ("undefined entity")
 			end
@@ -2229,7 +2280,9 @@ feature {NONE} -- Character data and references
 							note_entity_expansion (l_value.count)
 						end
 						if not has_error then
+							external_dtd_depth := external_dtd_depth + 1
 							process_internal_subset (l_value)
+							external_dtd_depth := external_dtd_depth - 1
 						end
 					else
 						set_error ("external entity not resolved")
@@ -2276,7 +2329,6 @@ feature {NONE} -- Character data and references
 		require
 			public_id_attached: a_public_id /= Void
 			system_id_attached: a_system_id /= Void
-			system_id_not_empty: not a_system_id.is_empty
 		do
 			if parameter_entity_loading_allowed then
 				if external_entity_resolver = Void then
@@ -2287,7 +2339,9 @@ feature {NONE} -- Character data and references
 							note_entity_expansion (l_value.count)
 						end
 						if not has_error then
+							external_dtd_depth := external_dtd_depth + 1
 							process_internal_subset (l_value)
+							external_dtd_depth := external_dtd_depth - 1
 						end
 					else
 						set_error ("external entity not resolved")
@@ -2314,7 +2368,9 @@ feature {NONE} -- Character data and references
 							if not l_value.is_empty then
 								document_has_external_subset := True
 							end
+							external_dtd_depth := external_dtd_depth + 1
 							process_internal_subset (l_value)
+							external_dtd_depth := external_dtd_depth - 1
 						end
 					else
 						set_error ("external entity not resolved")
@@ -2494,6 +2550,9 @@ feature {NONE} -- DTD entity declarations
 					if l_end = 0 then
 						set_error ("unterminated comment")
 						i := a_subset.count + 1
+					elseif find_sequence (a_subset, "--", i + 4) < l_end then
+						set_error ("double hyphen in comment")
+						i := a_subset.count + 1
 					else
 						emit_default (a_subset.substring (i, l_end + 2))
 						create l_text.make_from_string (a_subset.substring (i + 4, l_end - 1))
@@ -2513,8 +2572,13 @@ feature {NONE} -- DTD entity declarations
 							set_error ("unterminated processing instruction")
 							i := a_subset.count + 1
 						else
-							emit_default (a_subset.substring (i, l_end + 1))
-							i := l_end + 2
+							validate_processing_instruction_target (a_subset, i + 2, l_end)
+							if has_error then
+								i := a_subset.count + 1
+							else
+								emit_default (a_subset.substring (i, l_end + 1))
+								i := l_end + 2
+							end
 						end
 					end
 				elseif a_subset.item (i).code = 37 then
@@ -2539,6 +2603,33 @@ feature {NONE} -- DTD entity declarations
 				end
 			variant
 				a_subset.count - i + 1
+			end
+		end
+
+	validate_processing_instruction_target (a_input: READABLE_STRING_8; a_start_index, a_end_index: INTEGER)
+			-- Check the target of a processing instruction (not an XML declaration) that
+			-- starts at `a_start_index' and whose "?>" begins at `a_end_index'.
+		require
+			input_attached: a_input /= Void
+			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index <= a_input.count
+		local
+			i: INTEGER
+			l_target: STRING_8
+		do
+			if not is_name_start_character (a_input.item (a_start_index)) then
+				set_error ("invalid processing instruction target")
+			else
+				i := scan_name (a_input, a_start_index)
+				if not has_error then
+					create l_target.make_from_string (a_input.substring (a_start_index, i - 1))
+					if same_name_case_insensitive (l_target, "xml") then
+						set_error ("reserved processing instruction target")
+					elseif i < a_end_index and then not is_xml_space (a_input.item (i)) then
+						set_error ("missing space after processing instruction target")
+					elseif namespace_mode and then l_target.has (':') then
+						set_error ("colon in processing instruction target")
+					end
+				end
 			end
 		end
 
@@ -2727,6 +2818,322 @@ feature {NONE} -- DTD entity declarations
 			Result := a_code >= 128 and then a_code <= 191
 		end
 
+	utf8_character_length (a_input: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
+			-- Byte length of the UTF-8 sequence at `a_start_index' when it encodes an XML character,
+			-- which is then available as `last_utf8_code'; 0 when the bytes are not well-formed
+			-- UTF-8 or the character is not allowed in XML; -1 when the sequence is well-formed
+			-- so far but cut off by the end of `a_input'.
+		require
+			input_attached: a_input /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_input.count
+		local
+			l_lead: INTEGER
+			l_count: INTEGER
+			l_minimum: INTEGER
+			l_code: INTEGER
+			l_byte: INTEGER
+			l_invalid: BOOLEAN
+			j: INTEGER
+		do
+			l_lead := a_input.item (a_start_index).code
+			if l_lead < 128 then
+				if is_xml_character_code (l_lead) then
+					last_utf8_code := l_lead
+					Result := 1
+				end
+			else
+				if l_lead >= 194 and then l_lead <= 223 then
+					l_count := 2
+					l_code := l_lead - 192
+					l_minimum := 128
+				elseif l_lead >= 224 and then l_lead <= 239 then
+					l_count := 3
+					l_code := l_lead - 224
+					l_minimum := 2048
+				elseif l_lead >= 240 and then l_lead <= 244 then
+					l_count := 4
+					l_code := l_lead - 240
+					l_minimum := 65536
+				end
+				if l_count > 0 then
+					from
+						j := 1
+					invariant
+						offset_in_bounds: j >= 1 and j <= l_count
+					until
+						j = l_count
+					loop
+						if a_start_index + j > a_input.count then
+							Result := -1
+							j := l_count
+						else
+							l_byte := a_input.item (a_start_index + j).code
+							if is_utf8_continuation_byte (l_byte) then
+								l_code := l_code * 64 + l_byte - 128
+								j := j + 1
+							else
+								l_invalid := True
+								j := l_count
+							end
+						end
+					variant
+						l_count - j
+					end
+					if Result = 0 and then not l_invalid and then l_code >= l_minimum and then is_xml_character_code (l_code) then
+						last_utf8_code := l_code
+						Result := l_count
+					end
+				end
+			end
+		ensure
+			result_in_range: Result >= -1 and Result <= 4
+			ascii_has_length_one: a_input.item (a_start_index).code < 128 implies Result <= 1
+		end
+
+	is_name_start_code (a_code: INTEGER): BOOLEAN
+			-- Does `a_code' satisfy the XML 1.0 fifth edition NameStartChar production?
+		do
+			Result := (a_code >= 65 and a_code <= 90) or else (a_code >= 97 and a_code <= 122)
+				or else a_code = 58 or else a_code = 95
+				or else (a_code >= 0xC0 and a_code <= 0xD6) or else (a_code >= 0xD8 and a_code <= 0xF6)
+				or else (a_code >= 0xF8 and a_code <= 0x2FF) or else (a_code >= 0x370 and a_code <= 0x37D)
+				or else (a_code >= 0x37F and a_code <= 0x1FFF) or else (a_code >= 0x200C and a_code <= 0x200D)
+				or else (a_code >= 0x2070 and a_code <= 0x218F) or else (a_code >= 0x2C00 and a_code <= 0x2FEF)
+				or else (a_code >= 0x3001 and a_code <= 0xD7FF) or else (a_code >= 0xF900 and a_code <= 0xFDCF)
+				or else (a_code >= 0xFDF0 and a_code <= 0xFFFD) or else (a_code >= 0x10000 and a_code <= 0xEFFFF)
+		end
+
+	is_name_code (a_code: INTEGER): BOOLEAN
+			-- Does `a_code' satisfy the XML 1.0 fifth edition NameChar production?
+		do
+			Result := is_name_start_code (a_code) or else (a_code >= 48 and a_code <= 57)
+				or else a_code = 45 or else a_code = 46 or else a_code = 0xB7
+				or else (a_code >= 0x300 and a_code <= 0x36F) or else (a_code >= 0x203F and a_code <= 0x2040)
+		end
+
+	decoded_input (a_input: READABLE_STRING_8): READABLE_STRING_8
+			-- `a_input' as UTF-8. UTF-16 with a byte-order mark and declared ISO-8859-1 or
+			-- US-ASCII input are converted; an encoding declaration that contradicts the
+			-- byte-order mark is an error. Other input is returned unchanged.
+		require
+			input_attached: a_input /= Void
+		local
+			l_encoding: STRING_8
+			l_text: STRING_8
+			l_has_utf8_bom: BOOLEAN
+			i: INTEGER
+		do
+			Result := a_input
+			if input_is_utf8 then
+					-- Already converted by the caller (the native layer).
+			elseif
+				a_input.count >= 2
+				and then ((a_input.item (1).code = 255 and a_input.item (2).code = 254)
+					or (a_input.item (1).code = 254 and a_input.item (2).code = 255))
+			then
+				Result := utf_16_as_utf_8 (a_input, a_input.item (1).code = 254)
+				l_encoding := declared_encoding (Result, 1)
+				if not l_encoding.is_empty and then not l_encoding.starts_with ("utf-16") then
+					set_error ("incorrect encoding")
+				end
+			else
+				l_has_utf8_bom := a_input.count >= 3 and then a_input.item (1).code = 239
+					and then a_input.item (2).code = 187 and then a_input.item (3).code = 191
+				if l_has_utf8_bom then
+					l_encoding := declared_encoding (a_input, 4)
+				else
+					l_encoding := declared_encoding (a_input, 1)
+				end
+				if l_has_utf8_bom and then not l_encoding.is_empty and then not l_encoding.same_string ("utf-8") then
+					set_error ("incorrect encoding")
+				elseif l_encoding.starts_with ("utf-16") then
+					set_error ("incorrect encoding")
+				elseif l_encoding.same_string ("iso-8859-1") or else l_encoding.same_string ("latin1") or else l_encoding.same_string ("iso_8859-1") then
+					create l_text.make (a_input.count + a_input.count // 8)
+					from
+						i := 1
+					invariant
+						index_in_bounds: i >= 1 and i <= a_input.count + 1
+					until
+						i > a_input.count
+					loop
+						{UTF_CONVERTER}.utf_32_code_into_utf_8_string_8 (a_input.item (i).natural_32_code, l_text)
+						i := i + 1
+					variant
+						a_input.count - i + 1
+					end
+					Result := l_text
+				elseif l_encoding.same_string ("us-ascii") or else l_encoding.same_string ("ascii") then
+					from
+						i := 1
+					invariant
+						index_in_bounds: i >= 1 and i <= a_input.count + 1
+					until
+						i > a_input.count or has_error
+					loop
+						if a_input.item (i).code >= 128 then
+							set_error ("invalid XML character")
+						end
+						i := i + 1
+					variant
+						a_input.count - i + 1
+					end
+				end
+			end
+		ensure
+			result_attached: Result /= Void
+		end
+
+	declared_encoding (a_input: READABLE_STRING_8; a_start_index: INTEGER): STRING_8
+			-- Lower-case encoding name declared by an XML or text declaration at `a_start_index', or empty.
+		require
+			input_attached: a_input /= Void
+			valid_start: a_start_index >= 1
+		local
+			l_end: INTEGER
+			i: INTEGER
+			l_close: INTEGER
+		do
+			create Result.make_empty
+			if
+				has_at (a_input, a_start_index, "<?xml") and then a_start_index + 5 <= a_input.count
+				and then is_xml_space (a_input.item (a_start_index + 5))
+			then
+				l_end := find_sequence (a_input, "?>", a_start_index + 5)
+				if l_end > 0 then
+					i := find_sequence (a_input, "encoding", a_start_index + 5)
+					if i > 0 and then i < l_end then
+						i := skip_spaces (a_input, i + 8)
+						if i < l_end and then a_input.item (i) = '=' then
+							i := skip_spaces (a_input, i + 1)
+							if i < l_end and then is_quote (a_input.item (i)) then
+								l_close := find_character (a_input, a_input.item (i), i + 1)
+								if l_close > 0 and then l_close < l_end then
+									Result.append (a_input.substring (i + 1, l_close - 1))
+									Result.to_lower
+								end
+							end
+						end
+					end
+				end
+			end
+		ensure
+			result_attached: Result /= Void
+		end
+
+	utf_16_as_utf_8 (a_input: READABLE_STRING_8; a_big_endian: BOOLEAN): STRING_8
+			-- UTF-8 form of UTF-16 `a_input' after its two-byte byte-order mark.
+			-- A trailing odd byte or unpaired high surrogate at the end is dropped, as more input may follow.
+		require
+			input_attached: a_input /= Void
+			has_byte_order_mark: a_input.count >= 2
+		local
+			i: INTEGER
+			l_unit: INTEGER
+			l_next: INTEGER
+		do
+			create Result.make (a_input.count)
+			from
+				i := 3
+			invariant
+				index_in_bounds: i >= 3 and i <= a_input.count + 2
+			until
+				i + 1 > a_input.count or has_error
+			loop
+				l_unit := utf_16_unit_at (a_input, i, a_big_endian)
+				if l_unit >= 0xD800 and l_unit <= 0xDBFF then
+					if i + 3 <= a_input.count then
+						l_next := utf_16_unit_at (a_input, i + 2, a_big_endian)
+						if l_next >= 0xDC00 and l_next <= 0xDFFF then
+							{UTF_CONVERTER}.utf_32_code_into_utf_8_string_8 ((0x10000 + (l_unit - 0xD800) * 1024 + (l_next - 0xDC00)).to_natural_32, Result)
+							i := i + 4
+						else
+							set_error ("invalid XML character")
+							i := i + 2
+						end
+					else
+						i := a_input.count + 1
+					end
+				elseif l_unit >= 0xDC00 and l_unit <= 0xDFFF then
+					set_error ("invalid XML character")
+					i := i + 2
+				else
+					{UTF_CONVERTER}.utf_32_code_into_utf_8_string_8 (l_unit.to_natural_32, Result)
+					i := i + 2
+				end
+			variant
+				a_input.count - i + 2
+			end
+		ensure
+			result_attached: Result /= Void
+		end
+
+	utf_16_unit_at (a_input: READABLE_STRING_8; a_index: INTEGER; a_big_endian: BOOLEAN): INTEGER
+			-- 16-bit code unit stored at `a_index' and `a_index + 1'.
+		require
+			input_attached: a_input /= Void
+			valid_index: a_index >= 1 and a_index + 1 <= a_input.count
+		do
+			if a_big_endian then
+				Result := a_input.item (a_index).code * 256 + a_input.item (a_index + 1).code
+			else
+				Result := a_input.item (a_index + 1).code * 256 + a_input.item (a_index).code
+			end
+		ensure
+			sixteen_bits: Result >= 0 and Result <= 65535
+		end
+
+	is_valid_version_number (a_version: READABLE_STRING_8): BOOLEAN
+			-- Does `a_version' satisfy the XML 1.0 fifth edition VersionNum production ('1.' [0-9]+)?
+		require
+			version_attached: a_version /= Void
+		local
+			i: INTEGER
+		do
+			if a_version.count >= 3 and then a_version.item (1) = '1' and then a_version.item (2) = '.' then
+				from
+					Result := True
+					i := 3
+				invariant
+					index_in_bounds: i >= 3 and i <= a_version.count + 1
+				until
+					i > a_version.count or not Result
+				loop
+					Result := a_version.item (i).is_digit
+					i := i + 1
+				variant
+					a_version.count - i + 1
+				end
+			end
+		end
+
+	is_valid_encoding_name (a_name: READABLE_STRING_8): BOOLEAN
+			-- Does `a_name' satisfy the XML 1.0 EncName production?
+		require
+			name_attached: a_name /= Void
+		local
+			i: INTEGER
+			c: CHARACTER_8
+		do
+			if not a_name.is_empty and then ((a_name.item (1) >= 'A' and a_name.item (1) <= 'Z') or (a_name.item (1) >= 'a' and a_name.item (1) <= 'z')) then
+				from
+					Result := True
+					i := 2
+				invariant
+					index_in_bounds: i >= 2 and i <= a_name.count + 1
+				until
+					i > a_name.count or not Result
+				loop
+					c := a_name.item (i)
+					Result := (c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z') or (c >= '0' and c <= '9')
+						or c = '.' or c = '_' or c = '-'
+					i := i + 1
+				variant
+					a_name.count - i + 1
+				end
+			end
+		end
+
 	parse_element_declaration (a_subset: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
 			-- Parse an element declaration and emit its content model.
 		require
@@ -2746,24 +3153,27 @@ feature {NONE} -- DTD entity declarations
 				set_error ("unterminated element declaration")
 				Result := a_subset.count + 1
 			else
-				i := skip_spaces (a_subset, a_start_index + 9)
-				if i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
+				i := skip_required_spaces (a_subset, a_start_index + 9, "missing space in element declaration")
+				if has_error or else i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
 					set_error ("invalid element declaration name")
 					Result := a_subset.count + 1
 				else
 					name_start := i
 					i := scan_name (a_subset, i)
 					create l_name.make_from_string (a_subset.substring (name_start, i - 1))
-					i := skip_spaces (a_subset, i)
+					if not has_error then
+						i := skip_required_spaces (a_subset, i, "missing space before content model")
+					end
 					parsed_content_model := Void
-					if has_keyword_at (a_subset, i, "EMPTY") then
+					if has_error then
+					elseif has_keyword_at (a_subset, i, "EMPTY") then
 						create l_model.make ({XP_CONTENT_MODEL}.Type_empty, {XP_CONTENT_MODEL}.Quant_none, Void)
 						i := i + 5
 					elseif has_keyword_at (a_subset, i, "ANY") then
 						create l_model.make ({XP_CONTENT_MODEL}.Type_any, {XP_CONTENT_MODEL}.Quant_none, Void)
 						i := i + 3
 					elseif i <= l_end - 1 and then a_subset.item (i) = '(' then
-						i := parse_content_particle (a_subset, i, l_end - 1)
+						i := parse_content_particle (a_subset, i, l_end - 1, True)
 						if not has_error then
 							l_model := parsed_content_model
 						end
@@ -2796,11 +3206,13 @@ feature {NONE} -- DTD entity declarations
 			result_in_bounds: Result <= a_subset.count + 1
 		end
 
-	parse_content_particle (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER): INTEGER
+	parse_content_particle (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_top_level: BOOLEAN): INTEGER
 			-- Parse one element-content particle and store it in `parsed_content_model'.
+			-- Only the top-level group of a content model may be mixed content (#PCDATA).
+			-- On error the result is `a_end_index + 1'.
 		require
 			subset_attached: a_subset /= Void
-			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index <= a_subset.count
+			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index < a_subset.count
 		local
 			i: INTEGER
 			name_start: INTEGER
@@ -2811,53 +3223,70 @@ feature {NONE} -- DTD entity declarations
 			l_done: BOOLEAN
 			l_type: INTEGER
 			l_attributes: XP_ATTRIBUTES
+			l_name_count: INTEGER
 		do
 			create l_attributes.make
 			i := a_start_index
 			parsed_content_model := Void
-			if i <= a_end_index and then a_subset.item (i) = '(' then
-				i := skip_spaces (a_subset, i + 1)
+			if a_subset.item (i) = '(' then
+				i := skip_spaces (a_subset, i + 1).min (a_end_index + 1)
 				if has_at (a_subset, i, "#PCDATA") then
-					create l_node.make ({XP_CONTENT_MODEL}.Type_mixed, {XP_CONTENT_MODEL}.Quant_none, Void)
-					i := skip_spaces (a_subset, i + 7)
-					from
-					invariant
-						index_in_bounds: i >= 1 and i <= a_end_index + 1
-					until
-						has_error or l_done
-					loop
-						if i <= a_end_index and then a_subset.item (i) = ')' then
-							i := i + 1
-							l_done := True
-						elseif i <= a_end_index and then a_subset.item (i) = '|' then
-							i := skip_spaces (a_subset, i + 1)
-							if i <= a_end_index and then l_attributes.is_name_start_character (a_subset.item (i)) then
-								name_start := i
-								i := scan_name (a_subset, i)
-								create l_name.make_from_string (a_subset.substring (name_start, i - 1))
-								create l_child.make ({XP_CONTENT_MODEL}.Type_name, {XP_CONTENT_MODEL}.Quant_none, l_name)
-								l_node.add_child (l_child)
-								i := skip_spaces (a_subset, i)
+					if not a_top_level then
+						set_error ("#PCDATA in a nested content group")
+						i := a_end_index + 1
+					else
+						create l_node.make ({XP_CONTENT_MODEL}.Type_mixed, {XP_CONTENT_MODEL}.Quant_none, Void)
+						i := skip_spaces (a_subset, i + 7).min (a_end_index + 1)
+						from
+						invariant
+							index_in_bounds: i >= 1 and i <= a_end_index + 1
+						until
+							has_error or l_done
+						loop
+							if i <= a_end_index and then a_subset.item (i) = ')' then
+								i := i + 1
+								l_done := True
+							elseif i <= a_end_index and then a_subset.item (i) = '|' then
+								i := skip_spaces (a_subset, i + 1).min (a_end_index + 1)
+								if i <= a_end_index and then l_attributes.is_name_start_character (a_subset.item (i)) then
+									name_start := i
+									i := scan_name (a_subset, i).min (a_end_index + 1)
+									create l_name.make_from_string (a_subset.substring (name_start, i - 1))
+									create l_child.make ({XP_CONTENT_MODEL}.Type_name, {XP_CONTENT_MODEL}.Quant_none, l_name)
+									l_node.add_child (l_child)
+									l_name_count := l_name_count + 1
+									i := skip_spaces (a_subset, i).min (a_end_index + 1)
+								else
+									set_error ("invalid mixed content model")
+									i := a_end_index + 1
+								end
 							else
 								set_error ("invalid mixed content model")
+								i := a_end_index + 1
 							end
-						else
-							set_error ("invalid mixed content model")
+						variant
+							a_end_index - i + 2
 						end
-					variant
-						a_end_index - i + 2
+						if not has_error then
+							if i <= a_end_index and then a_subset.item (i) = '*' then
+								l_node.set_quantifier ({XP_CONTENT_MODEL}.Quant_repetition)
+								i := i + 1
+							elseif l_name_count > 0 then
+								set_error ("mixed content with element names must end with )*")
+							elseif i <= a_end_index and then (a_subset.item (i) = '?' or a_subset.item (i) = '+') then
+								set_error ("invalid quantifier on mixed content")
+							end
+						end
+						if not has_error then
+							parsed_content_model := l_node
+						end
 					end
-					if not has_error then
-						i := apply_content_quantifier (l_node, a_subset, i, a_end_index)
-						parsed_content_model := l_node
-						Result := i
-					else
-						Result := a_subset.count + 1
-					end
+				elseif i > a_end_index then
+					set_error ("unterminated element content model")
 				else
-					i := parse_content_particle (a_subset, i, a_end_index)
+					i := parse_content_particle (a_subset, i, a_end_index, False)
 					if not has_error and then attached parsed_content_model as l_first_child then
-						i := skip_spaces (a_subset, i)
+						i := skip_spaces (a_subset, i).min (a_end_index + 1)
 						if i <= a_end_index and then (a_subset.item (i) = ',' or else a_subset.item (i) = '|') then
 							l_separator := a_subset.item (i)
 							if l_separator = ',' then
@@ -2873,11 +3302,15 @@ feature {NONE} -- DTD entity declarations
 							until
 								has_error or l_done
 							loop
-								i := skip_spaces (a_subset, i + 1)
-								i := parse_content_particle (a_subset, i, a_end_index)
+								i := skip_spaces (a_subset, i + 1).min (a_end_index + 1)
+								if i > a_end_index then
+									set_error ("unterminated element content model")
+								else
+									i := parse_content_particle (a_subset, i, a_end_index, False)
+								end
 								if not has_error and then attached parsed_content_model as l_next_child then
 									l_node.add_child (l_next_child)
-									i := skip_spaces (a_subset, i)
+									i := skip_spaces (a_subset, i).min (a_end_index + 1)
 									if i <= a_end_index and then a_subset.item (i) = l_separator then
 									elseif i <= a_end_index and then a_subset.item (i) = ')' then
 										i := i + 1
@@ -2885,6 +3318,9 @@ feature {NONE} -- DTD entity declarations
 									else
 										set_error ("invalid element content separator")
 									end
+								end
+								if has_error then
+									i := a_end_index + 1
 								end
 							variant
 								a_end_index - i + 2
@@ -2899,28 +3335,30 @@ feature {NONE} -- DTD entity declarations
 						if not has_error and then attached l_node as l_attached_node then
 							i := apply_content_quantifier (l_attached_node, a_subset, i, a_end_index)
 							parsed_content_model := l_attached_node
-							Result := i
-						else
-							Result := a_subset.count + 1
 						end
-					else
-						Result := a_subset.count + 1
 					end
 				end
-			elseif i <= a_end_index and then l_attributes.is_name_start_character (a_subset.item (i)) then
+			elseif l_attributes.is_name_start_character (a_subset.item (i)) then
 				name_start := i
-				i := scan_name (a_subset, i)
-				create l_name.make_from_string (a_subset.substring (name_start, i - 1))
-				create l_node.make ({XP_CONTENT_MODEL}.Type_name, {XP_CONTENT_MODEL}.Quant_none, l_name)
-				i := apply_content_quantifier (l_node, a_subset, i, a_end_index)
-				parsed_content_model := l_node
-				Result := i
+				i := scan_name (a_subset, i).min (a_end_index + 1)
+				if not has_error then
+					create l_name.make_from_string (a_subset.substring (name_start, i - 1))
+					create l_node.make ({XP_CONTENT_MODEL}.Type_name, {XP_CONTENT_MODEL}.Quant_none, l_name)
+					i := apply_content_quantifier (l_node, a_subset, i, a_end_index)
+					parsed_content_model := l_node
+				end
 			else
 				set_error ("invalid element content particle")
-				Result := a_subset.count + 1
+			end
+			if has_error then
+				parsed_content_model := Void
+				Result := a_end_index + 1
+			else
+				Result := i
 			end
 		ensure
-			result_in_bounds: Result <= a_subset.count + 1
+			result_in_bounds: Result > a_start_index and Result <= a_end_index + 1
+			error_at_end: has_error implies Result = a_end_index + 1
 		end
 
 	apply_content_quantifier (a_model: XP_CONTENT_MODEL; a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER): INTEGER
@@ -2969,33 +3407,39 @@ feature {NONE} -- DTD entity declarations
 				set_error ("unterminated notation declaration")
 				Result := a_subset.count + 1
 			else
-				i := skip_spaces (a_subset, a_start_index + 10)
-				if i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
+				i := skip_required_spaces (a_subset, a_start_index + 10, "missing space in notation declaration")
+				if has_error or else i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
 					set_error ("invalid notation declaration name")
 					Result := a_subset.count + 1
 				else
 					name_start := i
 					i := scan_name (a_subset, i)
 					create l_name.make_from_string (a_subset.substring (name_start, i - 1))
+					if not has_error and then namespace_mode and then l_name.has (':') then
+						set_error ("colon in notation name")
+					end
 					create l_public_id.make_empty
 					create l_system_id.make_empty
-					i := skip_spaces (a_subset, i)
-					if has_keyword_at (a_subset, i, "SYSTEM") then
-						i := skip_spaces (a_subset, i + 6)
-						if i <= l_end - 1 and then is_quote (a_subset.item (i)) then
+					if not has_error then
+						i := skip_required_spaces (a_subset, i, "missing space after notation name")
+					end
+					if has_error then
+					elseif has_keyword_at (a_subset, i, "SYSTEM") then
+						i := skip_spaces_before_literal (a_subset, i + 6, "missing space after SYSTEM")
+						if not has_error and then i <= l_end - 1 and then is_quote (a_subset.item (i)) then
 							i := read_quoted_literal (a_subset, i, l_end - 1, l_system_id)
 							l_system := l_system_id
 						else
 							set_error ("missing notation system identifier")
 						end
 					elseif has_keyword_at (a_subset, i, "PUBLIC") then
-						i := skip_spaces (a_subset, i + 6)
-						if i <= l_end - 1 and then is_quote (a_subset.item (i)) then
+						i := skip_spaces_before_literal (a_subset, i + 6, "missing space after PUBLIC")
+						if not has_error and then i <= l_end - 1 and then is_quote (a_subset.item (i)) then
 							i := read_public_id_literal (a_subset, i, l_end - 1, l_public_id)
 							l_public := l_public_id
-							if not has_error then
-								i := skip_spaces (a_subset, i)
-								if i <= l_end - 1 and then is_quote (a_subset.item (i)) then
+							if not has_error and then skip_spaces (a_subset, i) <= l_end - 1 and then is_quote (a_subset.item (skip_spaces (a_subset, i))) then
+								i := skip_spaces_before_literal (a_subset, i, "missing space between public and system identifiers")
+								if not has_error and then i <= l_end - 1 and then is_quote (a_subset.item (i)) then
 									i := read_quoted_literal (a_subset, i, l_end - 1, l_system_id)
 									l_system := l_system_id
 								end
@@ -3045,6 +3489,7 @@ feature {NONE} -- DTD entity declarations
 			l_new_default_value: STRING_8
 			l_is_required: BOOLEAN
 			l_attributes: XP_ATTRIBUTES
+			j: INTEGER
 		do
 			create l_attributes.make
 			l_end := find_markup_declaration_end (a_subset, a_start_index)
@@ -3052,15 +3497,14 @@ feature {NONE} -- DTD entity declarations
 				set_error ("unterminated attlist declaration")
 				Result := a_subset.count + 1
 			else
-				i := skip_spaces (a_subset, a_start_index + 9)
-				if i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
+				i := skip_required_spaces (a_subset, a_start_index + 9, "missing space in attlist declaration")
+				if has_error or else i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
 					set_error ("invalid attlist element name")
 					Result := a_subset.count + 1
 				else
 					name_start := i
-					i := scan_name (a_subset, i)
+					i := scan_name (a_subset, i).min (l_end)
 					create l_element_name.make_from_string (a_subset.substring (name_start, i - 1))
-					i := skip_spaces (a_subset, i)
 					from
 					invariant
 						index_in_bounds: i >= 1 and i <= l_end
@@ -3068,51 +3512,67 @@ feature {NONE} -- DTD entity declarations
 					until
 						has_error or is_suspended or i >= l_end
 					loop
-						if not l_attributes.is_name_start_character (a_subset.item (i)) then
+							-- `i' is just after the element name or the previous attribute definition.
+						j := skip_spaces (a_subset, i).min (l_end)
+						if j >= l_end then
+							i := l_end
+						elseif j = i then
+							set_error ("missing space before attribute definition")
+						elseif not l_attributes.is_name_start_character (a_subset.item (j)) then
 							set_error ("invalid attlist attribute name")
 						else
-							name_start := i
-							i := scan_name (a_subset, i)
-							create l_attribute_name.make_from_string (a_subset.substring (name_start, i - 1))
-							i := skip_spaces (a_subset, i)
+							name_start := j
+							j := scan_name (a_subset, j).min (l_end)
+							create l_attribute_name.make_from_string (a_subset.substring (name_start, j - 1))
+							if not has_error then
+								j := skip_required_spaces (a_subset, j, "missing space before attribute type").min (l_end)
+							end
 							create l_attribute_type.make_empty
-							if i <= l_end - 1 then
-								i := parse_attlist_type (a_subset, i, l_end - 1, l_attribute_type)
-							else
-								set_error ("missing attlist type")
+							if not has_error then
+								if j < l_end then
+									j := parse_attlist_type (a_subset, j, l_end - 1, l_attribute_type)
+								else
+									set_error ("missing attlist type")
+								end
 							end
 							if not has_error then
-								i := skip_spaces (a_subset, i)
-								l_default_value := Void
-								l_is_required := False
-								if has_at (a_subset, i, "#REQUIRED") then
-									l_is_required := True
-									i := i + 9
-								elseif has_at (a_subset, i, "#IMPLIED") then
-									i := i + 8
-								elseif has_at (a_subset, i, "#FIXED") then
-									i := skip_spaces (a_subset, i + 6)
-									if i <= l_end - 1 and then is_quote (a_subset.item (i)) then
-										create l_new_default_value.make_empty
-										i := parse_attlist_default_value (a_subset, i, l_end - 1, l_new_default_value)
-										l_default_value := l_new_default_value
-									else
-										set_error ("missing fixed attlist default")
-									end
-								elseif i <= l_end - 1 and then is_quote (a_subset.item (i)) then
+								j := skip_required_spaces (a_subset, j, "missing space before attribute default").min (l_end)
+							end
+							l_default_value := Void
+							l_is_required := False
+							if has_error then
+							elseif has_keyword_at (a_subset, j, "#REQUIRED") then
+								l_is_required := True
+								j := j + 9
+							elseif has_keyword_at (a_subset, j, "#IMPLIED") then
+								j := j + 8
+							elseif has_keyword_at (a_subset, j, "#FIXED") then
+								j := skip_required_spaces (a_subset, j + 6, "missing space after #FIXED").min (l_end)
+								if not has_error and then j < l_end and then is_quote (a_subset.item (j)) then
 									create l_new_default_value.make_empty
-									i := parse_attlist_default_value (a_subset, i, l_end - 1, l_new_default_value)
+									j := parse_attlist_default_value (a_subset, j, l_end - 1, l_new_default_value)
 									l_default_value := l_new_default_value
 								else
-									set_error ("missing attlist default declaration")
+									set_error ("missing fixed attlist default")
 								end
-								if not has_error then
-									record_attribute_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
-									handler.on_attlist_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
-									check_handler_stop
-									i := skip_spaces (a_subset, i)
-								end
+							elseif j < l_end and then is_quote (a_subset.item (j)) then
+								create l_new_default_value.make_empty
+								j := parse_attlist_default_value (a_subset, j, l_end - 1, l_new_default_value)
+								l_default_value := l_new_default_value
+							else
+								set_error ("missing attlist default declaration")
 							end
+							if not has_error then
+								record_attribute_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
+								handler.on_attlist_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
+								check_handler_stop
+							end
+							if not has_error and then j > i and then j <= l_end then
+								i := j
+							end
+						end
+						if has_error or is_suspended then
+							i := l_end
 						end
 					variant
 						l_end - i
@@ -3132,80 +3592,142 @@ feature {NONE} -- DTD entity declarations
 
 	parse_attlist_type (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_type: STRING_8): INTEGER
 			-- Parse an attribute type and append Expat-compatible spelling to `a_type'.
+			-- On error the result is `a_end_index + 1'.
 		require
 			subset_attached: a_subset /= Void
 			type_attached: a_type /= Void
-			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index <= a_subset.count
+			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index < a_subset.count
 		local
 			i: INTEGER
-			name_start: INTEGER
-			l_attributes: XP_ATTRIBUTES
 		do
-			create l_attributes.make
 			i := a_start_index
 			if has_keyword_at (a_subset, i, "NOTATION") then
 				a_type.append ("NOTATION")
-				i := skip_spaces (a_subset, i + 8)
-				if i <= a_end_index and then a_subset.item (i) = '(' then
-					Result := append_attlist_group (a_subset, i, a_end_index, a_type)
+				i := skip_required_spaces (a_subset, i + 8, "missing space after NOTATION").min (a_end_index + 1)
+				if not has_error and then i <= a_end_index and then a_subset.item (i) = '(' then
+					Result := append_attlist_group (a_subset, i, a_end_index, a_type, True)
 				else
 					set_error ("missing notation attlist group")
-					Result := a_subset.count + 1
 				end
-			elseif i <= a_end_index and then a_subset.item (i) = '(' then
-				Result := append_attlist_group (a_subset, i, a_end_index, a_type)
-			elseif i <= a_end_index and then l_attributes.is_name_start_character (a_subset.item (i)) then
-				name_start := i
-				i := scan_name (a_subset, i)
-				a_type.append (a_subset.substring (name_start, i - 1))
+			elseif a_subset.item (i) = '(' then
+				Result := append_attlist_group (a_subset, i, a_end_index, a_type, False)
+			elseif
+				has_keyword_at (a_subset, i, "CDATA") or else has_keyword_at (a_subset, i, "ID")
+				or else has_keyword_at (a_subset, i, "IDREF") or else has_keyword_at (a_subset, i, "IDREFS")
+				or else has_keyword_at (a_subset, i, "ENTITY") or else has_keyword_at (a_subset, i, "ENTITIES")
+				or else has_keyword_at (a_subset, i, "NMTOKEN") or else has_keyword_at (a_subset, i, "NMTOKENS")
+			then
+				i := scan_name (a_subset, i).min (a_end_index + 1)
+				a_type.append (a_subset.substring (a_start_index, i - 1))
 				Result := i
 			else
 				set_error ("invalid attlist type")
-				Result := a_subset.count + 1
+			end
+			if has_error then
+				Result := a_end_index + 1
 			end
 		ensure
-			result_in_bounds: Result <= a_subset.count + 1
+			result_in_bounds: Result > a_start_index and Result <= a_end_index + 1
 		end
 
-	append_attlist_group (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_type: STRING_8): INTEGER
-			-- Append an enumeration/notation group with XML whitespace removed.
+	append_attlist_group (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_type: STRING_8; a_names: BOOLEAN): INTEGER
+			-- Parse an enumeration ('(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')') or, when `a_names',
+			-- a notation group of Names, and append it to `a_type' with whitespace removed.
+			-- On error the result is `a_end_index + 1'.
 		require
 			subset_attached: a_subset /= Void
 			type_attached: a_type /= Void
-			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index <= a_subset.count
+			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index < a_subset.count
 			starts_group: a_subset.item (a_start_index) = '('
 		local
 			i: INTEGER
-			c: CHARACTER_8
+			l_token_end: INTEGER
 			l_done: BOOLEAN
 		do
+			a_type.append_character ('(')
 			from
 				i := a_start_index
 			invariant
 				index_in_bounds: i >= a_start_index and i <= a_end_index + 1
 			until
-				i > a_end_index or has_error or l_done
+				has_error or l_done
 			loop
-				c := a_subset.item (i)
-				if not is_xml_character_code (c.code) then
-					set_error ("invalid XML character")
-				elseif not is_xml_space (c) then
-					a_type.append_character (c)
+					-- `i' is at '(' or at the '|' before the next token.
+				i := skip_spaces (a_subset, i + 1).min (a_end_index + 1)
+				if i <= a_end_index and then (is_name_character (a_subset.item (i)) and (a_names implies is_name_start_character (a_subset.item (i)))) then
+					if a_names then
+						l_token_end := scan_name (a_subset, i).min (a_end_index + 1)
+					else
+						l_token_end := scan_nmtoken (a_subset, i).min (a_end_index + 1)
+					end
+					if not has_error then
+						a_type.append (a_subset.substring (i, l_token_end - 1))
+						i := skip_spaces (a_subset, l_token_end).min (a_end_index + 1)
+						if i <= a_end_index and then a_subset.item (i) = '|' then
+							a_type.append_character ('|')
+						elseif i <= a_end_index and then a_subset.item (i) = ')' then
+							a_type.append_character (')')
+							l_done := True
+						else
+							set_error ("invalid attlist group separator")
+						end
+					end
+				else
+					set_error ("invalid attlist group token")
 				end
-				if c = ')' then
-					l_done := True
-					Result := i + 1
+				if has_error then
+					i := a_end_index + 1
 				end
-				i := i + 1
 			variant
 				a_end_index - i + 1
 			end
-			if not has_error and not l_done then
-				set_error ("unterminated attlist type")
-				Result := a_subset.count + 1
+			if has_error then
+				Result := a_end_index + 1
+			else
+				Result := i + 1
 			end
 		ensure
-			result_in_bounds: Result <= a_subset.count + 1
+			result_in_bounds: Result > a_start_index and Result <= a_end_index + 1
+		end
+
+	scan_nmtoken (a_input: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
+			-- Index immediately after the Nmtoken beginning at `a_start_index';
+			-- unlike a Name, it may start with any name character.
+		require
+			input_attached: a_input /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_input.count
+		local
+			i: INTEGER
+			l_length: INTEGER
+			l_stopped: BOOLEAN
+		do
+			from
+				i := a_start_index
+			invariant
+				index_in_bounds: i >= a_start_index and i <= a_input.count + 1
+			until
+				i > a_input.count or else l_stopped
+			loop
+				if a_input.item (i).code >= 128 then
+					l_length := utf8_character_length (a_input, i)
+					if l_length > 0 and then is_name_code (last_utf8_code) then
+						i := i + l_length
+					else
+						set_error ("invalid name character")
+						l_stopped := True
+					end
+				elseif is_name_character (a_input.item (i)) then
+					i := i + 1
+				else
+					l_stopped := True
+				end
+			variant
+				a_input.count - i + 1 + (not l_stopped).to_integer
+			end
+			Result := i.max (a_start_index + 1)
+		ensure
+			progress: Result > a_start_index
+			result_in_bounds: Result <= a_input.count + 1
 		end
 
 	parse_attlist_default_value (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_value: STRING_8): INTEGER
@@ -3249,21 +3771,22 @@ feature {NONE} -- DTD entity declarations
 					end
 					i := i + 1
 				end
+				if has_error or i > a_end_index then
+					i := a_end_index + 1
+				end
 			variant
 				a_end_index - i + 1
 			end
-			if not has_error then
-				if i > a_end_index then
-					set_error ("unterminated attlist default")
-					Result := a_subset.count + 1
-				else
-					Result := i + 1
-				end
+			if not has_error and then i > a_end_index then
+				set_error ("unterminated attlist default")
+			end
+			if has_error then
+				Result := a_end_index + 1
 			else
-				Result := a_subset.count + 1
+				Result := i + 1
 			end
 		ensure
-			result_in_bounds: Result <= a_subset.count + 1
+			result_in_bounds: Result > a_start_index and Result <= a_end_index + 1
 		end
 
 	record_attribute_decl (a_element_name, a_attribute_name, a_attribute_type: READABLE_STRING_8; a_default_value: detachable READABLE_STRING_8; a_is_required: BOOLEAN)
@@ -3340,6 +3863,10 @@ feature {NONE} -- DTD entity declarations
 					if l_decl.is_id and then a_attributes.has (l_decl.name) then
 						a_attributes.mark_id_attribute (l_decl.name)
 					end
+					if not l_decl.attribute_type.same_string ("CDATA") and then attached a_attributes.item (l_decl.name) as l_value then
+							-- Attribute-value normalization for declared non-CDATA types (XML 1.0 section 3.3.3).
+						collapse_spaces (l_value)
+					end
 					if attached l_decl.default_value as l_default_value and then not a_attributes.has (l_decl.name) then
 						if a_attributes.count >= max_attribute_count then
 							set_error ("attribute count exceeds limit")
@@ -3355,6 +3882,40 @@ feature {NONE} -- DTD entity declarations
 					l_decls.count - i + 1
 				end
 			end
+		end
+
+	collapse_spaces (a_value: STRING_8)
+			-- Remove leading and trailing spaces from `a_value' and replace each run of spaces by one.
+		require
+			value_attached: a_value /= Void
+		local
+			i: INTEGER
+			j: INTEGER
+		do
+			from
+				i := 1
+				j := 0
+			invariant
+				read_index_in_bounds: i >= 1 and i <= a_value.count + 1
+				write_index_behind: j < i
+			until
+				i > a_value.count
+			loop
+				if a_value.item (i) /= ' ' or else (j > 0 and then a_value.item (j) /= ' ') then
+					j := j + 1
+					a_value.put (a_value.item (i), j)
+				end
+				i := i + 1
+			variant
+				a_value.count - i + 1
+			end
+			if j > 0 and then a_value.item (j) = ' ' then
+				j := j - 1
+			end
+			a_value.keep_head (j)
+		ensure
+			no_leading_space: not a_value.is_empty implies a_value.item (1) /= ' '
+			no_trailing_space: not a_value.is_empty implies a_value.item (a_value.count) /= ' '
 		end
 
 	parse_entity_declaration (a_subset: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
@@ -3383,12 +3944,12 @@ feature {NONE} -- DTD entity declarations
 				set_error ("unterminated entity declaration")
 				Result := a_subset.count + 1
 			else
-				i := skip_spaces (a_subset, a_start_index + 8)
-				if i <= a_subset.count and then a_subset.item (i).code = 37 then
+				i := skip_required_spaces (a_subset, a_start_index + 8, "missing space in entity declaration")
+				if not has_error and then i <= a_subset.count and then a_subset.item (i).code = 37 then
 					l_is_parameter := True
-					i := skip_spaces (a_subset, i + 1)
+					i := skip_required_spaces (a_subset, i + 1, "missing space after %% in entity declaration")
 				end
-				if i > a_subset.count or else not l_attributes.is_name_start_character (a_subset.item (i)) then
+				if has_error or else i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
 					set_error ("invalid entity declaration name")
 					Result := a_subset.count + 1
 				else
@@ -3396,8 +3957,15 @@ feature {NONE} -- DTD entity declarations
 					i := scan_name (a_subset, i)
 					l_name_end := i - 1
 					create l_name.make_from_string (a_subset.substring (name_start, l_name_end))
-					i := skip_spaces (a_subset, i)
-					if i <= a_subset.count and then is_quote (a_subset.item (i)) then
+					if not has_error and then namespace_mode and then l_name.has (':') then
+						set_error ("colon in entity name")
+					end
+					if not has_error then
+						i := skip_required_spaces (a_subset, i, "missing space after entity name")
+					end
+					if has_error then
+						Result := a_subset.count + 1
+					elseif i <= a_subset.count and then is_quote (a_subset.item (i)) then
 						l_quote := a_subset.item (i)
 						l_literal_start := i
 						create l_value.make_empty
@@ -3413,6 +3981,10 @@ feature {NONE} -- DTD entity declarations
 						l_literal_end := i
 						l_accounting_count := l_value.count + current_entity_literal_accounting_adjustment
 						current_entity_literal_accounting_adjustment := 0
+						if not has_error and then skip_spaces (a_subset, l_literal_end + 1) /= l_end then
+								-- Only one literal, and no NDATA or other content, may follow the name.
+							set_error ("unexpected entity declaration content")
+						end
 						if not has_error then
 							if l_is_parameter then
 								put_parameter_entity (l_name, l_value, l_accounting_count)
@@ -3462,19 +4034,19 @@ feature {NONE} -- DTD entity declarations
 			create l_attributes.make
 			i := a_start_index
 			if has_keyword_at (a_subset, i, "SYSTEM") then
-				i := skip_spaces (a_subset, i + 6)
-				if i <= a_end_index and then is_quote (a_subset.item (i)) then
+				i := skip_spaces_before_literal (a_subset, i + 6, "missing space after SYSTEM")
+				if not has_error and then i <= a_end_index and then is_quote (a_subset.item (i)) then
 					i := read_quoted_literal (a_subset, i, a_end_index, l_system_id)
 				else
 					set_error ("missing external system identifier")
 				end
 			elseif has_keyword_at (a_subset, i, "PUBLIC") then
-				i := skip_spaces (a_subset, i + 6)
-				if i <= a_end_index and then is_quote (a_subset.item (i)) then
+				i := skip_spaces_before_literal (a_subset, i + 6, "missing space after PUBLIC")
+				if not has_error and then i <= a_end_index and then is_quote (a_subset.item (i)) then
 					i := read_public_id_literal (a_subset, i, a_end_index, l_public_id)
 					if not has_error then
-						i := skip_spaces (a_subset, i)
-						if i <= a_end_index and then is_quote (a_subset.item (i)) then
+						i := skip_spaces_before_literal (a_subset, i, "missing space between public and system identifiers")
+						if not has_error and then i <= a_end_index and then is_quote (a_subset.item (i)) then
 							i := read_quoted_literal (a_subset, i, a_end_index, l_system_id)
 						else
 							set_error ("missing external system identifier")
@@ -3486,12 +4058,18 @@ feature {NONE} -- DTD entity declarations
 			else
 				set_error ("invalid external entity declaration")
 			end
-			if not has_error then
+			if not has_error and then i <= a_end_index then
+				name_start := i
 				i := skip_spaces (a_subset, i)
 				if not a_is_parameter and then i < a_end_index and then has_keyword_at (a_subset, i, "NDATA") then
+					if i = name_start then
+						set_error ("missing space before NDATA")
+					end
 					l_is_unparsed := True
-					i := skip_spaces (a_subset, i + 5)
-					if i <= a_end_index and then l_attributes.is_name_start_character (a_subset.item (i)) then
+					if not has_error then
+						i := skip_required_spaces (a_subset, i + 5, "missing space after NDATA")
+					end
+					if not has_error and then i <= a_end_index and then l_attributes.is_name_start_character (a_subset.item (i)) then
 						name_start := i
 						i := scan_name (a_subset, i)
 						l_notation_name.append (a_subset.substring (name_start, i - 1))
@@ -3624,6 +4202,10 @@ feature {NONE} -- DTD entity declarations
 				if not is_valid_name (l_name) then
 					set_error ("invalid parameter entity name")
 					Result := a_input.count + 1
+				elseif not parsing_external_entity and then external_dtd_depth = 0 then
+						-- WFC "PEs in Internal Subset": not inside markup declarations there.
+					set_error ("parameter entity reference in internal subset declaration")
+					Result := a_input.count + 1
 				elseif is_entity_active (l_name) then
 					set_error ("recursive entity reference")
 					Result := a_input.count + 1
@@ -3658,6 +4240,7 @@ feature {NONE} -- DTD entity declarations
 			l_end: INTEGER
 			l_name: STRING_8
 		do
+			dtd_has_parameter_entity_references := True
 			l_end := find_character (a_subset, ';', a_start_index + 1)
 			if l_end = 0 then
 				set_error ("unterminated parameter entity reference")
@@ -3756,8 +4339,8 @@ feature {NONE} -- Event dispatch
 				set_error ("maximum element depth exceeded")
 			elseif element_stack.count = 0 and then document_element_count > 0 and then not parsing_external_entity then
 				set_error ("multiple document elements")
-			elseif element_stack.count = 0 and then not doctype_name.is_empty and then not doctype_matches_element_name (doctype_name, a_name) and then not parsing_external_entity then
-				set_error ("document element does not match doctype")
+				-- A root element whose name differs from the DOCTYPE name violates only the
+				-- "Root Element Type" validity constraint, so a non-validating parser accepts it.
 			else
 				if element_stack.count = 0 then
 					document_element_count := document_element_count + 1
@@ -3769,9 +4352,9 @@ feature {NONE} -- Event dispatch
 						l_namespace_scope := namespace_scope_for_element (a_attributes, l_namespace_prefixes)
 						if not has_error then
 							if attached l_namespace_scope as l_attached_scope then
-								if l_wants_start_events then
-									l_event_name := expanded_element_name (a_name, l_attached_scope)
-								else
+									-- Always resolved: an unbound or reserved prefix is an error even without events.
+								l_event_name := expanded_element_name (a_name, l_attached_scope)
+								if not l_wants_start_events then
 									l_event_name := Void
 								end
 							else
@@ -3860,6 +4443,10 @@ feature {NONE} -- Event dispatch
 			l_wants_end_events := handler.wants_end_element_events
 			if element_stack.count = 0 then
 				set_error ("unexpected end tag")
+			elseif element_stack.count <= entity_element_floor then
+					-- WFC "Parsed Entity": an entity may not close an element opened outside it.
+				note_current_entity_reference_position
+				set_error ("asynchronous entity")
 			elseif not open_element_matches_string (a_name) then
 				set_error ("mismatched end tag")
 			else
@@ -3894,6 +4481,9 @@ feature {NONE} -- Event dispatch
 		do
 			if element_stack.count = 0 then
 				set_error ("unexpected end tag")
+			elseif element_stack.count <= entity_element_floor then
+				note_current_entity_reference_position
+				set_error ("asynchronous entity")
 			elseif not open_element_matches_range (a_input, a_name_start, a_name_end) then
 				set_error ("mismatched end tag")
 			else
@@ -4153,7 +4743,10 @@ feature {NONE} -- Namespace handling
 			else
 				create l_prefix.make_from_string (a_name.substring (1, l_colon - 1))
 				create l_local_name.make_from_string (a_name.substring (l_colon + 1, a_name.count))
-				if attached a_scope.item (l_prefix) as l_uri and then not l_uri.is_empty then
+				if l_prefix.same_string ("xmlns") then
+					set_error ("reserved prefix xmlns")
+					create Result.make_from_string (a_name)
+				elseif attached a_scope.item (l_prefix) as l_uri and then not l_uri.is_empty then
 					Result := expanded_namespace_name (l_uri, l_local_name, l_prefix)
 				else
 					set_error ("unbound namespace prefix")
@@ -4438,20 +5031,24 @@ feature {NONE} -- Namespace handling
 feature {NONE} -- Scanning
 
 	normalized_input (a_input: READABLE_STRING_8; a_allow_alias: BOOLEAN): STRING_8
-			-- XML line-end normalized input.
+			-- XML line-end normalized UTF-8 form of `a_input'; every character must be an XML Char.
+			-- A UTF-8 sequence cut off by the end of `a_input' is kept for the markup parser.
 		require
 			input_attached: a_input /= Void
 		local
 			i: INTEGER
 			c: CHARACTER_8
 			l_needs_copy: BOOLEAN
+			l_length: INTEGER
+			l_source: READABLE_STRING_8
 		do
-			if a_allow_alias then
+			l_source := decoded_input (a_input)
+			if a_allow_alias and then l_source = a_input then
 				if
-					a_input.count >= 3
-					and then a_input.item (1).code = 239
-					and then a_input.item (2).code = 187
-					and then a_input.item (3).code = 191
+					l_source.count >= 3
+					and then l_source.item (1).code = 239
+					and then l_source.item (2).code = 187
+					and then l_source.item (3).code = 191
 				then
 					l_needs_copy := True
 					i := 4
@@ -4460,33 +5057,45 @@ feature {NONE} -- Scanning
 				end
 				from
 				invariant
-					index_in_bounds: i >= 1 and i <= a_input.count + 1
+					index_in_bounds: i >= 1 and i <= l_source.count + 1
 				until
-					i > a_input.count or has_error or l_needs_copy
+					i > l_source.count or has_error or l_needs_copy
 				loop
-					c := a_input.item (i)
+					c := l_source.item (i)
 					if c = '%R' then
 						l_needs_copy := True
 						i := i + 1
-					elseif not is_xml_character_code (c.code) then
-						set_error ("invalid XML character")
-						i := a_input.count + 1
+					elseif c.code < 128 then
+						if is_xml_character_code (c.code) then
+							i := i + 1
+						else
+							set_error ("invalid XML character")
+							i := l_source.count + 1
+						end
 					else
-						i := i + 1
+						l_length := utf8_character_length (l_source, i)
+						if l_length > 0 then
+							i := i + l_length
+						elseif l_length < 0 then
+							i := l_source.count + 1
+						else
+							set_error ("invalid XML character")
+							i := l_source.count + 1
+						end
 					end
 				variant
-					a_input.count - i + 1
+					l_source.count - i + 1
 				end
 			end
-			if a_allow_alias and then not has_error and then not l_needs_copy and then attached {STRING_8} a_input as l_string then
+			if a_allow_alias and then l_source = a_input and then not has_error and then not l_needs_copy and then attached {STRING_8} a_input as l_string then
 				Result := l_string
 			else
-				create Result.make (a_input.count)
+				create Result.make (l_source.count)
 				if
-					a_input.count >= 3
-					and then a_input.item (1).code = 239
-					and then a_input.item (2).code = 187
-					and then a_input.item (3).code = 191
+					l_source.count >= 3
+					and then l_source.item (1).code = 239
+					and then l_source.item (2).code = 187
+					and then l_source.item (3).code = 191
 				then
 					i := 4
 				else
@@ -4494,27 +5103,41 @@ feature {NONE} -- Scanning
 				end
 				from
 				invariant
-					index_in_bounds: i >= 1 and i <= a_input.count + 1
+					index_in_bounds: i >= 1 and i <= l_source.count + 1
 				until
-					i > a_input.count or has_error
+					i > l_source.count or has_error
 				loop
-					c := a_input.item (i)
+					c := l_source.item (i)
 					if c = '%R' then
 						Result.append_character ('%N')
-						if i + 1 <= a_input.count and then a_input.item (i + 1) = '%N' then
+						if i + 1 <= l_source.count and then l_source.item (i + 1) = '%N' then
 							i := i + 2
 						else
 							i := i + 1
 						end
-					elseif not is_xml_character_code (c.code) then
-						set_error ("invalid XML character")
-						i := a_input.count + 1
+					elseif c.code < 128 then
+						if is_xml_character_code (c.code) then
+							Result.append_character (c)
+							i := i + 1
+						else
+							set_error ("invalid XML character")
+							i := l_source.count + 1
+						end
 					else
-						Result.append_character (c)
-						i := i + 1
+						l_length := utf8_character_length (l_source, i)
+						if l_length > 0 then
+							Result.append_substring (l_source, i, i + l_length - 1)
+							i := i + l_length
+						elseif l_length < 0 then
+							Result.append_substring (l_source, i, l_source.count)
+							i := l_source.count + 1
+						else
+							set_error ("invalid XML character")
+							i := l_source.count + 1
+						end
 					end
 				variant
-					a_input.count - i + 1
+					l_source.count - i + 1
 				end
 			end
 		ensure
@@ -4523,13 +5146,16 @@ feature {NONE} -- Scanning
 
 	scan_name (a_input: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
 			-- Index immediately after the XML name beginning at `a_start_index'.
+			-- Non-ASCII characters are decoded; one that is not allowed at its position in a
+			-- name is an error, since markup never continues a name with a non-ASCII character.
+			-- A UTF-8 sequence cut off by the end of `a_input' is kept for prefix parsing.
 		require
 			input_attached: a_input /= Void
 			valid_start: a_start_index >= 1 and a_start_index <= a_input.count
 		local
 			i: INTEGER
 			l_code: INTEGER
-			c: CHARACTER_8
+			l_length: INTEGER
 			l_stopped: BOOLEAN
 		do
 			from
@@ -4539,9 +5165,19 @@ feature {NONE} -- Scanning
 			until
 				i > a_input.count or else l_stopped
 			loop
-				c := a_input.item (i)
-				l_code := c.code
-				if
+				l_code := a_input.item (i).code
+				if l_code >= 128 then
+					l_length := utf8_character_length (a_input, i)
+					if l_length > 0 and then (is_name_start_code (last_utf8_code) or else (i > a_start_index and then is_name_code (last_utf8_code))) then
+						i := i + l_length
+					elseif l_length < 0 then
+						i := a_input.count + 1
+					else
+						set_error ("invalid name character")
+						l_stopped := True
+						i := i + 1
+					end
+				elseif
 					(l_code >= 65 and l_code <= 90)
 					or else (l_code >= 97 and l_code <= 122)
 					or else (l_code >= 48 and l_code <= 57)
@@ -4549,8 +5185,6 @@ feature {NONE} -- Scanning
 					or else l_code = 58
 					or else l_code = 45
 					or else l_code = 46
-					or else l_code = 183
-					or else (l_code >= 128 and l_code <= 255)
 				then
 					i := i + 1
 				else
@@ -4561,13 +5195,32 @@ feature {NONE} -- Scanning
 				a_input.count - i + 1
 			end
 			if l_stopped then
-				Result := i - 1
+				Result := (i - 1).max (a_start_index + 1)
 			else
 				Result := i
 			end
 		ensure
 			progress: Result > a_start_index
 			result_in_bounds: Result <= a_input.count + 1
+		end
+
+	skip_spaces_before_literal (a_input: READABLE_STRING_8; a_start_index: INTEGER; a_message: READABLE_STRING_8): INTEGER
+			-- First non-XML-space index at or after `a_start_index'; reports `a_message'
+			-- when a quoted literal follows a keyword or literal without whitespace.
+			-- Callers report a missing literal themselves.
+		require
+			input_attached: a_input /= Void
+			message_attached: a_message /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_input.count + 1
+		do
+			if a_start_index <= a_input.count and then is_quote (a_input.item (a_start_index)) then
+				set_error (a_message)
+				Result := a_start_index
+			else
+				Result := skip_spaces (a_input, a_start_index)
+			end
+		ensure
+			result_in_bounds: Result >= a_start_index and Result <= a_input.count + 1
 		end
 
 	input_range_same_string (a_input: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_text: READABLE_STRING_8): BOOLEAN
@@ -4691,6 +5344,25 @@ feature {NONE} -- Scanning
 			result_in_bounds: Result >= a_start_index and Result <= a_input.count + 1
 		end
 
+	skip_required_spaces (a_input: READABLE_STRING_8; a_start_index: INTEGER; a_message: READABLE_STRING_8): INTEGER
+			-- First non-XML-space index after the whitespace at `a_start_index';
+			-- reports `a_message' when there is no whitespace there.
+		require
+			input_attached: a_input /= Void
+			message_attached: a_message /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_input.count + 1
+		do
+			if a_start_index <= a_input.count and then is_xml_space (a_input.item (a_start_index)) then
+				Result := skip_spaces (a_input, a_start_index)
+			else
+				set_error (a_message)
+				Result := a_start_index
+			end
+		ensure
+			result_in_bounds: Result >= a_start_index and Result <= a_input.count + 1
+			space_or_error: Result > a_start_index or has_error
+		end
+
 	find_sequence (a_input, a_marker: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
 			-- First index of `a_marker' at or after `a_start_index', or 0.
 		require
@@ -4763,9 +5435,10 @@ feature {NONE} -- Scanning
 			c: CHARACTER_8
 		do
 			from
-				i := a_start_index + 2
+					-- A prefix may end within the first two bytes ("<" or "<!"): nothing to scan then.
+				i := (a_start_index + 2).min (a_input.count + 1)
 			invariant
-				index_in_bounds: i >= a_start_index + 2 and i <= a_input.count + 1
+				index_in_bounds: i >= a_start_index and i <= a_input.count + 1
 			until
 				i > a_input.count or Result /= 0
 			loop
@@ -4912,6 +5585,9 @@ feature {NONE} -- Scanning
 						l_in_quote := False
 					end
 					i := i + 1
+				elseif l_depth > 0 and then c = '<' and then (has_at (a_input, i, "<!--") or has_at (a_input, i, "<?")) then
+						-- Quotes in comments and processing instructions do not start literals.
+					i := index_after_subset_comment_or_pi (a_input, i, a_input.count)
 				elseif is_quote (c) then
 					l_in_quote := True
 					l_quote := c
@@ -4931,6 +5607,35 @@ feature {NONE} -- Scanning
 			variant
 				a_input.count - i + 1
 			end
+		end
+
+	index_after_subset_comment_or_pi (a_input: READABLE_STRING_8; a_start_index, a_end_index: INTEGER): INTEGER
+			-- Index after the comment or processing instruction at `a_start_index', or
+			-- `a_end_index + 1' when it is not terminated by `a_end_index'.
+		require
+			input_attached: a_input /= Void
+			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index <= a_input.count
+			at_comment_or_pi: has_at (a_input, a_start_index, "<!--") or has_at (a_input, a_start_index, "<?")
+		local
+			l_end: INTEGER
+		do
+			if has_at (a_input, a_start_index, "<!--") then
+				l_end := find_sequence (a_input, "-->", a_start_index + 4)
+				if l_end > 0 and then l_end + 2 <= a_end_index then
+					Result := l_end + 3
+				end
+			else
+				l_end := find_sequence (a_input, "?>", a_start_index + 2)
+				if l_end > 0 and then l_end + 1 <= a_end_index then
+					Result := l_end + 2
+				end
+			end
+			if Result = 0 then
+				Result := a_end_index + 1
+			end
+		ensure
+			progress: Result > a_start_index
+			result_in_bounds: Result <= a_end_index + 1
 		end
 
 	find_unquoted_character (a_input: READABLE_STRING_8; a_character: CHARACTER_8; a_start_index, a_end_index: INTEGER): INTEGER
@@ -4973,12 +5678,45 @@ feature {NONE} -- Scanning
 		end
 
 	find_subset_end (a_input: READABLE_STRING_8; a_start_index, a_end_index: INTEGER): INTEGER
-			-- Matching unquoted `]' before `a_end_index', or 0.
+			-- Matching unquoted `]' before `a_end_index', or 0. Comments and processing
+			-- instructions are skipped, so quotes inside them do not start literals.
 		require
 			input_attached: a_input /= Void
 			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index <= a_input.count
+		local
+			i: INTEGER
+			l_in_quote: BOOLEAN
+			l_quote: CHARACTER_8
+			c: CHARACTER_8
 		do
-			Result := find_unquoted_character (a_input, ']', a_start_index, a_end_index)
+			from
+				i := a_start_index
+			invariant
+				index_in_bounds: i >= a_start_index and i <= a_end_index + 1
+			until
+				i > a_end_index or Result /= 0
+			loop
+				c := a_input.item (i)
+				if l_in_quote then
+					if c = l_quote then
+						l_in_quote := False
+					end
+					i := i + 1
+				elseif c = '<' and then (has_at (a_input, i, "<!--") or has_at (a_input, i, "<?")) then
+					i := index_after_subset_comment_or_pi (a_input, i, a_end_index)
+				elseif is_quote (c) then
+					l_in_quote := True
+					l_quote := c
+					i := i + 1
+				elseif c = ']' then
+					Result := i
+					i := a_end_index + 1
+				else
+					i := i + 1
+				end
+			variant
+				a_end_index - i + 1
+			end
 		end
 
 	read_quoted_literal (a_input: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_value: STRING_8): INTEGER
@@ -5282,7 +6020,7 @@ feature {NONE} -- Character and name validation
 			if a_body.is_empty then
 				set_error ("invalid character reference")
 			else
-				if a_body.count >= 2 and then a_body.item (1).as_lower = 'x' then
+				if a_body.count >= 2 and then a_body.item (1) = 'x' then
 					l_base := 16
 					i := 2
 				else
@@ -5572,7 +6310,6 @@ feature {NONE} -- Entity tables
 			valid_name: is_valid_name (a_name)
 			public_id_attached: a_public_id /= Void
 			system_id_attached: a_system_id /= Void
-			system_id_not_empty: not a_system_id.is_empty
 			notation_name_attached: a_notation_name /= Void
 			unparsed_only_for_general: a_is_unparsed implies not a_is_parameter
 		local
@@ -5802,6 +6539,9 @@ feature {NONE} -- State
 			lazy_position_accounting := False
 			last_attribute_name_start := 0
 			last_attribute_name_end := 0
+			external_dtd_depth := 0
+			entity_element_floor := 0
+			dtd_has_parameter_entity_references := False
 			current_position_index := 0
 			current_line_number := 1
 			current_column_number := 0
@@ -6146,6 +6886,9 @@ feature {NONE} -- State
 	use_foreign_dtd: BOOLEAN
 			-- Should a foreign DTD be loaded before the root element?
 
+	input_is_utf8: BOOLEAN
+			-- Do callers convert input to UTF-8 before parsing (see `set_input_is_utf8')?
+
 	foreign_dtd_loaded: BOOLEAN
 			-- Has the configured foreign DTD already been requested?
 
@@ -6169,6 +6912,20 @@ feature {NONE} -- State
 
 	last_attribute_name_end: INTEGER
 			-- Scratch end index for the most recent no-event attribute name.
+
+	last_utf8_code: INTEGER
+			-- Code point of the most recent sequence accepted by `utf8_character_length'.
+
+	external_dtd_depth: INTEGER
+			-- Number of external parameter entities currently being processed as DTD content.
+
+	entity_element_floor: INTEGER
+			-- Element depth at the start of the general entity whose content is being parsed;
+			-- end tags may not close elements at or below it.
+
+	dtd_has_parameter_entity_references: BOOLEAN
+			-- Has the DTD referenced a parameter entity? Undeclared general entities
+			-- are then not well-formedness errors unless the document is standalone.
 
 	parsed_content_model: detachable XP_CONTENT_MODEL
 			-- Scratch content model produced by recursive DTD parsing.
