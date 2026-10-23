@@ -199,7 +199,6 @@ feature -- Events
 			name_attached: a_name /= Void
 			name_not_empty: not a_name.is_empty
 			system_id_attached: a_system_id /= Void
-			system_id_not_empty: not a_system_id.is_empty
 		do
 		end
 
