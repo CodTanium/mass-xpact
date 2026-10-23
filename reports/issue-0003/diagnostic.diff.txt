@@ -1,0 +1,29 @@
+diff --git a/src/xp_gc_critical_section.e b/src/xp_gc_critical_section.e
+index 32406ba..c1b8df0 100644
+--- a/src/xp_gc_critical_section.e
++++ b/src/xp_gc_critical_section.e
+@@ -82,7 +82,10 @@ feature -- Basic operations
+ 		require
+ 			action_attached: a_action /= Void
+ 		do
+-			memory.execute_without_collection (a_action)
++			-- DIAGNOSTIC ONLY: no rescue, so exceptions inside a_action propagate.
++			enter
++			a_action.call (Void)
++			leave
+ 		ensure
+ 			collection_status_preserved: collecting = old collecting
+ 		end
+diff --git a/tests/xp_test_root.e b/tests/xp_test_root.e
+index 899e351..894aaec 100644
+--- a/tests/xp_test_root.e
++++ b/tests/xp_test_root.e
+@@ -1068,7 +1068,7 @@ feature {NONE} -- Tests
+ 
+ 			l_memory.collection_on
+ 			create l_native.make
+-			l_native.set_suspend_gc_during_parse (True)
++			l_native.set_suspend_gc_during_parse (False) -- DIAGNOSTIC ONLY
+ 			l_status := l_native.parse ("<root/>", True)
+ 			assert ("native GC-suspended parser accepts document", l_status = l_native.Xml_status_ok)
+ 			assert ("GC restored after native critical section", l_memory.collecting)
