@@ -13,6 +13,8 @@ feature {NONE} -- Initialization
 		do
 			create handler.make
 			create parser.make (handler)
+				-- `decoded_input' converts UTF-16 and Latin-1 to UTF-8 before parsing.
+			parser.set_input_is_utf8 (True)
 			parser.set_external_entity_resolver (handler)
 			configure_external_entity_policy
 			create input_buffer.make_empty
@@ -813,8 +815,11 @@ feature {NONE} -- Parsing implementation
 							l_context_input := input_buffer
 						end
 						handler.prepare_callback_replay (delivered_callback_count)
+							-- The direct start-tag shortcut only serves non-final input, which is parsed
+							-- again by later calls; a final call must parse all of the input (C01, #38).
 						if
-							not l_defer_callbacks
+							not a_is_final
+							and then not l_defer_callbacks
 							and then ready_plain_start_tag_start_index = 0
 							and then delivered_callback_count = 0
 							and then l_input.count > 0
@@ -832,7 +837,7 @@ feature {NONE} -- Parsing implementation
 							context_source_buffer.wipe_out
 						end
 						context_buffer := Void
-						if can_emit_ready_plain_start_tag_directly then
+						if not a_is_final and then can_emit_ready_plain_start_tag_directly then
 							l_ok := emit_ready_plain_start_tag_directly (l_input)
 							if l_ok then
 								l_direct_callback_count := 1
@@ -1672,11 +1677,13 @@ feature {NONE} -- Encoding
 						if i + 3 > a_input.count then
 							last_error_code := Xml_error_partial_char
 							Result := Void
+							i := a_input.count + 1
 						else
 							l_low := utf16_unit_at (a_input, i + 2, a_little_endian)
 							if l_low < 56320 or else l_low > 57343 then
 								last_error_code := Xml_error_invalid_token
 								Result := Void
+								i := a_input.count + 1
 							else
 								l_code := 65536 + ((l_unit - 55296) * 1024) + (l_low - 56320)
 								append_utf8_codepoint (Result, l_code)
@@ -1686,6 +1693,7 @@ feature {NONE} -- Encoding
 					elseif l_unit >= 56320 and then l_unit <= 57343 then
 						last_error_code := Xml_error_invalid_token
 						Result := Void
+						i := a_input.count + 1
 					else
 						append_utf8_codepoint (Result, l_unit)
 						i := i + 2
@@ -1723,10 +1731,12 @@ feature {NONE} -- Encoding
 				elseif l_unit >= 55296 and then l_unit <= 56319 then
 					if i + 3 > l_limit then
 						Result := Void
+						i := l_limit + 1
 					else
 						l_low := utf16_unit_at (a_input, i + 2, a_little_endian)
 						if l_low < 56320 or else l_low > 57343 then
 							Result := Void
+							i := l_limit + 1
 						else
 							l_code := 65536 + ((l_unit - 55296) * 1024) + (l_low - 56320)
 							append_utf8_codepoint (Result, l_code)
@@ -1735,6 +1745,7 @@ feature {NONE} -- Encoding
 					end
 				elseif l_unit >= 56320 and then l_unit <= 57343 then
 					Result := Void
+					i := l_limit + 1
 				else
 					append_utf8_codepoint (Result, l_unit)
 					i := i + 2
