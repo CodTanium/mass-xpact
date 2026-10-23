@@ -1,0 +1,116 @@
+================================================================================
+BUILD FIX NOTES — build_native_eiffel.ps1 "link response file not found"
+================================================================================
+
+ORIGINAL ERROR
+--------------
+  .\scripts\build_native_eiffel.ps1
+
+  Expected Eiffel link response file not found:
+  ...\EIFGENs\xpact_native_library\F_code\xpact_native_library.lnk
+  At ...\scripts\build_native_eiffel.ps1:91
+
+  (plus "C compilation completed" printed just before the failure)
+
+
+ROOT CAUSE
+----------
+The script assumed the Eiffel target was compiled with an MSVC backend that
+emits a `.lnk` response file in F_code. But the machine's default Eiffel
+"spec" is **mingw** (gcc), and:
+
+  * the mingw backend links with `dllwrap`/`gcc`, so it produces NO `.lnk`
+    file and a gcc-built `.exe` instead — hence "link response file not
+    found";
+  * the plain `msc` spec's runtime lib was incompatible with the installed
+    Visual Studio (linker error 0x460: unresolved `__iob_func`,
+    `_set_output_format`, etc.);
+  * only the **`msc_vc140`** spec produces a usable `.lnk` AND links against
+    a runtime compatible with the installed VS (MSVC 14.51 / VS 18).
+
+Additionally the ECF declared a `<precompile>` base (`base-safe`) that only
+exists for the mingw spec. That precompile entry blocked the MSVC build
+("precompiled file is missing or unreadable").
+
+There was also a stale `ec.lock` file from a previously interrupted run,
+which caused "Cannot create project directory ... fixing the permissions".
+
+
+CHANGES MADE
+------------
+1. tests\xpact_native_library.ecf
+   - Removed the `<precompile name="base_pre" .../>` element from BOTH
+     targets (`xpact_native_library` and `xpact_native_library_assertions`).
+     The precompiled base only exists for the mingw spec; removing it lets
+     the target compile with the MSVC spec.
+
+2. scripts\build_native_eiffel.ps1
+   - Force the correct Eiffel backend for this machine around the compile and
+     finalize steps by setting `ISE_C_COMPILER = "msc_vc140"`, and restore
+     the previous value afterwards:
+
+         $OldCompiler = $env:ISE_C_COMPILER
+         $env:ISE_C_COMPILER = "msc_vc140"
+         try {
+             ec -batch -clean -finalize -keep -config tests\xpact_native_library.ecf -target $EiffelTarget
+             ...
+             Push-Location $FinalCode
+             try { finish_freezing } finally { Pop-Location }
+             ...
+         } finally {
+             $env:ISE_C_COMPILER = $OldCompiler
+         }
+
+   - Guarded the native calls (`ec`, `finish_freezing`, the smoke `.exe`)
+     against the vswhere.exe stderr warning being promoted to a terminating
+     error under `$ErrorActionPreference = "Stop"`. They now temporarily set
+     `$ErrorActionPreference = "Continue"` and check `$LASTEXITCODE`
+     explicitly.
+   - Applied the same guard inside `Invoke-VcCommand` (the `cl`/`link`
+     helper).
+
+3. scripts\import_msvc_environment.ps1
+   - Same stderr guard around the `vcvars64.bat` invocation so the harmless
+     `'vswhere.exe' is not recognized` message does not abort the script.
+
+4. Removed the stale `EIFGENs\xpact_native_library\ec.lock` (left over from a
+   previous failed/interrupted run).
+
+
+RESULT
+------
+Production tier builds and passes its smoke test end-to-end:
+
+    .\scripts\build_native_eiffel.ps1
+      -> Built build\native-eiffel\xpact.dll (Production)
+      -> xpact Eiffel DLL smoke: ok
+      -> EXIT=0
+
+Assertions tier builds with the invocation CI/package use
+(`-BuildTier Assertions -SkipSmoke`), EXIT=0. (Note: CI and
+package_windows_release.ps1 always pass `-SkipSmoke` for the assertion tier.)
+
+Full packaging also succeeds:
+
+    .\scripts\package_windows_release.ps1
+      -> Built build\native-eiffel\xpact_assertions.dll (Assertions)
+      -> Packaged dist\xpact-0.1.0-preview-windows-x64.zip
+      -> EXIT=0
+
+
+NOTES / CAVEATS
+---------------
+* The Eiffel install on this machine has only a mingw precompiled base; there
+  is no usable MSVC precompiled base. The msc_vc140 spec is used WITHOUT a
+  precompiled base, which is why the `<precompile>` entry had to be removed.
+* The assertions-tier DLL smoke test (when NOT using `-SkipSmoke`) crashes at
+  process attach with STATUS_INVALID_HANDLE (0xC0000008). This is a separate,
+  pre-existing assertion-runtime/loader-lock issue and is why CI and packaging
+  use `-SkipSmoke` for the assertion tier. The production tier smoke passes
+  cleanly.
+* A prior failed attempt had left a broken precompiled base named
+  `base-safe.broken-20261013` in
+  %USERPROFILE%\Documents\Eiffel User Files\25.12\precomp\spec\win64\EIFGENs\.
+  This is unrelated to the fix but explains the state of the install.
+
+================================================================================

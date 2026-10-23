@@ -44,7 +44,8 @@ function Invoke-TestLane {
 	)
 	$CompileArgs = @("-batch", "-clean")
 	if ($Mode -eq "Finalized") {
-		$CompileArgs += "-finalize"
+		# Without -keep, ec -finalize drops every assertion from the system.
+		$CompileArgs += @("-finalize", "-keep")
 	}
 	$CompileArgs += @("-config", $ConfigPath, "-target", $Target)
 
@@ -83,17 +84,26 @@ function Invoke-TestLane {
 }
 
 $SelectedBuildModes = @(Selected-BuildModes)
-if ($SelectedBuildModes -contains "Finalized") {
+# finish_freezing also runs for Workbench lanes; with an MSVC C backend it
+# needs cl and link.
+if ($SelectedBuildModes -contains "Finalized" -or $env:ISE_C_COMPILER -like "msc*") {
 	. (Join-Path $PSScriptRoot "import_msvc_environment.ps1")
 }
 
-foreach ($AssertionTarget in Selected-AssertionTargets) {
-	foreach ($Mode in $SelectedBuildModes) {
-		Invoke-TestLane `
-			-AssertionLabel $AssertionTarget.Label `
-			-Target $AssertionTarget.Target `
-			-Mode $Mode
+# ec writes EIFGENs to the current folder and the tests read files relative to
+# it, so run every lane from the repository root, wherever the script started.
+Push-Location $RepoRoot
+try {
+	foreach ($AssertionTarget in Selected-AssertionTargets) {
+		foreach ($Mode in $SelectedBuildModes) {
+			Invoke-TestLane `
+				-AssertionLabel $AssertionTarget.Label `
+				-Target $AssertionTarget.Target `
+				-Mode $Mode
+		}
 	}
+} finally {
+	Pop-Location
 }
 
 Write-Host "xpact Eiffel test matrix: ok"

@@ -1,0 +1,33 @@
+commit:  1ea242eefa39b4d9bef426a96a425355a9eb8399 + uncommitted fix
+command: python -m unittest discover -s tests/python -p test_w3c_conformance.py -v
+date:    2026-10-22T00:39:02
+
+Python 3.10.22
+test_archive_members_are_checked_before_any_extraction (test_w3c_conformance.ArchiveTests) ... ok
+test_hash_mismatch_rejects_changed_archive (test_w3c_conformance.ArchiveTests) ... ok
+test_symlinks_are_rejected_and_safe_file_bytes_are_preserved (test_w3c_conformance.ArchiveTests) ... ok
+test_duplicate_ids_and_empty_catalog_are_setup_errors (test_w3c_conformance.CatalogTests) ... ok
+test_entities_dtd_defaults_nested_bases_and_original_bytes (test_w3c_conformance.CatalogTests) ... ok
+test_external_catalog_entities_cannot_access_network_or_parent (test_w3c_conformance.CatalogTests) ... ok
+test_inherited_network_base_is_rejected_even_for_empty_group (test_w3c_conformance.CatalogTests) ... ok
+test_network_and_parent_paths_are_rejected (test_w3c_conformance.CatalogTests) ... ok
+test_unpinned_bad_encoding_is_not_silently_repaired (test_w3c_conformance.CatalogTests) ... ok
+test_crash_or_invalid_protocol_cannot_pass_a_negative_case (test_w3c_conformance.ExecutionTests) ... ok
+test_expected_rejection_is_a_pass_and_namespace_opt_out_is_preserved (test_w3c_conformance.ExecutionTests) ... ok
+test_incorrect_binary_verdict_is_a_conformance_failure (test_w3c_conformance.ExecutionTests) ... ok
+test_original_binary_path_and_namespace_switch_are_passed_as_arguments (test_w3c_conformance.ExecutionTests) ... ok
+test_skipped_and_missing_inputs_do_not_launch_parser (test_w3c_conformance.ExecutionTests) ... ok
+test_timeout_and_launch_failure_are_errors (test_w3c_conformance.ExecutionTests) ... ok
+test_lists_containing_supported_version_and_edition_remain_applicable (test_w3c_conformance.ExpectationTests) ... ok
+test_nonvalidating_binary_expectations (test_w3c_conformance.ExpectationTests) ... ok
+test_out_of_profile_cases_have_explicit_skip_reason (test_w3c_conformance.ExpectationTests) ... ok
+test_unknown_metadata_does_not_become_a_pass (test_w3c_conformance.ExpectationTests) ... ok
+test_cli_runs_each_engine_and_fails_on_conformance_mismatch (test_w3c_conformance.ReportAndCliTests) ... ok
+test_junit_and_summary_reconcile_failure_error_skip_and_verdict_counts (test_w3c_conformance.ReportAndCliTests) ... ok
+test_setup_failure_replaces_stale_junit_with_visible_error (test_w3c_conformance.ReportAndCliTests) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.393s
+
+OK
+EXIT_CODE=0

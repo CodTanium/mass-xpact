@@ -1,0 +1,196 @@
+diff --git a/scripts/run_eiffel_test_matrix.ps1 b/scripts/run_eiffel_test_matrix.ps1
+index 8eb49f3..aa824e3 100644
+--- a/scripts/run_eiffel_test_matrix.ps1
++++ b/scripts/run_eiffel_test_matrix.ps1
+@@ -36,6 +36,21 @@ function Selected-BuildModes {
+ 	}
+ }
+ 
++# Runs a native command without letting stderr output (such as ec's banner)
++# become a terminating error under $ErrorActionPreference = "Stop" when the
++# output is redirected, e.g. in CI or to a log file. Returns the exit code.
++function Invoke-NativeCommand {
++	param([scriptblock] $Block)
++	$SavedErrorActionPreference = $ErrorActionPreference
++	$ErrorActionPreference = "Continue"
++	try {
++		& $Block | Out-Host
++		return $LASTEXITCODE
++	} finally {
++		$ErrorActionPreference = $SavedErrorActionPreference
++	}
++}
++
+ function Invoke-TestLane {
+ 	param(
+ 		[string] $AssertionLabel,
+@@ -49,8 +64,8 @@ function Invoke-TestLane {
+ 	$CompileArgs += @("-config", $ConfigPath, "-target", $Target)
+ 
+ 	Write-Host "== xpact tests: $AssertionLabel / $Mode =="
+-	& ec @CompileArgs
+-	if ($LASTEXITCODE -ne 0) {
++	$EiffelExitCode = Invoke-NativeCommand { ec @CompileArgs }
++	if ($EiffelExitCode -ne 0) {
+ 		throw "Eiffel compilation failed for $AssertionLabel / $Mode."
+ 	}
+ 
+@@ -63,21 +78,21 @@ function Invoke-TestLane {
+ 	if (Test-Path -LiteralPath (Join-Path $CodeDir "Makefile.SH") -PathType Leaf) {
+ 		Push-Location $CodeDir
+ 		try {
+-			& finish_freezing
+-			if ($LASTEXITCODE -ne 0) {
+-				throw "finish_freezing failed for $AssertionLabel / $Mode."
+-			}
++			$FinishExitCode = Invoke-NativeCommand { finish_freezing }
+ 		} finally {
+ 			Pop-Location
+ 		}
++		if ($FinishExitCode -ne 0) {
++			throw "finish_freezing failed for $AssertionLabel / $Mode."
++		}
+ 	}
+ 	$Exe = Join-Path $CodeDir "xpact_tests.exe"
+ 
+ 	if (-not (Test-Path -LiteralPath $Exe -PathType Leaf)) {
+ 		throw "Test executable not found: $Exe"
+ 	}
+-	& $Exe
+-	if ($LASTEXITCODE -ne 0) {
++	$TestExitCode = Invoke-NativeCommand { & $Exe }
++	if ($TestExitCode -ne 0) {
+ 		throw "Test executable failed for $AssertionLabel / $Mode."
+ 	}
+ }
+diff --git a/scripts/run_xmlconf_conformance.ps1 b/scripts/run_xmlconf_conformance.ps1
+index 875f52f..f80df1f 100644
+--- a/scripts/run_xmlconf_conformance.ps1
++++ b/scripts/run_xmlconf_conformance.ps1
+@@ -1,6 +1,12 @@
+ [CmdletBinding()]
+ param(
+-	[string] $SuiteDir = "xmlTests\xmlconf20130923",
++	# Leave empty to download the pinned W3C suite; set it to use a local copy
++	# offline, for example -SuiteDir xmlTests\xmlconf.
++	[string] $SuiteDir = "",
++	[string] $SuiteUrl = "https://www.w3.org/XML/Test/xmlts20130923.zip",
++	[string] $SuiteSha256 = "f9510b3532926e1b4c2e54855b021e4b8a66ec98a5337dcf4ff07e8a41968deb",
++	[string] $CacheDir = "build\validation-corpora\w3c-xml-20130923",
++	[switch] $RefreshSuite,
+ 	[string] $Catalog = "xmlconf.xml",
+ 	[string] $OutputDir = "build\xmlconf-conformance",
+ 	[ValidateSet("All", "xmltest", "sun", "oasis", "ibm", "eduni", "japanese")]
+@@ -46,6 +52,49 @@ function Resolve-SuiteRoot {
+ 	(Resolve-Path -LiteralPath $ResolvedPath).Path
+ }
+ 
++# Downloads the pinned W3C XML Test Suite ZIP once into $CacheDir, verifies its
++# SHA-256 on every run (also when reusing the cached copy), and extracts it.
++# The archive unpacks to <CacheDir>\xmlconf\xmlconf.xml.
++function Get-W3cSuite {
++	$CacheRoot = if ([System.IO.Path]::IsPathRooted($CacheDir)) { $CacheDir } else { Join-Path $RepoRoot $CacheDir }
++	New-Item -ItemType Directory -Force -Path $CacheRoot | Out-Null
++	$Archive = Join-Path $CacheRoot ([System.IO.Path]::GetFileName(([uri] $SuiteUrl).AbsolutePath))
++	$Extracted = Join-Path $CacheRoot "xmlconf"
++
++	if (-not (Test-Path -LiteralPath $Archive -PathType Leaf)) {
++		Write-Host "== xmlconf: downloading $SuiteUrl =="
++		$Temporary = "$Archive.download"
++		# Windows PowerShell 5.1 may default to TLS 1.0, which w3.org rejects;
++		# its progress bar also slows Invoke-WebRequest down considerably.
++		[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
++		$SavedProgressPreference = $ProgressPreference
++		$ProgressPreference = "SilentlyContinue"
++		try {
++			Invoke-WebRequest -Uri $SuiteUrl -OutFile $Temporary -UseBasicParsing
++			Move-Item -LiteralPath $Temporary -Destination $Archive -Force
++		} finally {
++			$ProgressPreference = $SavedProgressPreference
++			Remove-Item -LiteralPath $Temporary -Force -ErrorAction SilentlyContinue
++		}
++		$RefreshSuite = $true
++	}
++
++	$Actual = (Get-FileHash -LiteralPath $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
++	if ($Actual -ne $SuiteSha256.ToLowerInvariant()) {
++		throw "W3C suite SHA-256 mismatch for ${Archive}: got $Actual, expected $SuiteSha256. Delete the file to download it again."
++	}
++
++	if ($RefreshSuite -or -not (Test-Path -LiteralPath (Join-Path $Extracted $Catalog) -PathType Leaf)) {
++		Write-Host "== xmlconf: extracting $Archive =="
++		if (Test-Path -LiteralPath $Extracted) {
++			Remove-Item -LiteralPath $Extracted -Recurse -Force
++		}
++		Add-Type -AssemblyName System.IO.Compression.FileSystem
++		[System.IO.Compression.ZipFile]::ExtractToDirectory($Archive, $CacheRoot)
++	}
++	(Resolve-Path -LiteralPath $Extracted).Path
++}
++
+ function Get-XpactExecutable {
+ 	param([string] $Path)
+ 	if (-not [string]::IsNullOrWhiteSpace($Path)) {
+@@ -244,7 +293,8 @@ function Invoke-ConformanceRun {
+ # ---------------------------------------------------------------------------
+ # Main
+ # ---------------------------------------------------------------------------
+-$SuiteRoot = Resolve-SuiteRoot $SuiteDir
++$SuiteRoot = if ([string]::IsNullOrWhiteSpace($SuiteDir)) { Get-W3cSuite } else { Resolve-SuiteRoot $SuiteDir }
++$SuiteSource = if ([string]::IsNullOrWhiteSpace($SuiteDir)) { "$SuiteUrl (sha256 $SuiteSha256)" } else { "local directory" }
+ $CatalogPath = Join-Path $SuiteRoot $Catalog
+ if (-not (Test-Path -LiteralPath $CatalogPath -PathType Leaf)) {
+ 	throw "Conformance catalog not found: $CatalogPath"
+@@ -256,15 +306,40 @@ New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
+ if (-not $SkipXpactBuild) {
+ 	Write-Host "== xmlconf: building xpact workbench target =="
+ 	Push-Location $RepoRoot
++	# ec prints its banner to stderr; do not let "Stop" turn that into an error.
++	$SavedErrorActionPreference = $ErrorActionPreference
++	$ErrorActionPreference = "Continue"
+ 	try {
+ 		& ec -batch -config xpact.ecf -target xpact
+-		if ($LASTEXITCODE -ne 0) {
+-			throw "Eiffel compilation failed for the xpact target."
+-		}
++		$EiffelExitCode = $LASTEXITCODE
+ 	}
+- finally {
++	finally {
++		$ErrorActionPreference = $SavedErrorActionPreference
+ 		Pop-Location
+ 	}
++	if ($EiffelExitCode -ne 0) {
++		throw "Eiffel compilation failed for the xpact target."
++	}
++
++	# On a fresh EIFGENs, ec only generates C code; finish_freezing compiles and
++	# links xpact.exe. xpact.ecf is pure Eiffel with the mingw precompile, so the
++	# default backend is correct here (no ISE_C_COMPILER override needed).
++	$WorkCode = Join-Path $RepoRoot "EIFGENs\xpact\W_code"
++	if (Test-Path -LiteralPath (Join-Path $WorkCode "Makefile.SH") -PathType Leaf) {
++		Push-Location $WorkCode
++		$ErrorActionPreference = "Continue"
++		try {
++			finish_freezing
++			$FinishExitCode = $LASTEXITCODE
++		}
++		finally {
++			$ErrorActionPreference = $SavedErrorActionPreference
++			Pop-Location
++		}
++		if ($FinishExitCode -ne 0) {
++			throw "finish_freezing failed for the xpact target."
++		}
++	}
+ }
+ 
+ $Xpact = Get-XpactExecutable $XpactExe
+@@ -300,6 +375,7 @@ $SummaryPath = Join-Path $OutputRoot "xmlconf-summary.txt"
+ $Summary = New-Object System.Collections.Generic.List[string]
+ $Summary.Add("xpact XML conformance run")
+ $Summary.Add("suite:      $SuiteRoot")
++$Summary.Add("source:     $SuiteSource")
+ $Summary.Add("catalog:    $CatalogPath")
+ $Summary.Add("executable: $Xpact")
+ $Summary.Add("types:      $($Type -join ', ')")

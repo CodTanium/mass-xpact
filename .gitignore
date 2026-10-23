@@ -14,3 +14,6 @@ dist/
 *.rc
 __pycache__/
 *.py[cod]
+
+# Student work: logs under student/ are evidence and are committed
+!student/**/*.log
