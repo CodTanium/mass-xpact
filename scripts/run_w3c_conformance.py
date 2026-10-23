@@ -256,6 +256,12 @@ def xml_text(value: str) -> str:
     return re.sub(r"[^\x09\x0a\x0d\x20-\ud7ff\ue000-\ufffd\U00010000-\U0010ffff]", "?", value)
 
 
+def tsv_row(row: Result) -> dict:
+    # Before Python 3.11 the csv module cannot write NUL ("need to escape").
+    return {key: value.replace("\x00", "?") if isinstance(value, str) else value
+            for key, value in asdict(row).items()}
+
+
 def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     suites = ET.Element("testsuites")
@@ -286,7 +292,7 @@ def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> di
     with (output_dir / "results.tsv").open("w", newline="", encoding="utf-8") as target:
         writer = csv.DictWriter(target, fieldnames=list(Result.__dataclass_fields__), delimiter="\t")
         writer.writeheader()
-        writer.writerows(asdict(row) for row in results)
+        writer.writerows(tsv_row(row) for row in results)
     report = {**metadata, "profile": PROFILE, "engines": summaries}
     (output_dir / "summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     lines = ["# W3C XML conformance", "", f"Source: {SUITE_URL}", "", f"Profile: {PROFILE}", "",

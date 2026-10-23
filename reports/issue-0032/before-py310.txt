@@ -1,0 +1,23 @@
+commit:  1ea242eefa39b4d9bef426a96a425355a9eb8399 (before the fix)
+command: python -m unittest discover -s tests/python -p test_w3c_conformance.py
+date:    2026-10-22T00:39:04
+
+Python 3.10.22
+....................E.
+======================================================================
+ERROR: test_junit_and_summary_reconcile_failure_error_skip_and_verdict_counts (test_w3c_conformance.ReportAndCliTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\xpact\xpact-student-Mass\tests\python\test_w3c_conformance.py", line 222, in test_junit_and_summary_reconcile_failure_error_skip_and_verdict_counts
+    runner.write_reports(rows, self.output, {"catalog_cases": 5})
+  File "C:\xpact\xpact-student-Mass\scripts\run_w3c_conformance.py", line 289, in write_reports
+    writer.writerows(asdict(row) for row in results)
+  File "C:\Users\masou\AppData\Roaming\uv\python\cpython-3.10-windows-x86_64-none\lib\csv.py", line 157, in writerows
+    return self.writer.writerows(map(self._dict_to_list, rowdicts))
+_csv.Error: need to escape, but no escapechar set
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.660s
+
+FAILED (errors=1)
+EXIT_CODE=1

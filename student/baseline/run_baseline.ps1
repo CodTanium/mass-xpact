@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
 	# Steps to run (default: all). Names match the step list below.
-	[string[]] $Step = @("environment", "event-trace", "matrix-workbench", "matrix-finalized", "matrix-finalized-keep", "native-runtime-smoke", "assertions-dll", "xmlconf")
+	[string[]] $Step = @("environment", "event-trace", "matrix-workbench", "matrix-finalized", "matrix-finalized-keep", "native-runtime-smoke", "assertions-dll", "xmlconf"),
+	# Where the logs go, relative to the repository root (default: this
+	# folder's logs\, which holds the week 2 run).
+	[string] $LogDir = ""
 )
 
 # ---------------------------------------------------------------------------
@@ -20,7 +23,7 @@ $ErrorActionPreference = "Stop"
 $Here = $PSScriptRoot
 # This folder is student\baseline, two levels below the repository root.
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $Here)
-$Logs = Join-Path $Here "logs"
+$Logs = if ($LogDir) { Join-Path $RepoRoot $LogDir } else { Join-Path $Here "logs" }
 New-Item -ItemType Directory -Force -Path $Logs | Out-Null
 $ResultsPath = Join-Path $Logs "results.tsv"
 if (-not (Test-Path -LiteralPath $ResultsPath)) {
@@ -80,6 +83,11 @@ if ($Step -contains "environment") {
 		"ec:              $((& ec -version 2>&1 | Out-String).Trim())"
 		"ec path:         $((Get-Command ec).Source)"
 		"python:          $((& python --version 2>&1 | Out-String).Trim())"
+		# Pythons installed with uv are not on PATH (see student\README.md).
+		$UvPython = Join-Path $env:APPDATA "uv\python"
+		if (Test-Path -LiteralPath $UvPython) {
+			"python (uv):     $((Get-ChildItem -LiteralPath $UvPython -Directory -Filter 'cpython-*' | Select-Object -ExpandProperty Name) -join ', ')"
+		}
 		"ISE_EIFFEL:      $env:ISE_EIFFEL"
 		"ISE_C_COMPILER:  '$env:ISE_C_COMPILER' (empty = mingw default)"
 		$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"

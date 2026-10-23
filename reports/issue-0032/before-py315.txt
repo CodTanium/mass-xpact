@@ -1,0 +1,11 @@
+commit:  1ea242eefa39b4d9bef426a96a425355a9eb8399 (before the fix)
+command: python -m unittest discover -s tests/python -p test_w3c_conformance.py
+date:    2026-10-22T00:39:04
+
+Python 3.15.0
+......................
+----------------------------------------------------------------------
+Ran 22 tests in 0.423s
+
+OK
+EXIT_CODE=0

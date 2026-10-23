@@ -17,3 +17,6 @@ First seen during weeks 1–2 (error report, section 7.2) without a known cause.
 
 ## Proposed next step
 Either document "Python 3.11 or newer", or make `write_reports` work on every Python version, e.g. by escaping control characters before writing the TSV. Check which Python version Jenkins uses.
+
+## Update 2026-10-22
+Filed as [#32](https://github.com/andersoxie/xpact/issues/32) and fixed on `student-Mass`: NUL becomes `?` in `results.tsv`, so all 22 tests pass on Python 3.10.22 and 3.15.0. Report: `reports/issue-0032/report.md`.

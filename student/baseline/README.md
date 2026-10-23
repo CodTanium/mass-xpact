@@ -44,5 +44,20 @@ Trace your own XML file after one run:
 
 > The logs in `logs/` are from the first run on 2026-10-14 in `Desktop\xpact-student-test`,
 > where this folder was called `Assertion enabled tests`. That checkout had the two patches in
-> `student/history/patches/` applied. Apply them before rerunning: `run_xmlconf_conformance.ps1`,
-> the `msc_vc140` backend and the stderr guards come from them.
+> `student/history/patches/` applied.
+>
+> *Update 2026-10-20:* most of patch 01 is now on `student-Mass` (the `msc_vc140` backend,
+> include fallbacks, precompile and stderr guards: #2, #7, #10), so **do not apply patch 01
+> again**; it would conflict. Still missing from git: `scripts/run_xmlconf_conformance.ps1`
+> (patch 01) and patch 02 (pinned W3C download, test-matrix stderr guard), so the `xmlconf`
+> step cannot run until they are brought in through their own issue. Rerun in the clone
+> `C:\xpact\xpact-student-Mass` (task A02).
+>
+> *Update 2026-10-21:* the W3C suite now runs with the teacher's Python runner
+> `scripts/run_w3c_conformance.py`, which downloads the pinned ZIP itself, with assertions
+> off and on: [`results/w3c-conformance-2026-10-21/`](../results/w3c-conformance-2026-10-21/README.md)
+> (#29). Its verdict rules differ from the `xmlconf` step, so the two are not comparable.
+>
+> *Update 2026-10-22:* rerun in the git clone at `1799b35` (task A02, #33), without the
+> `xmlconf` step, into [`../results/A02-baseline/`](../results/A02-baseline/README.md) with
+> the new `-LogDir` option. The logs in `logs/` stay as the week 2 record.
