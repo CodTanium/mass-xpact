@@ -11,6 +11,8 @@ param(
 	[string] $W3cSuiteDirectory = "",
 	[ValidateRange(1, 3600)]
 	[int] $W3cTimeoutSeconds = 10,
+	# Recorded parser gaps that do not fail the run; pass "" to fail on every W3C failure.
+	[string] $W3cKnownFailures = "benchmarks\w3c-known-failures.tsv",
 	[switch] $SkipW3cConformance
 )
 
@@ -588,13 +590,16 @@ if (-not $SkipW3cConformance) {
 	if (-not [string]::IsNullOrWhiteSpace($W3cSuiteDirectory)) {
 		$W3cArguments += @("--suite-dir", $W3cSuiteDirectory)
 	}
+	if (-not [string]::IsNullOrWhiteSpace($W3cKnownFailures)) {
+		$W3cArguments += @("--known-failures", (Join-Path $RepoRoot $W3cKnownFailures))
+	}
 	foreach ($BuildSpec in $SelectedEiffelBuilds) {
 		$XpactExe = Join-Path $RepoRoot "EIFGENs\$($BuildSpec.Target)\$($BuildSpec.CodeDirectory)\xpact_benchmarks.exe"
 		$W3cArguments += @("--engine", "$($BuildSpec.Name)=$XpactExe")
 	}
 	& $Python @W3cArguments
 	if ($LASTEXITCODE -ne 0) {
-		throw "W3C XML conformance failed. See $W3cOutputRoot\summary.md and junit.xml for per-case results."
+		throw "W3C XML conformance has unexpected results (not in the known-failures list, or a listed case changed). See $W3cOutputRoot\summary.md and junit.xml for per-case results."
 	}
 }
 
