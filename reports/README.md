@@ -16,6 +16,7 @@ test scripts that back it up. The rules are in
 | Issue | Fix | Pull request | Commit on `student-Mass` | Report |
 |---|---|---|---|---|
 | [#2](https://github.com/andersoxie/xpact/issues/2) | Eiffel runtime include fallback path in `build_native_eiffel.ps1` | - (committed before the workflow) | `9eb18bd` | [issue-0002](issue-0002/report.md) |
+| [#3](https://github.com/andersoxie/xpact/issues/3) | B03: fix the loop variant in `direct_start_tag_attributes` (parser change, reviewed before merging) | [#12](https://github.com/andersoxie/xpact/pull/12) | this pull request's squash commit | [issue-0003](issue-0003/report.md) |
 | [#4](https://github.com/andersoxie/xpact/issues/4) | Stop repeated MSVC imports from growing PATH past cmd's limit | [#9](https://github.com/andersoxie/xpact/pull/9) | `3b8a205` | [issue-0004](issue-0004/report.md) |
 | [#5](https://github.com/andersoxie/xpact/issues/5) | Versioning workflow for fixes | [#6](https://github.com/andersoxie/xpact/pull/6) | `cada501` | [issue-0005](issue-0005/report.md) |
 | [#7](https://github.com/andersoxie/xpact/issues/7) | Build the native Eiffel library with the `msc_vc140` C backend | [#8](https://github.com/andersoxie/xpact/pull/8) | `eb6fc5d` | [issue-0007](issue-0007/report.md) |
@@ -47,9 +48,12 @@ test scripts that back it up. The rules are in
 | [#64](https://github.com/andersoxie/xpact/issues/64) | Jenkins check of B02 dropped (not pursued); week 3 marked complete in `student/PLAN.md` | (the pull request) | see `git log --grep "Refs #64"` | (the pull request) |
 | [#66](https://github.com/andersoxie/xpact/issues/66) | Items put on hold on 2026-10-22 recorded in `student/PLAN.md` (B03/#12, A04, 47 DTD crashes, #13, #38-#40) | (the pull request) | see `git log --grep "Refs #66"` | (the pull request) |
 | [#70](https://github.com/andersoxie/xpact/issues/70) | Checklist audit of every closed issue (2026-10-22): verified items ticked on GitHub; dates/commits on four pages; `student/github/README.md` issue tables to #70 | (the pull request) | see `git log --grep "Refs #70"` | [issue-0070](issue-0070/report.md) |
+| [#68](https://github.com/andersoxie/xpact/issues/68) | A01 evidence completed: checking tests linked, change-and-predict (predictions committed before the run), notes in `student/results/A01-orientation/` | (the pull request) | see `git log --grep "Refs #68"` | [issue-0068](issue-0068/report.md), [notes](../student/results/A01-orientation/README.md) |
 
 #36, #41, #42 and #44 were stacked pull requests, merged in that order on 2026-10-22.
 
+Open: [#13](https://github.com/andersoxie/xpact/issues/13) (GC critical section
+swallows exceptions).
 On hold ([#26](https://github.com/andersoxie/xpact/issues/26)):
 [#3](https://github.com/andersoxie/xpact/issues/3) (B03 loop variant, fix in
 draft pull request [#12](https://github.com/andersoxie/xpact/pull/12)) and
