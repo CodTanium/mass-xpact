@@ -1,5 +1,7 @@
 # Report and handover
 
+> **Last updated:** 2026-10-22 · describes `student-Mass` @ `76ac272`
+
 Weeks 8–10. The guide's minimum outcome is a reproducible baseline, an agreed
 regression set, one reviewed contribution or demonstrated blocker, and a clear
 handover.

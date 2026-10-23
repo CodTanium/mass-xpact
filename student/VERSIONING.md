@@ -1,5 +1,7 @@
 # Versioning workflow
 
+> **Last updated:** 2026-10-22 · describes `student-Mass` @ `76ac272`
+
 Every fix should be **traceable** (you can see which issue it belongs to and
 why it was made), **tested** (the evidence is in the repository) and **easy to
 revert** (one commit undoes it). This page describes how that is done on
