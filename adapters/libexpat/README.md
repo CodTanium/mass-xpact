@@ -72,6 +72,10 @@ first assertion failure. A failing callback exits the child immediately rather
 than jumping across active Eiffel frames. The parent collects each result and
 continues with a fresh process for the next test.
 
+The adapter applies the selected reparse-deferral default to every parser factory
+and successful reset. External entity parsers inherit their parent's setting.
+This makes both deferral configurations exercise the requested native behavior.
+
 Each child has a 120-second timeout, configurable with the CMake cache setting
 `XPACT_TEST_TIMEOUT_SECONDS` (1 to 3600 seconds). CTest also limits the complete
 suite to 1800 seconds. Cancelling the parent terminates its active child.
@@ -94,6 +98,12 @@ Native process-isolation tests also require CMake and the Windows C toolchain:
 
 ```powershell
 python -m unittest discover -s tests/python -p test_libexpat_isolation.py
+```
+
+Run all adapter regressions, including factory/reset configuration checks:
+
+```powershell
+python -m unittest discover -s tests/python -p 'test_libexpat_*.py'
 ```
 
 See `docs/libexpat-parity.md` for the current Windows Phase 1 parity summary.

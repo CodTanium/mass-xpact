@@ -22,6 +22,7 @@ feature {NONE} -- Initialization
 			is_initialized := False
 			handler := a_handler
 			max_input_bytes := Default_max_input_bytes
+			max_name_length := Default_max_name_length.min (max_input_bytes)
 			max_element_depth := Default_max_element_depth
 			max_attribute_count := Default_max_attribute_count
 			max_token_length := Default_max_token_length
@@ -63,6 +64,7 @@ feature {NONE} -- Initialization
 			is_initialized := False
 			handler := a_handler
 			max_input_bytes := a_max_input_bytes
+			max_name_length := Default_max_name_length.min (max_input_bytes)
 			max_element_depth := a_max_element_depth
 			max_attribute_count := a_max_attribute_count
 			max_token_length := a_max_token_length
@@ -101,6 +103,40 @@ feature -- Access
 
 	max_element_depth: INTEGER
 			-- Maximum accepted nesting depth.
+
+	max_name_length: INTEGER
+			-- Maximum name bytes; never exceeds the configured input budget.
+
+	set_max_name_length (a_limit: INTEGER)
+			-- Set a name ceiling within the parser's existing input budget.
+		require
+			positive: a_limit > 0
+			within_input_budget: a_limit <= max_input_bytes
+		do
+			if a_limit /= max_name_length then
+				clear_cached_doctype
+			end
+			if a_limit > 0 and then a_limit <= max_input_bytes then
+				max_name_length := a_limit
+			end
+		ensure
+			limit_set: max_name_length = a_limit
+		end
+
+	uses_legacy_name_character_ranges: BOOLEAN
+			-- Use the XML 1.0 fourth-edition name tables required by native Expat.
+			-- The generic parser retains the fifth-edition character productions.
+
+	set_legacy_name_character_ranges (a_enabled: BOOLEAN)
+			-- Configure name productions; retained across parse resets and child imports.
+		do
+			if a_enabled /= uses_legacy_name_character_ranges then
+				clear_cached_doctype
+			end
+			uses_legacy_name_character_ranges := a_enabled
+		ensure
+			policy_set: uses_legacy_name_character_ranges = a_enabled
+		end
 
 	max_attribute_count: INTEGER
 			-- Maximum attributes accepted on a single element.
@@ -169,6 +205,9 @@ feature -- Configuration
 	set_namespace_mode (a_separator: CHARACTER_8)
 			-- Enable XML namespace expansion using `a_separator'.
 		do
+			if not namespace_mode or else namespace_separator /= a_separator then
+				clear_cached_doctype
+			end
 			namespace_mode := True
 			namespace_separator := a_separator
 			reset_namespace_context
@@ -180,6 +219,9 @@ feature -- Configuration
 	set_return_ns_triplet (a_enabled: BOOLEAN)
 			-- Control Expat-compatible namespace triplet output.
 		do
+			if a_enabled /= return_ns_triplet then
+				clear_cached_doctype
+			end
 			return_ns_triplet := a_enabled
 		ensure
 			value_set: return_ns_triplet = a_enabled
@@ -190,6 +232,9 @@ feature -- Configuration
 		require
 			valid_policy: is_valid_policy (a_policy)
 		do
+			if a_policy /= external_entity_policy then
+				clear_cached_doctype
+			end
 			external_entity_policy := a_policy
 		ensure
 			policy_set: external_entity_policy = a_policy
@@ -198,6 +243,9 @@ feature -- Configuration
 	set_external_entity_resolver (a_resolver: detachable XP_EXTERNAL_ENTITY_RESOLVER)
 			-- Set resolver used when `external_entity_policy' permits loading.
 		do
+			if a_resolver /= external_entity_resolver then
+				clear_cached_doctype
+			end
 			external_entity_resolver := a_resolver
 		ensure
 			resolver_set: external_entity_resolver = a_resolver
@@ -208,6 +256,10 @@ feature -- Configuration
 		require
 			parent_attached: a_parent /= Void
 		do
+			clear_cached_doctype
+			uses_legacy_name_character_ranges := a_parent.uses_legacy_name_character_ranges
+			inherited_dtd_declarations_disabled := a_parent.dtd_declarations_disabled
+			inherited_dtd_is_standalone := a_parent.dtd_is_standalone
 			inherited_entity_table := cloned_string_table (a_parent.general_entity_context_table)
 			inherited_parameter_entity_table := cloned_string_table (a_parent.parameter_entity_context_table)
 			inherited_parameter_entity_accounting_table := cloned_integer_table (a_parent.parameter_entity_accounting_context_table)
@@ -219,11 +271,43 @@ feature -- Configuration
 			external_general_entities_imported: attached inherited_external_entity_table
 		end
 
+
+	entity_context_snapshot: XP_PARSER
+			-- Detached NEW declarations only; inherited bindings and source are not retained.
+		local
+			l_handler: XP_NULL_EVENT_HANDLER
+		do
+			create l_handler.make
+			create Result.make_with_limits (l_handler, max_input_bytes, max_element_depth, max_attribute_count, max_token_length)
+			Result.set_max_name_length (max_name_length)
+			Result.set_legacy_name_character_ranges (uses_legacy_name_character_ranges)
+			Result.general_entity_context_table.wipe_out
+			copy_string_entity_delta (entity_table, inherited_entity_table, Result.general_entity_context_table, True)
+			copy_string_entity_delta (parameter_entity_table, inherited_parameter_entity_table, Result.parameter_entity_context_table, False)
+			copy_integer_entity_delta (parameter_entity_accounting_table, inherited_parameter_entity_accounting_table, Result.parameter_entity_accounting_context_table)
+			copy_external_entity_delta (external_entity_table, inherited_external_entity_table, Result.external_general_entity_context_table)
+			copy_external_entity_delta (external_parameter_entity_table, inherited_external_parameter_entity_table, Result.external_parameter_entity_context_table)
+			Result.set_entity_snapshot_state (dtd_declarations_disabled, dtd_is_standalone)
+			Result.import_entity_context (Result)
+		ensure
+			result_attached: Result /= Void
+			no_cached_source: Result.cached_doctype_byte_count = 0
+		end
+
+	entity_context_definition_count: INTEGER
+			-- Definition records currently retained, excluding accounting metadata.
+		do
+			Result := entity_table.count + parameter_entity_table.count + external_entity_table.count + external_parameter_entity_table.count
+		end
+
 	merge_entity_context_from (a_child: XP_PARSER)
 			-- Merge DTD entity declarations parsed by external entity child `a_child'.
 		require
 			child_attached: a_child /= Void
 		do
+			clear_cached_doctype
+			dtd_declarations_disabled := dtd_declarations_disabled or else a_child.dtd_declarations_disabled
+			dtd_has_parameter_entity_references := dtd_has_parameter_entity_references or else a_child.dtd_declarations_disabled
 			copy_string_table_into (a_child.general_entity_context_table, entity_table)
 			copy_string_table_into (a_child.parameter_entity_context_table, parameter_entity_table)
 			copy_integer_table_into (a_child.parameter_entity_accounting_context_table, parameter_entity_accounting_table)
@@ -234,6 +318,9 @@ feature -- Configuration
 	set_parameter_entities_unless_standalone (a_enabled: BOOLEAN)
 			-- Honor standalone='yes' for XML_PARAM_ENTITY_PARSING_UNLESS_STANDALONE.
 		do
+			if a_enabled /= parameter_entities_unless_standalone then
+				clear_cached_doctype
+			end
 			parameter_entities_unless_standalone := a_enabled
 		ensure
 			value_set: parameter_entities_unless_standalone = a_enabled
@@ -242,6 +329,9 @@ feature -- Configuration
 	set_use_foreign_dtd (a_enabled: BOOLEAN)
 			-- Load a foreign DTD when no external subset is declared.
 		do
+			if a_enabled /= use_foreign_dtd then
+				clear_cached_doctype
+			end
 			use_foreign_dtd := a_enabled
 		ensure
 			value_set: use_foreign_dtd = a_enabled
@@ -251,12 +341,19 @@ feature -- Configuration
 			-- Declare that callers convert input to UTF-8 themselves, so byte-order marks and
 			-- encoding declarations are not used to convert it again.
 		do
+			clear_cached_doctype
 			input_is_utf8 := a_enabled
 		ensure
 			value_set: input_is_utf8 = a_enabled
 		end
 
 feature {XP_NATIVE_PARSER} -- State
+
+	has_document_type: BOOLEAN
+			-- Has the current parse established a DOCTYPE and its declaration context?
+		do
+			Result := has_doctype
+		end
 
 	reset_for_reuse
 			-- Reset parse state while preserving parser object storage.
@@ -269,6 +366,23 @@ feature {XP_NATIVE_PARSER} -- State
 		end
 
 feature {XP_PARSER} -- Entity context import
+
+	set_entity_snapshot_state (a_disabled, a_standalone: BOOLEAN)
+			-- Preserve scalar DTD state without retaining a source parser.
+		do
+			dtd_declarations_disabled := a_disabled
+			inherited_dtd_declarations_disabled := a_disabled
+			inherited_dtd_is_standalone := a_standalone
+		end
+
+	dtd_declarations_disabled: BOOLEAN
+			-- Has an unread external parameter entity made later declarations unreliable?
+
+	dtd_is_standalone: BOOLEAN
+			-- Does this document or its external-DTD parent declare standalone='yes'?
+		do
+			Result := xml_standalone = 1 or else inherited_dtd_is_standalone
+		end
 
 	general_entity_context_table: HASH_TABLE [STRING_8, STRING_8]
 			-- Current internal general entity table for child parser import.
@@ -413,6 +527,9 @@ feature -- Parsing
 				note_position (i)
 				if l_input.item (i) = '<' then
 					if is_incomplete_markup_prefix (l_input, i) then
+						if has_at (l_input, i, "<!DOCTYPE") then
+							process_incomplete_doctype_prefix (l_input, i)
+						end
 						i := l_input.count + 1
 					else
 						i := parse_markup (l_input, i)
@@ -429,6 +546,186 @@ feature -- Parsing
 			Result := not has_error and not is_suspended
 		ensure
 			result_matches_state: Result = (not has_error and not is_suspended)
+		end
+
+
+	cached_doctype_byte_count: INTEGER
+			-- Bytes retained by the optional native completed-DOCTYPE cache.
+		do
+			if attached cached_doctype_prefix as l_prefix then
+				Result := l_prefix.count
+			end
+		ensure
+			non_negative: Result >= 0
+			within_input_budget: Result <= max_input_bytes
+		end
+
+	clear_cached_doctype
+			-- Release cached source and snapshot references without changing parse diagnostics.
+		do
+			cached_doctype_prefix := Void
+			cached_doctype_name := Void
+			cached_doctype_line := 0
+			cached_doctype_column := 0
+			cached_doctype_entity_bytes := 0
+			cached_doctype_has_external_subset := False
+			cached_doctype_has_parameter_references := False
+			cached_doctype_declarations_disabled := False
+			cached_doctype_standalone := 0
+			cached_doctype_foreign_loaded := False
+			cached_doctype_not_standalone_checked := False
+		ensure
+			storage_released: cached_doctype_byte_count = 0 and cached_doctype_name = Void
+		end
+
+	parse_with_cached_doctype (a_input: READABLE_STRING_8; a_is_final: BOOLEAN): BOOLEAN
+			-- Native-only opt-in: retain an already completed, unobserved initial DTD.
+			-- Generic `parse' and `parse_prefix' always reset and reparse normally.
+			-- The native caller must clear this cache if DTD observers or policy change.
+		require
+			input_attached: a_input /= Void
+			input_within_limit: a_input.count <= max_input_bytes
+		local
+			i, l_end, l_cr, l_prefix_count: INTEGER
+			l_ok, l_prepared: BOOLEAN
+			l_input, l_body, l_prefix_input: STRING_8
+		do
+			if a_input.count > max_input_bytes then
+				reset
+				set_error ("input exceeds limit")
+			else
+				if attached cached_doctype_prefix as l_prefix and then
+					(a_input.count < l_prefix.count or else not a_input.same_characters (l_prefix, 1, l_prefix.count, 1))
+				then
+					clear_cached_doctype
+				end
+				if cached_doctype_prefix = Void and then not a_is_final and then has_at (a_input, 1, "<!DOCTYPE") then
+					l_end := find_doctype_end (a_input, 1)
+					l_cr := find_character (a_input, '%R', 1)
+					if l_end > 0 and then (l_cr = 0 or else l_cr > l_end) then
+						l_prefix_input := a_input.substring (1, l_end).to_string_8
+						l_prepared := True
+						l_ok := parse_prefix (l_prefix_input)
+						if l_ok and then has_doctype and then document_element_count = 0 then
+							force_current_position
+							cached_doctype_prefix := l_prefix_input.twin
+							cached_doctype_name := doctype_name.twin
+							cached_doctype_line := current_line_number
+							cached_doctype_column := current_column_number
+							cached_doctype_entity_bytes := expanded_entity_bytes
+							cached_doctype_has_external_subset := document_has_external_subset
+							cached_doctype_has_parameter_references := dtd_has_parameter_entity_references
+							cached_doctype_declarations_disabled := dtd_declarations_disabled
+							cached_doctype_standalone := xml_standalone
+							cached_doctype_foreign_loaded := foreign_dtd_loaded
+							cached_doctype_not_standalone_checked := not_standalone_checked
+						end
+					end
+				end
+				if attached cached_doctype_prefix as l_prefix and attached cached_doctype_name as l_name then
+					l_prefix_count := l_prefix.count
+					reset_cached_doctype_body (l_prefix_count, l_name)
+					l_body := normalized_input (a_input.substring (l_prefix_count + 1, a_input.count), False)
+					l_input := l_prefix.twin
+					l_input.append (l_body)
+					position_input := l_input
+					from
+						i := l_prefix_count + 1
+					until
+						i > l_input.count or has_error or is_suspended
+					loop
+						note_position (i)
+						if l_input.item (i) = '<' then
+							if not a_is_final and then is_incomplete_markup_prefix (l_input, i) then
+								i := l_input.count + 1
+							else
+								i := parse_markup (l_input, i)
+							end
+						elseif a_is_final then
+							i := parse_character_data (l_input, i)
+						else
+							i := parse_character_data_prefix (l_input, i)
+						end
+						if not has_error then
+							note_position (i)
+						end
+					variant
+						l_input.count - i + 1
+					end
+					if a_is_final and then not has_error and then not is_suspended then
+						if element_stack.count /= 0 then
+							set_error ("unclosed element")
+						elseif document_element_count = 0 then
+							set_error ("missing document element")
+						end
+					end
+					if not has_error and not is_suspended then
+						note_position (l_input.count + 1)
+					end
+					force_current_position
+					Result := not has_error and not is_suspended
+					if has_error or else (a_is_final and then not is_suspended) then
+						clear_cached_doctype
+					end
+				elseif not l_prepared or else (not has_error and then not is_suspended) then
+					if a_is_final then
+						Result := parse (a_input)
+					else
+						Result := parse_prefix (a_input)
+					end
+				end
+			end
+		ensure
+			result_matches_state: Result = (not has_error and not is_suspended)
+			terminal_storage_released: has_error or else (a_is_final and then not is_suspended) implies cached_doctype_byte_count = 0
+		end
+
+	parse_external_entity_prefix (a_input: READABLE_STRING_8): BOOLEAN
+			-- Parse complete tokens available in a non-final external general entity.
+		require
+			input_attached: a_input /= Void
+			input_within_limit: a_input.count <= max_input_bytes
+		local
+			i: INTEGER
+			l_input: STRING_8
+		do
+			reset
+			parsing_external_entity := True
+			l_input := normalized_input (a_input, False)
+			position_input := l_input
+			note_position (1)
+			from
+				i := 1
+			invariant
+				index_in_bounds: i >= 1 and i <= l_input.count + 1
+				depth_within_limit: element_stack.count <= max_element_depth
+			until
+				i > l_input.count or has_error or is_suspended
+			loop
+				note_position (i)
+				if l_input.item (i) = '<' then
+					if is_incomplete_markup_prefix (l_input, i) then
+						if has_at (l_input, i, "<!DOCTYPE") then
+							process_incomplete_doctype_prefix (l_input, i)
+						end
+						i := l_input.count + 1
+					else
+						i := parse_markup (l_input, i)
+					end
+				else
+					i := parse_character_data_prefix (l_input, i)
+				end
+				if not has_error then
+					note_position (i)
+				end
+			variant
+				l_input.count - i + 1
+			end
+			Result := not has_error and not is_suspended
+			parsing_external_entity := False
+		ensure
+			result_matches_state: Result = (not has_error and not is_suspended)
+			not_external_after_parse: not parsing_external_entity
 		end
 
 	parse_external_entity (a_input: READABLE_STRING_8): BOOLEAN
@@ -746,7 +1043,11 @@ feature {NONE} -- Markup parsing
 				set_error ("unterminated declaration")
 				Result := a_input.count + 1
 			elseif has_at (a_input, a_start_index, "<!") then
-				set_error ("unsupported declaration")
+				if has_at (a_input, a_start_index, "<![") and then not has_at (a_input, a_start_index, "<![CD") then
+					set_error ("unterminated declaration")
+				else
+					set_error ("invalid declaration")
+				end
 				Result := a_input.count + 1
 			else
 				Result := parse_start_tag (a_input, a_start_index)
@@ -786,7 +1087,7 @@ feature {NONE} -- Markup parsing
 				name_start := i
 				i := scan_name (a_input, i)
 				name_end := i - 1
-				if i - name_start > Default_max_name_length then
+				if i - name_start > max_name_length then
 					set_error ("element name exceeds limit")
 					Result := a_input.count + 1
 				else
@@ -862,7 +1163,9 @@ feature {NONE} -- Markup parsing
 						Result := a_input.count + 1
 					end
 					if not has_error and not is_suspended then
-						emit_default_range (a_input, a_start_index, Result - 1)
+						if handler.wants_start_element_default then
+							emit_default_range (a_input, a_start_index, Result - 1)
+						end
 						note_position (a_start_index)
 						if l_use_slice_stack then
 							open_element_range (a_input, name_start, name_end)
@@ -908,7 +1211,7 @@ feature {NONE} -- Markup parsing
 				name_start := i
 				i := scan_name (a_input, i)
 				name_end := i - 1
-				if i - name_start > Default_max_name_length then
+				if i - name_start > max_name_length then
 					set_error ("end tag name exceeds limit")
 					Result := a_input.count + 1
 				else
@@ -927,7 +1230,9 @@ feature {NONE} -- Markup parsing
 							else
 								note_position (name_start)
 							end
-							emit_default_range (a_input, a_start_index, i)
+							if handler.wants_end_element_default then
+								emit_default_range (a_input, a_start_index, i)
+							end
 							if not namespace_mode and then not handler.wants_end_element_events then
 								close_element_range (a_input, name_start, name_end)
 							else
@@ -1318,7 +1623,9 @@ feature {NONE} -- Markup parsing
 					Result := a_input.count + 1
 				else
 					create l_text.make_from_string (a_input.substring (a_start_index + 4, l_end - 1))
-					emit_default (a_input.substring (a_start_index, l_end + 2))
+					if handler.wants_comment_default then
+						emit_default (a_input.substring (a_start_index, l_end + 2))
+					end
 					note_token_position (a_start_index, l_end + 3 - a_start_index)
 					handler.on_comment (l_text)
 					check_handler_stop
@@ -1351,7 +1658,9 @@ feature {NONE} -- Markup parsing
 					set_error ("CDATA token exceeds limit")
 					Result := a_input.count + 1
 				else
-					emit_default (a_input.substring (a_start_index, l_end + 2))
+					if handler.wants_start_cdata_default then
+						emit_default ("<![CDATA[")
+					end
 					note_position (a_start_index)
 					handler.on_start_cdata_section
 					check_handler_stop
@@ -1361,9 +1670,15 @@ feature {NONE} -- Markup parsing
 						if not has_error then
 							note_token_position (a_start_index + 9, l_text.count)
 							emit_text (l_text)
+							if not has_error and not is_suspended and then handler.wants_automatic_character_data_default then
+								emit_default (l_text)
+							end
 						end
 					end
 					if not has_error and not is_suspended then
+						if handler.wants_end_cdata_default then
+							emit_default ("]]>")
+						end
 						note_position (l_end + 3)
 						handler.on_end_cdata_section
 						check_handler_stop
@@ -1434,6 +1749,9 @@ feature {NONE} -- Markup parsing
 								l_data.append (a_input.substring (i, l_end - 1))
 							end
 							parse_xml_declaration_data (l_data)
+							if not has_error and not is_suspended and then handler.wants_xml_declaration_default then
+								emit_default_range (a_input, a_start_index, l_end + 1)
+							end
 						else
 							if i < l_end and then is_xml_space (a_input.item (i)) then
 								i := skip_spaces (a_input, i)
@@ -1441,7 +1759,9 @@ feature {NONE} -- Markup parsing
 							if i <= l_end - 1 then
 								l_data.append (a_input.substring (i, l_end - 1))
 							end
-							emit_default (a_input.substring (a_start_index, l_end + 1))
+							if handler.wants_processing_instruction_default then
+								emit_default (a_input.substring (a_start_index, l_end + 1))
+							end
 							note_token_position (a_start_index, l_end + 2 - a_start_index)
 							handler.on_processing_instruction (l_target, l_data)
 							check_handler_stop
@@ -1603,6 +1923,7 @@ feature {NONE} -- Markup parsing
 			l_has_internal_subset: BOOLEAN
 			l_name_end: INTEGER
 			l_attributes: XP_ATTRIBUTES
+			l_previous_subset_offset: INTEGER
 		do
 			create l_attributes.make
 			create l_public_id.make_empty
@@ -1613,7 +1934,10 @@ feature {NONE} -- Markup parsing
 			else
 				l_end := find_doctype_end (a_input, a_start_index)
 				if l_end = 0 then
-					set_error ("unterminated doctype")
+					process_incomplete_doctype_prefix (a_input, a_start_index)
+					if not has_error and not is_suspended then
+						set_error ("unterminated doctype")
+					end
 					Result := a_input.count + 1
 				elseif l_end - a_start_index > max_token_length then
 					set_error ("doctype token exceeds limit")
@@ -1686,7 +2010,7 @@ feature {NONE} -- Markup parsing
 						if l_subset_start > 0 then
 							l_has_internal_subset := True
 						end
-						if not has_error then
+						if not has_error and then handler.wants_start_doctype_default then
 							emit_doctype_default_open (a_input, a_start_index, name_start, l_name_end, l_subset_start, l_end)
 						end
 						if not has_error and not is_suspended then
@@ -1713,13 +2037,16 @@ feature {NONE} -- Markup parsing
 								set_error ("unexpected content after internal subset")
 							else
 								create l_subset.make_from_string (a_input.substring (l_subset_start + 1, l_subset_end - 1))
+								l_previous_subset_offset := dtd_subset_position_offset
+								dtd_subset_position_offset := l_subset_start
 								process_internal_subset (l_subset)
+								dtd_subset_position_offset := l_previous_subset_offset
 							end
 						end
 						if not has_error and not is_suspended and l_has_external_subset then
 							include_external_subset (l_public_id, l_system_id)
 						end
-						if not has_error and not is_suspended then
+						if not has_error and not is_suspended and then handler.wants_end_doctype_default then
 							emit_doctype_default_close (l_has_internal_subset)
 						end
 						if has_error then
@@ -1741,6 +2068,50 @@ feature {NONE} -- Markup parsing
 
 feature {NONE} -- Character data and references
 
+	process_incomplete_doctype_prefix (a_input: READABLE_STRING_8; a_start_index: INTEGER)
+			-- Process complete declarations before an internal subset's outer ]> arrives.
+		local
+			i, l_subset_start, l_subset_end, l_name_start, l_name_end, l_previous_offset: INTEGER
+			l_subset: STRING_8
+		do
+			if a_start_index + 9 <= a_input.count then
+				l_subset_start := find_unquoted_character (a_input, '[', a_start_index + 9, a_input.count)
+				if l_subset_start > 0 then
+					i := skip_spaces (a_input, a_start_index + 9)
+					if i > a_start_index + 9 and then i < l_subset_start and then is_name_start_character (a_input.item (i)) then
+						l_name_start := i
+						i := scan_name (a_input, i)
+						l_name_end := i - 1
+						if not has_error and then skip_spaces (a_input, i) = l_subset_start then
+							has_doctype := True
+							doctype_name := a_input.substring (l_name_start, l_name_end).to_string_8
+							if handler.wants_start_doctype_default then
+								emit_doctype_default_open (a_input, a_start_index, l_name_start, l_name_end, l_subset_start, a_input.count)
+							end
+							if not has_error and not is_suspended then
+								handler.on_start_doctype_decl (doctype_name, Void, Void, True)
+								check_handler_stop
+							end
+							if not has_error and not is_suspended then
+								l_subset_end := 0
+								if l_subset_start < a_input.count then
+									l_subset_end := find_subset_end (a_input, l_subset_start + 1, a_input.count)
+								end
+								if l_subset_end = 0 then
+									l_subset_end := a_input.count + 1
+								end
+								l_subset := a_input.substring (l_subset_start + 1, l_subset_end - 1).to_string_8
+								l_previous_offset := dtd_subset_position_offset
+								dtd_subset_position_offset := l_subset_start
+								process_internal_subset_prefix (l_subset)
+								dtd_subset_position_offset := l_previous_offset
+							end
+						end
+					end
+				end
+			end
+		end
+
 	parse_character_data (a_input: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
 			-- Parse character data until next markup delimiter.
 		require
@@ -1752,9 +2123,14 @@ feature {NONE} -- Character data and references
 			c: CHARACTER_8
 			l_text: detachable STRING_8
 			l_materialize_text: BOOLEAN
+			l_literal_default: BOOLEAN
+			l_default_start, l_default_end, l_reference_end: INTEGER
 			l_all_space: BOOLEAN
 		do
 			l_materialize_text := handler.wants_character_data_events or else handler.wants_default_events or else handler.wants_automatic_character_data_default
+			l_literal_default := handler.wants_automatic_character_data_default and then handler.wants_literal_character_data_default
+			l_default_start := a_start_index
+			l_default_end := a_start_index - 1
 			if lazy_position_accounting and then not l_materialize_text then
 				Result := parse_character_data_no_events (a_input, a_start_index)
 			end
@@ -1788,7 +2164,17 @@ feature {NONE} -- Character data and references
 								end
 							end
 							check attached l_text as l_attached_text then
-								i := append_reference_in_content (a_input, i, l_attached_text)
+								l_reference_end := find_character (a_input, ';', i + 1)
+								if l_literal_default and then l_reference_end > i + 1 and then a_input.item (i + 1) /= '#' and then not is_predefined_entity (a_input.substring (i + 1, l_reference_end - 1)) then
+									emit_default_range (a_input, l_default_start, i - 1)
+									if not has_error and not is_suspended then
+										i := append_reference_in_content (a_input, i, l_attached_text)
+										l_default_start := i
+									end
+								else
+									i := append_reference_in_content (a_input, i, l_attached_text)
+								end
+								l_default_end := i - 1
 							end
 						end
 					elseif is_incomplete_utf8_sequence_at (a_input, i) then
@@ -1805,6 +2191,7 @@ feature {NONE} -- Character data and references
 							l_attached_text.append_character (c)
 						end
 						i := i + 1
+						l_default_end := i - 1
 					end
 				variant
 					a_input.count - i + 1
@@ -1832,7 +2219,11 @@ feature {NONE} -- Character data and references
 						end
 						if attached l_text as l_attached_text then
 							if handler.wants_automatic_character_data_default then
-								emit_default (l_attached_text)
+								if l_literal_default then
+									emit_default_range (a_input, l_default_start, l_default_end)
+								else
+									emit_default (l_attached_text)
+								end
 							end
 							if entity_reference_count_stack.count > 0 then
 								note_token_position (entity_reference_start_stack.i_th (entity_reference_start_stack.count), entity_reference_count_stack.i_th (entity_reference_count_stack.count))
@@ -1950,10 +2341,15 @@ feature {NONE} -- Character data and references
 			c: CHARACTER_8
 			l_text: detachable STRING_8
 			l_materialize_text: BOOLEAN
+			l_literal_default: BOOLEAN
+			l_default_start, l_default_end, l_reference_end: INTEGER
 			l_all_space: BOOLEAN
 			l_done: BOOLEAN
 		do
 			l_materialize_text := handler.wants_character_data_events or else handler.wants_default_events or else handler.wants_automatic_character_data_default
+			l_literal_default := handler.wants_automatic_character_data_default and then handler.wants_literal_character_data_default
+			l_default_start := a_start_index
+			l_default_end := a_start_index - 1
 			if l_materialize_text then
 				create l_text.make_empty
 			end
@@ -1982,7 +2378,17 @@ feature {NONE} -- Character data and references
 							create l_text.make_empty
 						end
 						check attached l_text as l_attached_text then
-							i := append_reference_in_content (a_input, i, l_attached_text)
+							l_reference_end := find_character (a_input, ';', i + 1)
+							if l_literal_default and then l_reference_end > i + 1 and then a_input.item (i + 1) /= '#' and then not is_predefined_entity (a_input.substring (i + 1, l_reference_end - 1)) then
+								emit_default_range (a_input, l_default_start, i - 1)
+								if not has_error and not is_suspended then
+									i := append_reference_in_content (a_input, i, l_attached_text)
+									l_default_start := i
+								end
+							else
+								i := append_reference_in_content (a_input, i, l_attached_text)
+							end
+							l_default_end := i - 1
 						end
 					end
 				elseif is_incomplete_utf8_sequence_at (a_input, i) then
@@ -1999,6 +2405,7 @@ feature {NONE} -- Character data and references
 						l_attached_text.append_character (c)
 					end
 					i := i + 1
+					l_default_end := i - 1
 				end
 			variant
 				a_input.count - i + 1
@@ -2020,7 +2427,11 @@ feature {NONE} -- Character data and references
 				else
 					if attached l_text as l_attached_text then
 						if handler.wants_automatic_character_data_default then
-							emit_default (l_attached_text)
+							if l_literal_default then
+								emit_default_range (a_input, l_default_start, l_default_end)
+							else
+								emit_default (l_attached_text)
+							end
 						end
 						if entity_reference_count_stack.count > 0 then
 							note_token_position (entity_reference_start_stack.i_th (entity_reference_start_stack.count), entity_reference_count_stack.i_th (entity_reference_count_stack.count))
@@ -2141,6 +2552,43 @@ feature {NONE} -- Character data and references
 			result_in_bounds: Result <= a_input.count + 1
 		end
 
+	single_entity_reference_name (a_value: READABLE_STRING_8; a_marker: CHARACTER_8): detachable STRING_8
+			-- Name when the entire replacement is one reference, otherwise Void.
+		local
+			l_name: STRING_8
+		do
+			if a_value.count > 2 and then a_value.item (1) = a_marker and then a_value.item (a_value.count) = ';' then
+				create l_name.make_from_string (a_value.substring (2, a_value.count - 1))
+				if is_valid_name (l_name) then
+					Result := l_name
+				end
+			end
+		end
+
+	resolved_general_entity_name (a_name: READABLE_STRING_8): STRING_8
+			-- Follow linear aliases without growing the Eiffel call stack.
+		local
+			l_seen: HASH_TABLE [BOOLEAN, STRING_8]
+			l_done: BOOLEAN
+		do
+			create Result.make_from_string (a_name)
+			create l_seen.make (8)
+			from
+			until
+				l_done or has_error
+			loop
+				if l_seen.has (Result) or else is_entity_active (Result) then
+					set_error ("recursive entity reference")
+				elseif attached entity_value (Result) as l_value and then attached single_entity_reference_name (l_value, '&') as l_next and then not is_predefined_entity (l_next) and then attached entity_value (l_next) then
+					l_seen.force (True, Result)
+					note_entity_expansion (l_value.count)
+					Result := l_next
+				else
+					l_done := True
+				end
+			end
+		end
+
 	include_general_entity_in_content (a_name: READABLE_STRING_8)
 			-- Include general entity `a_name' as parsed content.
 		require
@@ -2148,18 +2596,21 @@ feature {NONE} -- Character data and references
 		local
 			l_element_depth: INTEGER
 			l_previous_floor: INTEGER
+			l_name: STRING_8
 		do
-			if is_entity_active (a_name) then
+			l_name := resolved_general_entity_name (a_name)
+			if has_error then
+			elseif is_entity_active (l_name) then
 				set_error ("recursive entity reference")
 			elseif entity_stack.count >= Default_max_entity_depth then
 				set_error ("entity expansion depth exceeded")
-			elseif attached entity_value (a_name) as l_value then
+			elseif attached entity_value (l_name) as l_value then
 				note_entity_expansion (l_value.count)
 				if not has_error then
 					l_element_depth := element_stack.count
 					l_previous_floor := entity_element_floor
 					entity_element_floor := l_element_depth
-					push_entity (a_name)
+					push_entity (l_name)
 					parse_entity_content (l_value)
 					pop_entity
 					entity_element_floor := l_previous_floor
@@ -2168,7 +2619,7 @@ feature {NONE} -- Character data and references
 						set_error ("asynchronous entity")
 					end
 				end
-			elseif attached external_entity (a_name) as l_external then
+			elseif attached external_entity (l_name) as l_external then
 				include_external_entity_in_content (l_external)
 			elseif (document_has_external_subset or dtd_has_parameter_entity_references) and then xml_standalone /= 1 then
 				-- A non-validating parser may skip externally declared general entities.
@@ -2187,19 +2638,22 @@ feature {NONE} -- Character data and references
 			valid_name: is_valid_name (a_name)
 			text_attached: a_text /= Void
 		local
+			l_name: STRING_8
 		do
-			if is_entity_active (a_name) then
+			l_name := resolved_general_entity_name (a_name)
+			if has_error then
+			elseif is_entity_active (l_name) then
 				set_error ("recursive entity reference")
 			elseif entity_stack.count >= Default_max_entity_depth then
 				set_error ("entity expansion depth exceeded")
-			elseif attached entity_value (a_name) as l_value then
+			elseif attached entity_value (l_name) as l_value then
 				note_entity_expansion (l_value.count)
 				if not has_error then
-					push_entity (a_name)
+					push_entity (l_name)
 					expand_literal_text (l_value, a_text)
 					pop_entity
 				end
-			elseif attached external_entity (a_name) as l_external then
+			elseif attached external_entity (l_name) as l_external then
 				include_external_entity_in_literal (l_external, a_text)
 			elseif (document_has_external_subset or dtd_has_parameter_entity_references) and then xml_standalone /= 1 then
 					-- As in Expat, the entity may be declared where a non-validating parser does not read;
@@ -2365,7 +2819,7 @@ feature {NONE} -- Character data and references
 							note_entity_expansion (l_value.count)
 						end
 						if not has_error then
-							if not l_value.is_empty then
+							if not l_value.is_empty or else l_resolver.last_resolution_is_external_child_parse then
 								document_has_external_subset := True
 							end
 							external_dtd_depth := external_dtd_depth + 1
@@ -2527,6 +2981,8 @@ feature {NONE} -- DTD entity declarations
 			l_end: INTEGER
 			l_text: STRING_8
 			l_seen_xml_declaration: BOOLEAN
+			l_target_end, l_data_start: INTEGER
+			l_target, l_data: STRING_8
 		do
 			from
 				i := 1
@@ -2535,6 +2991,11 @@ feature {NONE} -- DTD entity declarations
 			until
 				i > a_subset.count or has_error or is_suspended
 			loop
+				if dtd_entity_reference_position > 0 then
+					note_position (dtd_entity_reference_position)
+				else
+					note_position (dtd_subset_position_offset + i)
+				end
 				if has_at (a_subset, i, "<!ENTITY") then
 					i := parse_entity_declaration (a_subset, i)
 				elseif has_at (a_subset, i, "<!ATTLIST") then
@@ -2554,7 +3015,9 @@ feature {NONE} -- DTD entity declarations
 						set_error ("double hyphen in comment")
 						i := a_subset.count + 1
 					else
-						emit_default (a_subset.substring (i, l_end + 2))
+						if handler.wants_comment_default then
+							emit_default (a_subset.substring (i, l_end + 2))
+						end
 						create l_text.make_from_string (a_subset.substring (i + 4, l_end - 1))
 						if not has_error and not is_suspended then
 							handler.on_comment (l_text)
@@ -2576,7 +3039,17 @@ feature {NONE} -- DTD entity declarations
 							if has_error then
 								i := a_subset.count + 1
 							else
-								emit_default (a_subset.substring (i, l_end + 1))
+								if handler.wants_processing_instruction_default then
+									emit_default (a_subset.substring (i, l_end + 1))
+								end
+								if not has_error and not is_suspended then
+									l_target_end := scan_name (a_subset, i + 2)
+									l_target := a_subset.substring (i + 2, l_target_end - 1).to_string_8
+									l_data_start := skip_spaces (a_subset, l_target_end).min (l_end)
+									l_data := a_subset.substring (l_data_start, l_end - 1).to_string_8
+									handler.on_processing_instruction (l_target, l_data)
+									check_handler_stop
+								end
 								i := l_end + 2
 							end
 						end
@@ -2593,7 +3066,10 @@ feature {NONE} -- DTD entity declarations
 					elseif is_quote (a_subset.item (i)) then
 						set_error ("unterminated literal")
 						i := a_subset.count + 1
-					elseif l_seen_xml_declaration and then a_subset.item (i).code = 36 then
+					elseif a_subset.item (i) = ']' then
+						set_error ("invalid DTD closing delimiter")
+						i := a_subset.count + 1
+					elseif a_subset.item (i).code = 36 then
 						set_error ("invalid DTD content")
 						i := a_subset.count + 1
 					else
@@ -2634,32 +3110,13 @@ feature {NONE} -- DTD entity declarations
 		end
 
 	process_internal_subset_prefix (a_subset: READABLE_STRING_8)
-			-- Process the complete declaration prefix of a non-final DTD subset.
+			-- Process only complete declaration tokens in a non-final subset.
 		require
 			subset_attached: a_subset /= Void
 		local
 			l_end: INTEGER
-			l_percent: INTEGER
-			l_markup_start: INTEGER
 		do
 			l_end := complete_dtd_prefix_end (a_subset)
-			l_percent := find_character (a_subset, '%%', 1)
-			if l_percent > 0 and then l_percent <= l_end then
-				from
-					l_markup_start := l_percent
-				until
-					l_markup_start <= 1 or else a_subset.item (l_markup_start) = '<'
-				loop
-					l_markup_start := l_markup_start - 1
-				variant
-					l_markup_start - 1
-				end
-				if l_markup_start > 1 and then a_subset.item (l_markup_start) = '<' then
-					l_end := l_markup_start - 1
-				else
-					l_end := l_percent - 1
-				end
-			end
 			if l_end > 0 then
 				process_internal_subset (a_subset.substring (1, l_end))
 			end
@@ -2677,9 +3134,13 @@ feature {NONE} -- DTD entity declarations
 			l_inner: STRING_8
 			l_status: STRING_8
 		do
-			l_end := find_sequence (a_subset, "]]>", a_start_index + 3)
+			l_end := find_conditional_section_end (a_subset, a_start_index)
 			if l_end = 0 then
-				set_error ("unterminated conditional section")
+				if has_partial_utf8_tail (a_subset) then
+					set_error ("partial character")
+				else
+					set_error ("incomplete conditional section")
+				end
 				Result := a_subset.count + 1
 			else
 				create l_status.make_empty
@@ -2730,6 +3191,46 @@ feature {NONE} -- DTD entity declarations
 		ensure
 			progress_or_error: Result > a_start_index or has_error
 			result_in_bounds: Result <= a_subset.count + 1
+		end
+
+	find_conditional_section_end (a_input: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
+			-- Closing marker of a possibly nested conditional section.
+		local
+			i, l_depth: INTEGER
+		do
+			from
+				i := a_start_index + 3
+				l_depth := 1
+			until
+				i > a_input.count or Result > 0
+			loop
+				if has_at (a_input, i, "<![") then
+					l_depth := l_depth + 1
+					i := i + 3
+				elseif has_at (a_input, i, "]]>") then
+					l_depth := l_depth - 1
+					if l_depth = 0 then
+						Result := i
+					end
+					i := i + 3
+				else
+					i := i + 1
+				end
+			end
+		end
+
+	has_partial_utf8_tail (a_input: READABLE_STRING_8): BOOLEAN
+		local
+			i: INTEGER
+		do
+			from
+				i := (a_input.count - 3).max (1)
+			until
+				i > a_input.count or Result
+			loop
+				Result := is_incomplete_utf8_sequence_at (a_input, i)
+				i := i + 1
+			end
 		end
 
 	starts_xml_declaration_at (a_input: READABLE_STRING_8; a_start_index: INTEGER): BOOLEAN
@@ -2891,24 +3392,132 @@ feature {NONE} -- DTD entity declarations
 		end
 
 	is_name_start_code (a_code: INTEGER): BOOLEAN
-			-- Does `a_code' satisfy the XML 1.0 fifth edition NameStartChar production?
+			-- Is `a_code' accepted by the configured XML name production?
 		do
-			Result := (a_code >= 65 and a_code <= 90) or else (a_code >= 97 and a_code <= 122)
-				or else a_code = 58 or else a_code = 95
-				or else (a_code >= 0xC0 and a_code <= 0xD6) or else (a_code >= 0xD8 and a_code <= 0xF6)
-				or else (a_code >= 0xF8 and a_code <= 0x2FF) or else (a_code >= 0x370 and a_code <= 0x37D)
-				or else (a_code >= 0x37F and a_code <= 0x1FFF) or else (a_code >= 0x200C and a_code <= 0x200D)
-				or else (a_code >= 0x2070 and a_code <= 0x218F) or else (a_code >= 0x2C00 and a_code <= 0x2FEF)
-				or else (a_code >= 0x3001 and a_code <= 0xD7FF) or else (a_code >= 0xF900 and a_code <= 0xFDCF)
-				or else (a_code >= 0xFDF0 and a_code <= 0xFFFD) or else (a_code >= 0x10000 and a_code <= 0xEFFFF)
+			if uses_legacy_name_character_ranges then
+				Result := code_in_ranges (a_code, name_start_ranges)
+			else
+				Result := (a_code >= 65 and a_code <= 90) or else (a_code >= 97 and a_code <= 122)
+					or else a_code = 58 or else a_code = 95
+					or else (a_code >= 0xC0 and a_code <= 0xD6) or else (a_code >= 0xD8 and a_code <= 0xF6)
+					or else (a_code >= 0xF8 and a_code <= 0x2FF) or else (a_code >= 0x370 and a_code <= 0x37D)
+					or else (a_code >= 0x37F and a_code <= 0x1FFF) or else (a_code >= 0x200C and a_code <= 0x200D)
+					or else (a_code >= 0x2070 and a_code <= 0x218F) or else (a_code >= 0x2C00 and a_code <= 0x2FEF)
+					or else (a_code >= 0x3001 and a_code <= 0xD7FF) or else (a_code >= 0xF900 and a_code <= 0xFDCF)
+					or else (a_code >= 0xFDF0 and a_code <= 0xFFFD) or else (a_code >= 0x10000 and a_code <= 0xEFFFF)
+			end
 		end
 
 	is_name_code (a_code: INTEGER): BOOLEAN
-			-- Does `a_code' satisfy the XML 1.0 fifth edition NameChar production?
+			-- Is `a_code' accepted by the configured XML name production?
 		do
-			Result := is_name_start_code (a_code) or else (a_code >= 48 and a_code <= 57)
-				or else a_code = 45 or else a_code = 46 or else a_code = 0xB7
-				or else (a_code >= 0x300 and a_code <= 0x36F) or else (a_code >= 0x203F and a_code <= 0x2040)
+			if uses_legacy_name_character_ranges then
+				Result := is_name_start_code (a_code) or else code_in_ranges (a_code, name_extra_ranges)
+			else
+				Result := is_name_start_code (a_code) or else (a_code >= 48 and a_code <= 57)
+					or else a_code = 45 or else a_code = 46 or else a_code = 0xB7
+					or else (a_code >= 0x300 and a_code <= 0x36F) or else (a_code >= 0x203F and a_code <= 0x2040)
+			end
+		end
+
+	code_in_ranges (a_code: INTEGER; a_ranges: ARRAY [INTEGER]): BOOLEAN
+			-- Binary lookup in inclusive lower/upper pairs.
+		local
+			l_low, l_high, l_middle, l_index: INTEGER
+		do
+			from
+				l_high := a_ranges.count // 2 - 1
+			until
+				l_low > l_high or Result
+			loop
+				l_middle := (l_low + l_high) // 2
+				l_index := l_middle * 2 + 1
+				if a_code < a_ranges [l_index] then
+					l_high := l_middle - 1
+				elseif a_code > a_ranges [l_index + 1] then
+					l_low := l_middle + 1
+				else
+					Result := True
+				end
+			end
+		end
+
+	name_start_ranges: ARRAY [INTEGER]
+			-- Sorted inclusive ranges from XML 1.0 fourth-edition name productions.
+		once
+			Result := <<
+				0x3A, 0x3A, 0x41, 0x5A, 0x5F, 0x5F, 0x61, 0x7A, 0xC0, 0xD6,
+				0xD8, 0xF6, 0xF8, 0x131, 0x134, 0x13E, 0x141, 0x148, 0x14A, 0x17E,
+				0x180, 0x1C3, 0x1CD, 0x1F0, 0x1F4, 0x1F5, 0x1FA, 0x217, 0x250, 0x2A8,
+				0x2BB, 0x2C1, 0x386, 0x386, 0x388, 0x38A, 0x38C, 0x38C, 0x38E, 0x3A1,
+				0x3A3, 0x3CE, 0x3D0, 0x3D6, 0x3DA, 0x3DA, 0x3DC, 0x3DC, 0x3DE, 0x3DE,
+				0x3E0, 0x3E0, 0x3E2, 0x3F3, 0x401, 0x40C, 0x40E, 0x44F, 0x451, 0x45C,
+				0x45E, 0x481, 0x490, 0x4C4, 0x4C7, 0x4C8, 0x4CB, 0x4CC, 0x4D0, 0x4EB,
+				0x4EE, 0x4F5, 0x4F8, 0x4F9, 0x531, 0x556, 0x559, 0x559, 0x561, 0x586,
+				0x5D0, 0x5EA, 0x5F0, 0x5F2, 0x621, 0x63A, 0x641, 0x64A, 0x671, 0x6B7,
+				0x6BA, 0x6BE, 0x6C0, 0x6CE, 0x6D0, 0x6D3, 0x6D5, 0x6D5, 0x6E5, 0x6E6,
+				0x905, 0x939, 0x93D, 0x93D, 0x958, 0x961, 0x985, 0x98C, 0x98F, 0x990,
+				0x993, 0x9A8, 0x9AA, 0x9B0, 0x9B2, 0x9B2, 0x9B6, 0x9B9, 0x9DC, 0x9DD,
+				0x9DF, 0x9E1, 0x9F0, 0x9F1, 0xA05, 0xA0A, 0xA0F, 0xA10, 0xA13, 0xA28,
+				0xA2A, 0xA30, 0xA32, 0xA33, 0xA35, 0xA36, 0xA38, 0xA39, 0xA59, 0xA5C,
+				0xA5E, 0xA5E, 0xA72, 0xA74, 0xA85, 0xA8B, 0xA8D, 0xA8D, 0xA8F, 0xA91,
+				0xA93, 0xAA8, 0xAAA, 0xAB0, 0xAB2, 0xAB3, 0xAB5, 0xAB9, 0xABD, 0xABD,
+				0xAE0, 0xAE0, 0xB05, 0xB0C, 0xB0F, 0xB10, 0xB13, 0xB28, 0xB2A, 0xB30,
+				0xB32, 0xB33, 0xB36, 0xB39, 0xB3D, 0xB3D, 0xB5C, 0xB5D, 0xB5F, 0xB61,
+				0xB85, 0xB8A, 0xB8E, 0xB90, 0xB92, 0xB95, 0xB99, 0xB9A, 0xB9C, 0xB9C,
+				0xB9E, 0xB9F, 0xBA3, 0xBA4, 0xBA8, 0xBAA, 0xBAE, 0xBB5, 0xBB7, 0xBB9,
+				0xC05, 0xC0C, 0xC0E, 0xC10, 0xC12, 0xC28, 0xC2A, 0xC33, 0xC35, 0xC39,
+				0xC60, 0xC61, 0xC85, 0xC8C, 0xC8E, 0xC90, 0xC92, 0xCA8, 0xCAA, 0xCB3,
+				0xCB5, 0xCB9, 0xCDE, 0xCDE, 0xCE0, 0xCE1, 0xD05, 0xD0C, 0xD0E, 0xD10,
+				0xD12, 0xD28, 0xD2A, 0xD39, 0xD60, 0xD61, 0xE01, 0xE2E, 0xE30, 0xE30,
+				0xE32, 0xE33, 0xE40, 0xE45, 0xE81, 0xE82, 0xE84, 0xE84, 0xE87, 0xE88,
+				0xE8A, 0xE8A, 0xE8D, 0xE8D, 0xE94, 0xE97, 0xE99, 0xE9F, 0xEA1, 0xEA3,
+				0xEA5, 0xEA5, 0xEA7, 0xEA7, 0xEAA, 0xEAB, 0xEAD, 0xEAE, 0xEB0, 0xEB0,
+				0xEB2, 0xEB3, 0xEBD, 0xEBD, 0xEC0, 0xEC4, 0xF40, 0xF47, 0xF49, 0xF69,
+				0x10A0, 0x10C5, 0x10D0, 0x10F6, 0x1100, 0x1100, 0x1102, 0x1103, 0x1105, 0x1107,
+				0x1109, 0x1109, 0x110B, 0x110C, 0x110E, 0x1112, 0x113C, 0x113C, 0x113E, 0x113E,
+				0x1140, 0x1140, 0x114C, 0x114C, 0x114E, 0x114E, 0x1150, 0x1150, 0x1154, 0x1155,
+				0x1159, 0x1159, 0x115F, 0x1161, 0x1163, 0x1163, 0x1165, 0x1165, 0x1167, 0x1167,
+				0x1169, 0x1169, 0x116D, 0x116E, 0x1172, 0x1173, 0x1175, 0x1175, 0x119E, 0x119E,
+				0x11A8, 0x11A8, 0x11AB, 0x11AB, 0x11AE, 0x11AF, 0x11B7, 0x11B8, 0x11BA, 0x11BA,
+				0x11BC, 0x11C2, 0x11EB, 0x11EB, 0x11F0, 0x11F0, 0x11F9, 0x11F9, 0x1E00, 0x1E9B,
+				0x1EA0, 0x1EF9, 0x1F00, 0x1F15, 0x1F18, 0x1F1D, 0x1F20, 0x1F45, 0x1F48, 0x1F4D,
+				0x1F50, 0x1F57, 0x1F59, 0x1F59, 0x1F5B, 0x1F5B, 0x1F5D, 0x1F5D, 0x1F5F, 0x1F7D,
+				0x1F80, 0x1FB4, 0x1FB6, 0x1FBC, 0x1FBE, 0x1FBE, 0x1FC2, 0x1FC4, 0x1FC6, 0x1FCC,
+				0x1FD0, 0x1FD3, 0x1FD6, 0x1FDB, 0x1FE0, 0x1FEC, 0x1FF2, 0x1FF4, 0x1FF6, 0x1FFC,
+				0x2126, 0x2126, 0x212A, 0x212B, 0x212E, 0x212E, 0x2180, 0x2182, 0x3007, 0x3007,
+				0x3021, 0x3029, 0x3041, 0x3094, 0x30A1, 0x30FA, 0x3105, 0x312C, 0x4E00, 0x9FA5,
+				0xAC00, 0xD7A3
+			>>
+		end
+
+	name_extra_ranges: ARRAY [INTEGER]
+			-- Sorted inclusive ranges from XML 1.0 fourth-edition name productions.
+		once
+			Result := <<
+				0x2D, 0x2E, 0x30, 0x39, 0xB7, 0xB7, 0x2D0, 0x2D1, 0x300, 0x345,
+				0x360, 0x361, 0x387, 0x387, 0x483, 0x486, 0x591, 0x5A1, 0x5A3, 0x5B9,
+				0x5BB, 0x5BD, 0x5BF, 0x5BF, 0x5C1, 0x5C2, 0x5C4, 0x5C4, 0x640, 0x640,
+				0x64B, 0x652, 0x660, 0x669, 0x670, 0x670, 0x6D6, 0x6E4, 0x6E7, 0x6E8,
+				0x6EA, 0x6ED, 0x6F0, 0x6F9, 0x901, 0x903, 0x93C, 0x93C, 0x93E, 0x94D,
+				0x951, 0x954, 0x962, 0x963, 0x966, 0x96F, 0x981, 0x983, 0x9BC, 0x9BC,
+				0x9BE, 0x9C4, 0x9C7, 0x9C8, 0x9CB, 0x9CD, 0x9D7, 0x9D7, 0x9E2, 0x9E3,
+				0x9E6, 0x9EF, 0xA02, 0xA02, 0xA3C, 0xA3C, 0xA3E, 0xA42, 0xA47, 0xA48,
+				0xA4B, 0xA4D, 0xA66, 0xA71, 0xA81, 0xA83, 0xABC, 0xABC, 0xABE, 0xAC5,
+				0xAC7, 0xAC9, 0xACB, 0xACD, 0xAE6, 0xAEF, 0xB01, 0xB03, 0xB3C, 0xB3C,
+				0xB3E, 0xB43, 0xB47, 0xB48, 0xB4B, 0xB4D, 0xB56, 0xB57, 0xB66, 0xB6F,
+				0xB82, 0xB83, 0xBBE, 0xBC2, 0xBC6, 0xBC8, 0xBCA, 0xBCD, 0xBD7, 0xBD7,
+				0xBE7, 0xBEF, 0xC01, 0xC03, 0xC3E, 0xC44, 0xC46, 0xC48, 0xC4A, 0xC4D,
+				0xC55, 0xC56, 0xC66, 0xC6F, 0xC82, 0xC83, 0xCBE, 0xCC4, 0xCC6, 0xCC8,
+				0xCCA, 0xCCD, 0xCD5, 0xCD6, 0xCE6, 0xCEF, 0xD02, 0xD03, 0xD3E, 0xD43,
+				0xD46, 0xD48, 0xD4A, 0xD4D, 0xD57, 0xD57, 0xD66, 0xD6F, 0xE31, 0xE31,
+				0xE34, 0xE3A, 0xE46, 0xE4E, 0xE50, 0xE59, 0xEB1, 0xEB1, 0xEB4, 0xEB9,
+				0xEBB, 0xEBC, 0xEC6, 0xEC6, 0xEC8, 0xECD, 0xED0, 0xED9, 0xF18, 0xF19,
+				0xF20, 0xF29, 0xF35, 0xF35, 0xF37, 0xF37, 0xF39, 0xF39, 0xF3E, 0xF3F,
+				0xF71, 0xF84, 0xF86, 0xF8B, 0xF90, 0xF95, 0xF97, 0xF97, 0xF99, 0xFAD,
+				0xFB1, 0xFB7, 0xFB9, 0xFB9, 0x20D0, 0x20DC, 0x20E1, 0x20E1, 0x3005, 0x3005,
+				0x302A, 0x302F, 0x3031, 0x3035, 0x3099, 0x309A, 0x309D, 0x309E, 0x30FC, 0x30FE
+			>>
 		end
 
 	decoded_input (a_input: READABLE_STRING_8): READABLE_STRING_8
@@ -3186,7 +3795,9 @@ feature {NONE} -- DTD entity declarations
 							set_error ("unexpected element declaration content")
 							Result := a_subset.count + 1
 						elseif attached l_model as l_attached_model then
-							emit_default (a_subset.substring (a_start_index, l_end))
+							if handler.wants_element_decl_default then
+								emit_default (a_subset.substring (a_start_index, l_end))
+							end
 							if not has_error and not is_suspended then
 								handler.on_element_decl (l_name, l_attached_model)
 								check_handler_stop
@@ -3207,6 +3818,106 @@ feature {NONE} -- DTD entity declarations
 		end
 
 	parse_content_particle (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_top_level: BOOLEAN): INTEGER
+			-- Parse content-model groups with an explicit stack, including very deep groups.
+		require
+			subset_attached: a_subset /= Void
+			valid_bounds: a_start_index >= 1 and a_start_index <= a_end_index and a_end_index < a_subset.count
+		local
+			i, name_start: INTEGER
+			l_nodes: ARRAYED_STACK [XP_CONTENT_MODEL]
+			l_separators: ARRAYED_STACK [CHARACTER_8]
+			l_node, l_group: XP_CONTENT_MODEL
+			l_result: detachable XP_CONTENT_MODEL
+			l_name: STRING_8
+			l_expect_child, l_done: BOOLEAN
+			c, l_separator: CHARACTER_8
+		do
+			i := a_start_index
+			parsed_content_model := Void
+			if a_subset.item (i) = '(' and then has_at (a_subset, skip_spaces (a_subset, i + 1), "#PCDATA") then
+				Result := parse_mixed_content_particle (a_subset, a_start_index, a_end_index, a_top_level)
+			else
+				create l_nodes.make (8)
+				create l_separators.make (8)
+				l_expect_child := True
+				from
+				until
+					l_done or has_error
+				loop
+					i := skip_spaces (a_subset, i).min (a_end_index + 1)
+					if i > a_end_index then
+						set_error ("unterminated element content model")
+					elseif l_expect_child then
+						if a_subset.item (i) = '(' then
+							create l_group.make ({XP_CONTENT_MODEL}.Type_sequence, {XP_CONTENT_MODEL}.Quant_none, Void)
+							l_nodes.extend (l_group)
+							l_separators.extend (' ')
+							i := i + 1
+						elseif is_name_start_character (a_subset.item (i)) then
+							name_start := i
+							i := scan_name (a_subset, i).min (a_end_index + 1)
+							if not has_error then
+								create l_name.make_from_string (a_subset.substring (name_start, i - 1))
+								create l_node.make ({XP_CONTENT_MODEL}.Type_name, {XP_CONTENT_MODEL}.Quant_none, l_name)
+								i := apply_content_quantifier (l_node, a_subset, i, a_end_index)
+								if l_nodes.is_empty then
+									l_result := l_node
+									l_done := True
+								else
+									l_nodes.item.add_child (l_node)
+									l_expect_child := False
+								end
+							end
+						else
+							set_error ("invalid element content particle")
+						end
+					else
+						c := a_subset.item (i)
+						if c = ',' or c = '|' then
+							l_separator := l_separators.item
+							if l_separator = ' ' then
+								l_separators.remove
+								l_separators.extend (c)
+								if c = '|' then
+									create l_group.make ({XP_CONTENT_MODEL}.Type_choice, {XP_CONTENT_MODEL}.Quant_none, Void)
+									l_group.add_child (l_nodes.item.children.first)
+									l_nodes.remove
+									l_nodes.extend (l_group)
+								end
+							elseif l_separator /= c then
+								set_error ("invalid element content separator")
+							end
+							i := i + 1
+							l_expect_child := True
+						elseif c = ')' then
+							l_node := l_nodes.item
+							l_nodes.remove
+							l_separators.remove
+							i := apply_content_quantifier (l_node, a_subset, i + 1, a_end_index)
+							if l_nodes.is_empty then
+								l_result := l_node
+								l_done := True
+							else
+								l_nodes.item.add_child (l_node)
+							end
+						else
+							set_error ("invalid element content separator")
+						end
+					end
+				end
+				if has_error then
+					Result := a_end_index + 1
+				else
+					parsed_content_model := l_result
+					Result := i
+				end
+			end
+		ensure
+			result_in_bounds: Result > a_start_index and Result <= a_end_index + 1
+			error_at_end: has_error implies Result = a_end_index + 1
+		end
+
+	parse_mixed_content_particle (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_top_level: BOOLEAN): INTEGER
 			-- Parse one element-content particle and store it in `parsed_content_model'.
 			-- Only the top-level group of a content model may be mixed content (#PCDATA).
 			-- On error the result is `a_end_index + 1'.
@@ -3453,7 +4164,9 @@ feature {NONE} -- DTD entity declarations
 					if not has_error then
 						i := skip_spaces (a_subset, i)
 						if i = l_end then
-							emit_default (a_subset.substring (a_start_index, l_end))
+							if handler.wants_notation_decl_default then
+								emit_default (a_subset.substring (a_start_index, l_end))
+							end
 							if not has_error and not is_suspended then
 								handler.on_notation_decl (l_name, Void, l_system, l_public)
 								check_handler_stop
@@ -3496,6 +4209,8 @@ feature {NONE} -- DTD entity declarations
 			if l_end = 0 then
 				set_error ("unterminated attlist declaration")
 				Result := a_subset.count + 1
+			elseif skip_declaration_for_undefined_parameter (a_subset, a_start_index, l_end) then
+				Result := l_end + 1
 			else
 				i := skip_required_spaces (a_subset, a_start_index + 9, "missing space in attlist declaration")
 				if has_error or else i >= l_end or else not l_attributes.is_name_start_character (a_subset.item (i)) then
@@ -3560,9 +4275,13 @@ feature {NONE} -- DTD entity declarations
 								j := parse_attlist_default_value (a_subset, j, l_end - 1, l_new_default_value)
 								l_default_value := l_new_default_value
 							else
-								set_error ("missing attlist default declaration")
+								if j < l_end and then a_subset.item (j) = '#' and then j + 1 < l_end and then a_subset.item (j + 1).code < 128 then
+									set_error ("invalid attlist default keyword")
+								else
+									set_error ("missing attlist default declaration")
+								end
 							end
-							if not has_error then
+							if not has_error and then not dtd_declarations_disabled then
 								record_attribute_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
 								handler.on_attlist_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
 								check_handler_stop
@@ -3580,7 +4299,9 @@ feature {NONE} -- DTD entity declarations
 					if has_error then
 						Result := a_subset.count + 1
 					else
-						emit_default (a_subset.substring (a_start_index, l_end))
+						if dtd_declarations_disabled or else handler.wants_attlist_decl_default then
+							emit_default (a_subset.substring (a_start_index, l_end))
+						end
 						Result := l_end + 1
 					end
 				end
@@ -3588,6 +4309,49 @@ feature {NONE} -- DTD entity declarations
 		ensure
 			progress_or_error: Result > a_start_index or has_error
 			result_in_bounds: Result <= a_subset.count + 1
+		end
+
+	skip_declaration_for_undefined_parameter (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER): BOOLEAN
+			-- A non-validating external subset may skip declarations using unknown PEs.
+		local
+			i, l_end: INTEGER
+			l_quote: CHARACTER_8
+			l_in_quote: BOOLEAN
+			l_name: STRING_8
+		do
+			from
+				i := a_start_index
+			until
+				i > a_end_index or has_error or Result
+			loop
+				if l_in_quote then
+					if a_subset.item (i) = l_quote then
+						l_in_quote := False
+					end
+					i := i + 1
+				elseif is_quote (a_subset.item (i)) then
+					l_quote := a_subset.item (i)
+					l_in_quote := True
+					i := i + 1
+				elseif a_subset.item (i).code = 37 then
+					if not parsing_external_entity and then external_dtd_depth = 0 and then parameter_subset_expansion_depth = 0 then
+						set_error ("parameter entity reference in internal subset declaration")
+					else
+						l_end := find_character (a_subset, ';', i + 1)
+						if l_end > i + 1 and then l_end <= a_end_index then
+							l_name := a_subset.substring (i + 1, l_end - 1).to_string_8
+							if is_valid_name (l_name) and then not is_parameter_entity_declared (l_name) then
+								dtd_has_parameter_entity_references := True
+								dtd_declarations_disabled := not dtd_is_standalone
+								Result := True
+							end
+						end
+					end
+					i := i + 1
+				else
+					i := i + 1
+				end
+			end
 		end
 
 	parse_attlist_type (a_subset: READABLE_STRING_8; a_start_index, a_end_index: INTEGER; a_type: STRING_8): INTEGER
@@ -3757,9 +4521,13 @@ feature {NONE} -- DTD entity declarations
 				elseif c = '&' then
 					l_reference_end := find_character (a_subset, ';', i + 1)
 					if l_reference_end = 0 or else l_reference_end > a_end_index then
-						set_error ("unterminated reference")
+						set_error ("invalid reference in attlist default")
 					else
-						i := append_reference_in_literal (a_subset, i, a_value)
+						if dtd_declarations_disabled then
+							i := append_reference_in_entity_value (a_subset, i, a_value)
+						else
+							i := append_reference_in_literal (a_subset, i, a_value)
+						end
 					end
 				elseif not is_xml_character_code (c.code) then
 					set_error ("invalid XML character")
@@ -3937,7 +4705,10 @@ feature {NONE} -- DTD entity declarations
 			l_literal_start: INTEGER
 			l_literal_end: INTEGER
 			l_accounting_count: INTEGER
+			l_default_entity_unparsed: BOOLEAN
+			l_process_entity: BOOLEAN
 		do
+			l_process_entity := not dtd_declarations_disabled
 			create l_attributes.make
 			l_end := find_markup_declaration_end (a_subset, a_start_index)
 			if l_end = 0 then
@@ -3971,7 +4742,9 @@ feature {NONE} -- DTD entity declarations
 						create l_value.make_empty
 						current_entity_literal_accounting_adjustment := 0
 						l_existing_parameter := l_is_parameter and then is_parameter_entity_declared (l_name)
-						if l_is_parameter and then not l_existing_parameter then
+						if not l_process_entity then
+							i := read_quoted_literal (a_subset, i, l_end, l_value) - 1
+						elseif l_is_parameter and then not l_existing_parameter then
 							push_entity (l_name)
 							i := parse_entity_literal (a_subset, i + 1, l_quote, l_value)
 							pop_entity
@@ -3986,13 +4759,16 @@ feature {NONE} -- DTD entity declarations
 							set_error ("unexpected entity declaration content")
 						end
 						if not has_error then
-							if l_is_parameter then
+							if not l_process_entity then
+							elseif l_is_parameter then
 								put_parameter_entity (l_name, l_value, l_accounting_count)
 							else
 								put_general_entity (l_name, l_value)
 							end
-							emit_internal_entity_declaration_default (a_subset, a_start_index, name_start, l_name_end, l_literal_start, l_literal_end, l_end)
-							if not has_error and not is_suspended then
+							if not l_process_entity or else handler.wants_entity_decl_default (False) then
+								emit_internal_entity_declaration_default (a_subset, a_start_index, name_start, l_name_end, l_literal_start, l_literal_end, l_end)
+							end
+							if l_process_entity and then not has_error and then not is_suspended then
 								handler.on_entity_decl (l_name, l_is_parameter, l_value, Void, Void, Void)
 								check_handler_stop
 							end
@@ -4002,7 +4778,10 @@ feature {NONE} -- DTD entity declarations
 						end
 					else
 						Result := parse_external_entity_declaration (a_subset, i, l_end, l_name, l_is_parameter)
-						if not has_error and not is_suspended then
+						if not l_is_parameter and then attached external_entity (l_name) as l_external then
+							l_default_entity_unparsed := l_external.is_unparsed
+						end
+						if not has_error and not is_suspended and then (not l_process_entity or else handler.wants_entity_decl_default (l_default_entity_unparsed)) then
 							emit_default (a_subset.substring (a_start_index, Result - 1))
 						end
 					end
@@ -4084,12 +4863,14 @@ feature {NONE} -- DTD entity declarations
 					set_error ("unexpected external entity declaration content")
 					Result := a_subset.count + 1
 				else
-					put_external_entity (a_name, l_public_id, l_system_id, l_notation_name, a_is_parameter, l_is_unparsed)
-					handler.on_entity_decl (a_name, a_is_parameter, Void, optional_string (l_public_id), optional_string (l_system_id), optional_string (l_notation_name))
-					check_handler_stop
-					if l_is_unparsed then
-						handler.on_unparsed_entity_decl (a_name, l_system_id, optional_string (l_public_id), optional_string (l_notation_name))
+					if not dtd_declarations_disabled then
+						put_external_entity (a_name, l_public_id, l_system_id, l_notation_name, a_is_parameter, l_is_unparsed)
+						handler.on_entity_decl (a_name, a_is_parameter, Void, optional_string (l_public_id), optional_string (l_system_id), optional_string (l_notation_name))
 						check_handler_stop
+						if l_is_unparsed then
+							handler.on_unparsed_entity_decl (a_name, l_system_id, optional_string (l_public_id), optional_string (l_notation_name))
+							check_handler_stop
+						end
 					end
 					Result := a_end_index + 1
 				end
@@ -4112,12 +4893,13 @@ feature {NONE} -- DTD entity declarations
 			i: INTEGER
 			c: CHARACTER_8
 		do
+			entity_literal_ended_by_undefined_parameter := False
 			from
 				i := a_start_index
 			invariant
 				index_in_bounds: i >= a_start_index and i <= a_input.count + 1
 			until
-				i > a_input.count or has_error or else a_input.item (i) = a_quote
+				i > a_input.count or has_error or entity_literal_ended_by_undefined_parameter or else a_input.item (i) = a_quote
 			loop
 				c := a_input.item (i)
 				if c = '&' then
@@ -4135,6 +4917,12 @@ feature {NONE} -- DTD entity declarations
 				a_input.count - i + 1
 			end
 			if not has_error then
+				if entity_literal_ended_by_undefined_parameter then
+					i := find_character (a_input, a_quote, i)
+					if i = 0 then
+						i := a_input.count + 1
+					end
+				end
 				if i > a_input.count then
 					set_error ("unterminated entity literal")
 					Result := a_input.count + 1
@@ -4183,6 +4971,58 @@ feature {NONE} -- DTD entity declarations
 			result_in_bounds: Result <= a_input.count + 1
 		end
 
+	append_parameter_entity_literal (a_name: READABLE_STRING_8; a_text: STRING_8)
+			-- Expand parameter replacement text without recursion for linear alias chains.
+		local
+			l_name: STRING_8
+			l_seen: HASH_TABLE [BOOLEAN, STRING_8]
+			l_done: BOOLEAN
+			i, l_output_start, l_accounting_start, l_adjustment: INTEGER
+		do
+			l_output_start := a_text.count
+			l_accounting_start := expanded_entity_bytes
+			l_adjustment := current_entity_literal_accounting_adjustment
+			create l_name.make_from_string (a_name)
+			create l_seen.make (8)
+			from
+			until
+				l_done or has_error
+			loop
+				if is_entity_active (l_name) or else l_seen.has (l_name) then
+					set_error ("recursive entity reference")
+				elseif attached parameter_entity_value (l_name) as l_value then
+					l_seen.force (True, l_name)
+					note_entity_expansion (parameter_entity_accounting_value (l_name))
+					if not has_error then
+						if attached single_entity_reference_name (l_value, '%%') as l_next and then attached parameter_entity_value (l_next) then
+							l_name := l_next
+						elseif entity_stack.count >= Default_max_entity_depth then
+							set_error ("entity expansion depth exceeded")
+						else
+							push_entity (l_name)
+							from
+								i := 1
+							until
+								i > l_value.count or has_error or entity_literal_ended_by_undefined_parameter
+							loop
+								if l_value.item (i).code = 37 then
+									i := append_parameter_reference_in_entity_value (l_value, i, a_text)
+								else
+									a_text.append_character (l_value.item (i))
+									i := i + 1
+								end
+							end
+							pop_entity
+							l_done := True
+						end
+					end
+				else
+					set_error ("undefined parameter entity")
+				end
+			end
+			current_entity_literal_accounting_adjustment := l_adjustment + expanded_entity_bytes - l_accounting_start - (a_text.count - l_output_start)
+		end
+
 	append_parameter_reference_in_entity_value (a_input: READABLE_STRING_8; a_start_index: INTEGER; a_text: STRING_8): INTEGER
 			-- Expand parameter entity reference in an entity value.
 		require
@@ -4202,17 +5042,15 @@ feature {NONE} -- DTD entity declarations
 				if not is_valid_name (l_name) then
 					set_error ("invalid parameter entity name")
 					Result := a_input.count + 1
-				elseif not parsing_external_entity and then external_dtd_depth = 0 then
+				elseif not parsing_external_entity and then external_dtd_depth = 0 and then parameter_subset_expansion_depth = 0 then
 						-- WFC "PEs in Internal Subset": not inside markup declarations there.
 					set_error ("parameter entity reference in internal subset declaration")
 					Result := a_input.count + 1
 				elseif is_entity_active (l_name) then
 					set_error ("recursive entity reference")
 					Result := a_input.count + 1
-				elseif attached parameter_entity_value (l_name) as l_value then
-					note_entity_expansion (parameter_entity_accounting_value (l_name))
-					current_entity_literal_accounting_adjustment := current_entity_literal_accounting_adjustment + parameter_entity_accounting_value (l_name) - l_value.count
-					a_text.append (l_value)
+				elseif attached parameter_entity_value (l_name) then
+					append_parameter_entity_literal (l_name, a_text)
 					Result := l_end + 1
 				elseif attached external_parameter_entity (l_name) as l_external then
 					append_external_parameter_entity_in_literal (l_external, a_text)
@@ -4222,13 +5060,40 @@ feature {NONE} -- DTD entity declarations
 						Result := l_end + 1
 					end
 				else
-					set_error ("undefined parameter entity")
-					Result := a_input.count + 1
+					dtd_has_parameter_entity_references := True
+					dtd_declarations_disabled := not dtd_is_standalone
+					entity_literal_ended_by_undefined_parameter := True
+					Result := l_end + 1
 				end
 			end
 		ensure
 			progress_or_error: Result > a_start_index or has_error
 			result_in_bounds: Result <= a_input.count + 1
+		end
+
+
+	resolved_parameter_entity_name (a_name: READABLE_STRING_8): STRING_8
+			-- Collapse pure subset aliases, charging each link without a recursive frame.
+		local
+			l_seen: HASH_TABLE [BOOLEAN, STRING_8]
+			l_done: BOOLEAN
+		do
+			create Result.make_from_string (a_name)
+			create l_seen.make (8)
+			from
+			until
+				l_done or has_error
+			loop
+				if l_seen.has (Result) or else is_entity_active (Result) then
+					set_error ("recursive entity reference")
+				elseif attached parameter_entity_value (Result) as l_value and then attached single_entity_reference_name (l_value, '%%') as l_next and then attached parameter_entity_value (l_next) then
+					l_seen.force (True, Result)
+					note_entity_expansion (parameter_entity_accounting_value (Result))
+					Result := l_next
+				else
+					l_done := True
+				end
+			end
 		end
 
 	include_parameter_entity_in_subset (a_subset: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
@@ -4239,6 +5104,7 @@ feature {NONE} -- DTD entity declarations
 		local
 			l_end: INTEGER
 			l_name: STRING_8
+			l_previous_reference_position: INTEGER
 		do
 			dtd_has_parameter_entity_references := True
 			l_end := find_character (a_subset, ';', a_start_index + 1)
@@ -4247,17 +5113,32 @@ feature {NONE} -- DTD entity declarations
 				Result := a_subset.count + 1
 			else
 				create l_name.make_from_string (a_subset.substring (a_start_index + 1, l_end - 1))
+				if is_valid_name (l_name) then
+					l_name := resolved_parameter_entity_name (l_name)
+				end
 				if not is_valid_name (l_name) then
 					set_error ("invalid parameter entity name")
 					Result := a_subset.count + 1
+				elseif has_error then
+					Result := a_subset.count + 1
 				elseif is_entity_active (l_name) then
 					set_error ("recursive entity reference")
+					Result := a_subset.count + 1
+				elseif entity_stack.count >= Default_max_entity_depth then
+					set_error ("entity expansion depth exceeded")
 					Result := a_subset.count + 1
 				elseif attached parameter_entity_value (l_name) as l_value then
 					note_entity_expansion (parameter_entity_accounting_value (l_name))
 					if not has_error then
 						push_entity (l_name)
+						l_previous_reference_position := dtd_entity_reference_position
+						if dtd_entity_reference_position = 0 then
+							dtd_entity_reference_position := dtd_subset_position_offset + a_start_index
+						end
+						parameter_subset_expansion_depth := parameter_subset_expansion_depth + 1
 						process_internal_subset (l_value)
+						parameter_subset_expansion_depth := parameter_subset_expansion_depth - 1
+						dtd_entity_reference_position := l_previous_reference_position
 						pop_entity
 					end
 					if has_error then
@@ -4275,9 +5156,15 @@ feature {NONE} -- DTD entity declarations
 						Result := l_end + 1
 					end
 				else
-					handler.on_skipped_entity (l_name, True)
-					check_handler_stop
-					Result := a_subset.count + 1
+					if not parsing_external_entity and then external_dtd_depth = 0 and then parameter_subset_expansion_depth = 0 and then dtd_is_standalone then
+						set_error ("undefined entity")
+						Result := a_subset.count + 1
+					else
+						dtd_declarations_disabled := not dtd_is_standalone
+						handler.on_skipped_entity (l_name, True)
+						check_handler_stop
+						Result := l_end + 1
+					end
 				end
 			end
 		ensure
@@ -4587,13 +5474,46 @@ feature {NONE} -- Event dispatch
 			end
 			if not has_error and not is_suspended then
 				if a_subset_start > 0 then
-					emit_default_range (a_input, a_name_end + 1, a_subset_start - 1)
+					emit_doctype_default_tail (a_input, a_name_end + 1, a_subset_start - 1)
 					if not has_error and not is_suspended then
 						emit_default_range (a_input, a_subset_start, a_subset_start)
 					end
 				else
-					emit_default_range (a_input, a_name_end + 1, a_doctype_end - 1)
+					emit_doctype_default_tail (a_input, a_name_end + 1, a_doctype_end - 1)
 				end
+			end
+		end
+
+	emit_doctype_default_tail (a_input: READABLE_STRING_8; a_start_index, a_end_index: INTEGER)
+			-- Emit names, whitespace and complete quoted external identifiers separately.
+		local
+			i, l_end: INTEGER
+			l_quote: CHARACTER_8
+		do
+			from
+				i := a_start_index
+			until
+				i > a_end_index or has_error or is_suspended
+			loop
+				if is_quote (a_input.item (i)) then
+					l_quote := a_input.item (i)
+					l_end := find_character (a_input, l_quote, i + 1)
+					if l_end = 0 or l_end > a_end_index then
+						l_end := a_end_index
+					end
+				elseif is_xml_space (a_input.item (i)) then
+					l_end := skip_spaces (a_input, i).min (a_end_index + 1) - 1
+				else
+					from
+						l_end := i
+					until
+						l_end >= a_end_index or else is_xml_space (a_input.item (l_end + 1)) or else is_quote (a_input.item (l_end + 1))
+					loop
+						l_end := l_end + 1
+					end
+				end
+				emit_default_range (a_input, i, l_end)
+				i := l_end + 1
 			end
 		end
 
@@ -5553,7 +6473,7 @@ feature {NONE} -- Scanning
 					i := a_subset.count + 1
 				end
 			variant
-				a_subset.count - i + 1
+				a_subset.count - i + 1 + (not l_done).to_integer
 			end
 		ensure
 			result_in_bounds: Result >= 0 and Result <= a_subset.count
@@ -5904,10 +6824,28 @@ feature {NONE} -- Character and name validation
 		require
 			name_attached: a_name /= Void
 		local
-			l_attributes: XP_ATTRIBUTES
+			i, l_length: INTEGER
 		do
-			create l_attributes.make
-			Result := l_attributes.is_valid_name (a_name)
+			if a_name.count > 0 and then a_name.count <= max_name_length then
+				from
+					Result := True
+					i := 1
+				until
+					i > a_name.count or not Result
+				loop
+					l_length := utf8_character_length (a_name, i)
+					if l_length > 0 then
+						if i = 1 then
+							Result := is_name_start_code (last_utf8_code)
+						else
+							Result := is_name_code (last_utf8_code)
+						end
+						i := i + l_length
+					else
+						Result := False
+					end
+				end
+			end
 		end
 
 	is_valid_public_id (a_text: READABLE_STRING_8): BOOLEAN
@@ -6018,7 +6956,7 @@ feature {NONE} -- Character and name validation
 			l_digit: INTEGER
 		do
 			if a_body.is_empty then
-				set_error ("invalid character reference")
+				set_error ("invalid character reference syntax")
 			else
 				if a_body.count >= 2 and then a_body.item (1) = 'x' then
 					l_base := 16
@@ -6028,7 +6966,7 @@ feature {NONE} -- Character and name validation
 					i := 1
 				end
 				if i > a_body.count then
-					set_error ("invalid character reference")
+					set_error ("invalid character reference syntax")
 				end
 				from
 				invariant
@@ -6043,7 +6981,7 @@ feature {NONE} -- Character and name validation
 						l_digit := decimal_digit_value (a_body.item (i))
 					end
 					if l_digit < 0 then
-						set_error ("invalid character reference")
+						set_error ("invalid character reference digit")
 					else
 						l_code := l_code * l_base + l_digit
 						if l_code > 1114111 then
@@ -6152,6 +7090,8 @@ feature {NONE} -- Entity tables
 	install_inherited_entity_context
 			-- Install inherited DTD entity bindings into the current parse state.
 		do
+			dtd_declarations_disabled := dtd_declarations_disabled or else inherited_dtd_declarations_disabled
+			dtd_has_parameter_entity_references := dtd_has_parameter_entity_references or else inherited_dtd_declarations_disabled
 			if attached inherited_entity_table as l_entities then
 				copy_string_table_into (l_entities, entity_table)
 			end
@@ -6166,6 +7106,43 @@ feature {NONE} -- Entity tables
 			end
 			if attached inherited_external_parameter_entity_table as l_entities then
 				copy_external_entity_table_into (l_entities, external_parameter_entity_table)
+			end
+		end
+
+
+	copy_string_entity_delta (a_source: HASH_TABLE [STRING_8, STRING_8]; a_inherited: detachable HASH_TABLE [STRING_8, STRING_8]; a_target: HASH_TABLE [STRING_8, STRING_8]; a_skip_predefined: BOOLEAN)
+		local
+			l_key, l_value: STRING_8
+		do
+			across a_source as c loop
+				if (a_inherited = Void or else not a_inherited.has (c.key)) and then
+					(not a_skip_predefined or else not is_predefined_entity (c.key))
+				then
+					l_key := c.key.twin
+					l_value := c.item.twin
+					a_target.put (l_value, l_key)
+				end
+			end
+		end
+
+	copy_integer_entity_delta (a_source: HASH_TABLE [INTEGER, STRING_8]; a_inherited: detachable HASH_TABLE [INTEGER, STRING_8]; a_target: HASH_TABLE [INTEGER, STRING_8])
+		do
+			across a_source as c loop
+				if a_inherited = Void or else not a_inherited.has (c.key) then
+					a_target.put (c.item, c.key.twin)
+				end
+			end
+		end
+
+	copy_external_entity_delta (a_source: HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8]; a_inherited: detachable HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8]; a_target: HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8])
+		local
+			l_value: XP_EXTERNAL_ENTITY
+		do
+			across a_source as c loop
+				if a_inherited = Void or else not a_inherited.has (c.key) then
+					create l_value.make (c.item.name, c.item.public_id, c.item.system_id, c.item.notation_name, c.item.is_parameter, c.item.is_unparsed)
+					a_target.put (l_value, c.key.twin)
+				end
 			end
 		end
 
@@ -6530,9 +7507,50 @@ feature {NONE} -- Entity tables
 
 feature {NONE} -- State
 
+
+	reset_cached_doctype_body (a_prefix_count: INTEGER; a_doctype_name: STRING_8)
+			-- Restore the completed DTD baseline, retaining all existing declaration tables.
+		do
+			has_error := False
+			last_error.wipe_out
+			is_suspended := False
+			lazy_position_accounting := False
+			current_position_index := a_prefix_count + 1
+			current_line_number := cached_doctype_line
+			current_column_number := cached_doctype_column
+			current_byte_index := a_prefix_count
+			current_byte_count := 0
+			last_attribute_name_start := 0
+			last_attribute_name_end := 0
+			external_dtd_depth := 0
+			entity_element_floor := 0
+			element_stack.wipe_out
+			element_slice_stack.wipe_out
+			entity_stack.wipe_out
+			entity_reference_start_stack.wipe_out
+			entity_reference_count_stack.wipe_out
+			document_element_count := 0
+			expanded_entity_bytes := cached_doctype_entity_bytes
+			current_entity_literal_accounting_adjustment := 0
+			parameter_subset_expansion_depth := 0
+			dtd_subset_position_offset := 0
+			dtd_entity_reference_position := 0
+			entity_literal_ended_by_undefined_parameter := False
+			has_doctype := True
+			doctype_name := a_doctype_name.twin
+			document_has_external_subset := cached_doctype_has_external_subset
+			dtd_has_parameter_entity_references := cached_doctype_has_parameter_references
+			dtd_declarations_disabled := cached_doctype_declarations_disabled
+			xml_standalone := cached_doctype_standalone
+			foreign_dtd_loaded := cached_doctype_foreign_loaded
+			not_standalone_checked := cached_doctype_not_standalone_checked
+			reset_namespace_context
+		end
+
 	reset
 			-- Reset parse state.
 		do
+			clear_cached_doctype
 			has_error := False
 			last_error.wipe_out
 			create position_input.make_empty
@@ -6542,6 +7560,8 @@ feature {NONE} -- State
 			external_dtd_depth := 0
 			entity_element_floor := 0
 			dtd_has_parameter_entity_references := False
+			dtd_declarations_disabled := False
+			entity_literal_ended_by_undefined_parameter := False
 			current_position_index := 0
 			current_line_number := 1
 			current_column_number := 0
@@ -6563,6 +7583,9 @@ feature {NONE} -- State
 			document_element_count := 0
 			expanded_entity_bytes := 0
 			current_entity_literal_accounting_adjustment := 0
+			parameter_subset_expansion_depth := 0
+			dtd_subset_position_offset := 0
+			dtd_entity_reference_position := 0
 			has_doctype := False
 			document_has_external_subset := False
 			xml_standalone := -1
@@ -6847,6 +7870,27 @@ feature {NONE} -- State
 	namespace_declaration_stack: ARRAYED_STACK [ARRAYED_LIST [STRING_8]]
 			-- Namespace prefixes declared at each element depth.
 
+	cached_doctype_prefix: detachable STRING_8
+			-- Immutable validated UTF-8 prefix; absent when the optional cache is inactive.
+
+	cached_doctype_name: detachable STRING_8
+			-- Small immutable name snapshot paired with the retained source prefix.
+
+	cached_doctype_line, cached_doctype_column, cached_doctype_entity_bytes: INTEGER
+	cached_doctype_standalone: INTEGER
+	cached_doctype_has_external_subset, cached_doctype_has_parameter_references: BOOLEAN
+	cached_doctype_declarations_disabled, cached_doctype_foreign_loaded: BOOLEAN
+	cached_doctype_not_standalone_checked: BOOLEAN
+
+	inherited_dtd_declarations_disabled: BOOLEAN
+			-- Declaration-processing snapshot supplied by an external-DTD parent.
+
+	inherited_dtd_is_standalone: BOOLEAN
+			-- Standalone snapshot supplied by an external-DTD parent.
+
+	entity_literal_ended_by_undefined_parameter: BOOLEAN
+			-- Stop collecting the current entity value after an unread parameter reference.
+
 	inherited_entity_table: detachable HASH_TABLE [STRING_8, STRING_8]
 			-- Parent general entity bindings for external entity child parsers.
 
@@ -6870,6 +7914,15 @@ feature {NONE} -- State
 
 	current_entity_literal_accounting_adjustment: INTEGER
 			-- Difference between stored and logical replacement bytes in current entity literal.
+
+	parameter_subset_expansion_depth: INTEGER
+			-- Number of parameter replacement fragments being interpreted as DTD content.
+
+	dtd_subset_position_offset: INTEGER
+			-- Raw document offset of the DTD substring currently being parsed.
+
+	dtd_entity_reference_position: INTEGER
+			-- Source position held during parameter entity replacement processing.
 
 	has_doctype: BOOLEAN
 			-- Has the document type declaration been parsed?
@@ -6957,6 +8010,7 @@ invariant
 	valid_external_entity_policy: is_initialized implies is_valid_policy (external_entity_policy)
 	input_limit_positive: is_initialized implies max_input_bytes > 0
 	depth_limit_positive: is_initialized implies max_element_depth > 0
+	name_limit_within_input_budget: is_initialized implies max_name_length > 0 and max_name_length <= max_input_bytes
 	attribute_limit_positive: is_initialized implies max_attribute_count > 0
 	token_limit_positive: is_initialized implies max_token_length > 0
 	stack_within_depth_limit: is_initialized implies element_stack.count <= max_element_depth
