@@ -48,6 +48,7 @@ feature {NONE} -- Initialization
 			run_test ("test_garbage_collection_suspension", agent test_garbage_collection_suspension)
 			run_test ("test_native_eiffel_bridge_parser", agent test_native_eiffel_bridge_parser)
 			run_test ("test_native_bridge_installer", agent test_native_bridge_installer)
+			run_test ("test_native_handle_survives_collection", agent test_native_handle_survives_collection)
 			run_test ("test_expat_api_manifest", agent test_expat_api_manifest)
 			run_test ("test_libexpat_adapter_files", agent test_libexpat_adapter_files)
 			run_test ("test_benchmark_publication_files", agent test_benchmark_publication_files)
@@ -1362,6 +1363,29 @@ feature {NONE} -- Tests
 			assert ("native bridge installer drops handle", not attached l_installer.parser_for (l_handle))
 			l_status := l_installer.parse (l_handle, l_input.item, l_input.count, True)
 			assert ("native bridge installer rejects freed handle", l_status = l_installer.Xml_status_error)
+		end
+
+	test_native_handle_survives_collection
+			-- Native ownership must keep the parser live without an Eiffel client reference.
+		local
+			l_installer: XP_NATIVE_BRIDGE_INSTALLER
+			l_memory: MEMORY
+			l_handle: POINTER
+			l_input: C_STRING
+			l_status: INTEGER
+		do
+			create l_installer.make
+			create l_memory
+			l_handle := l_installer.parser_create (default_pointer, default_pointer, default_pointer)
+			l_memory.full_collect
+			assert ("native handle roots parser through collection", attached l_installer.parser_for (l_handle))
+			create l_input.make ("<root>retained</root>")
+			l_status := l_installer.parse (l_handle, l_input.item, l_input.count, True)
+			assert ("collected native handle still parses", l_status = l_installer.Xml_status_ok)
+			l_installer.parser_free (l_handle)
+			l_memory.full_collect
+			assert ("freed native handle has no retained parser", not attached l_installer.parser_for (l_handle))
+			assert ("freed native handle leaves no registry entry", l_installer.active_parser_count = 0)
 		end
 
 	test_expat_api_manifest
