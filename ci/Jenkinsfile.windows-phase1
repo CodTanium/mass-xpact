@@ -854,7 +854,7 @@ pipeline {
           runWithJenkinsTestResult('libexpat adapter', 'PowerShell runner regression tests') {
             powershell '''
               $ErrorActionPreference = "Stop"
-              python -m unittest discover -s tests/python -p test_libexpat_adapter.py
+              python -m unittest discover -s tests/python -p 'test_libexpat_*.py'
             '''
           }
           if (powershell(returnStatus: true, script: '''

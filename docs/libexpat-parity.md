@@ -233,8 +233,20 @@ in Jenkins. Only a completed run whose observed failures all match the expected
 patterns is accepted. An expanded expected-failure list alone does not establish
 that a failed run is expected.
 
-Jenkins build 67 crashed with an access violation before completing the suite.
-A diagnostic run reached `test_alloc_dtd_default_handling` before that crash.
-Excluding allocator tests also exposed ordinary parser failures and another
-crash, so the full native suite has not been verified to pass. The green rows
+Jenkins builds 67 and 68 crashed with an access violation before completing the
+suite. Diagnostic sequences implicated minicheck's `longjmp` from failing C
+callbacks across active Eiffel frames. The Windows adapter now runs each named
+test in a fresh process and exits that child immediately on an assertion.
+Passing tests still exercise all 12 chunk-size/deferral combinations; failing
+tests stop at their first failure. Timeouts and actual child crashes remain
+fatal suite results, and cancellation releases the active child through a
+Windows job.
+
+With the Jenkins workspace library, `test_invalid_foreign_dtd` followed by
+`test_attributes` now completes with one assertion failure and one pass instead
+of corrupting the following test's GC state. A 399-test diagnostic sweep with a
+deliberately short five-second child limit completed in 87 seconds: 267 passed,
+121 reported assertions, and 11 timed out, with no process exceptions. That
+short limit is diagnostic evidence, not the configured 120-second release gate.
+The full native suite still has unlisted compatibility failures. The green rows
 above record their individual evidence and do not establish a passing full run.
