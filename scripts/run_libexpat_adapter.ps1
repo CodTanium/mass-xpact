@@ -438,7 +438,10 @@ function Invoke-NativeSuite {
 	try {
 		$env:Path = "$RuntimeDir;$OldPath"
 		$ErrorActionPreference = "Continue"
-		$Output = & $CTest.Source --test-dir $BuildDir -C Debug --verbose 2>&1
+		$Output = & $CTest.Source --test-dir $BuildDir -C Debug --verbose 2>&1 | ForEach-Object {
+			Write-Host $_
+			$_
+		}
 		$ExitCode = $LASTEXITCODE
 		$OutputText = ($Output | Out-String).Trim()
 		$OutputText | Set-Content -LiteralPath $LogPath -Encoding UTF8 -ErrorAction Stop
@@ -447,7 +450,6 @@ function Invoke-NativeSuite {
 		$ErrorActionPreference = $OldErrorActionPreference
 	}
 
-	Write-Host $OutputText
 	Assert-NativeSuiteResult $OutputText $ExitCode $ExpectedFailures $LogPath $ManifestRows
 	# Jenkins exits with LASTEXITCODE after running this script. Clear CTest's
 	# nonzero code only after verifying that every failure is expected.
