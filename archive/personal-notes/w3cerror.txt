@@ -1,0 +1,87 @@
+W3C SKIPS ON JENKINS - 2 STEPS BACK, 2 STEPS FORWARD
+Checked on main @ 366460d, 2026-10-24
+
+Jenkins reported: 1,716 skipped, 3,497 passed.
+
+
+STEP BACK 2 - WHAT THE W3C TEST DOES
+------------------------------------
+Jenkins feeds xpact 2,585 official XML test files from W3C (the people who
+write the XML standard), twice: once with the normal build and once with the
+assertions build. Each file has a known right answer, "accept" or "reject".
+Jenkins checks whether xpact gives that answer.
+
+
+STEP BACK 1 - THE "SKIP METHOD" WE REMEMBER
+-------------------------------------------
+On 2026-10-23, xpact got 519 answers wrong (236 + 236 wrong verdicts, plus 47
+crashes). To quiet Jenkins while working, a known-failures list was made:
+benchmarks/w3c-known-failures.tsv. Cases on that list stop turning the build red.
+
+  - First all 519 failures were put on it. That was the skip.
+  - Then the parser was really fixed, and the list was emptied before it was
+    committed. On main it has 0 rows: the tool is still there, but switched off.
+
+So the known-failures list is NOT what produces the 1,716 skips.
+
+
+WHERE THE JENKINS NUMBERS COME FROM
+-----------------------------------
+  1,716 skipped = 858 skip ped files x 2 builds.
+                  The skip rules were written by the supervisor on 2026-10-06
+                  (commit 4f71743) and have not been changed since. They are the
+                  same 858 as in the old failing run (cf12dee).
+  3,497 passed  = 1,727 W3C files x 2 builds = 3,454, plus 43 other test results.
+
+Also checked: no Eiffel test was removed or disabled (no run_test line deleted,
+only new tests added).
+
+
+STEP FORWARD 1 - WHICH SKIPS CAN REALLY BE FIXED
+------------------------------------------------
+The 858 skipped files per build:
+
+  Count  Why skipped                                         Can we fix it?
+  -----  --------------------------------------------------  ------------------------------
+  310    Written for OLDER editions of XML 1.0; the fifth     NO - testing them would demand
+         edition changed these rules                          the old, now-wrong answer
+  273    XML 1.1 - a different language version xpact        NO - out of scope
+         does not claim to support
+  27+1   "Error" files with no required answer, and one      NO - no right answer to check
+         not for XML 1.0
+  247    Need EXTERNAL ENTITIES (extra files the XML pulls   YES - xpact has a resolver
+         in). The test runner switches xpact's resolver      (there are Eiffel tests for
+         off                                                  it); the guide says resolve
+                                                              local files, block only network
+
+So 247 files per build (494 in Jenkins' count) are real skips that hide
+untested behaviour: 127 valid, 54 invalid, 66 not-well-formed.
+
+How the 858 was counted: the catalog was loaded with load_catalog() from
+scripts/run_w3c_conformance.py on main, against
+build/validation-corpora/w3c-xml-20130923/xmlconf, and skip_reason counted:
+  310 Case does not apply to XML 1.0 fifth edition
+  273 XML 1.1 / Namespaces 1.1 is outside this profile
+  169 Requires external parameter entities; resolver is disabled
+   61 Requires external both entities; resolver is disabled
+   27 Optional error detection has no required binary verdict
+   17 Requires external general entities; resolver is disabled
+    1 Case does not apply to XML 1.0
+
+
+STEP FORWARD 2 - THE PLAN (all on student-Mass, never main)
+-----------------------------------------------------------
+  [ ] 1. Remove the known-failures tool completely, so nobody can switch the
+         skip back on. One issue, one PR.
+  [ ] 2. Test the 247 external-entity files:
+         - give xpact.exe an option to load external files, limited to the
+           test-suite folder (no network)
+         - let the runner use it
+         - write the expected results down first, then run and record what fails
+  [ ] 3. Fix what fails, one issue per problem, with before/after logs.
+         Jenkins skips should drop from 1,716 to 1,222.
+
+OPEN QUESTION
+-------------
+Which Jenkins build number and commit gave 1,716 / 3,497? If it is 366460d or
+later and green, it also verifies #79 and lets us close it.

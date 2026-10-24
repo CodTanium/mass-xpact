@@ -1,0 +1,139 @@
+XPACT REPORTING GUIDE
+=====================
+Sources: docs/xpact-student-introduction.md, docs/test-matrix.md,
+docs/w3c-xml-conformance.md, docs/drop-in-verification.md, TODO_CODE_REVIEW.md
+
+
+PART 1 - REPORTING AN ERROR
+---------------------------
+
+What to record for every error
+(xpact-student-introduction.md lines 95, 132, 324)
+
+  - Git commit hash (the "source revision"): the exact xpact commit you built.
+  - Input file, or its SHA-256 hash: save the smallest input that still causes
+    the failure. For invalid UTF-8, keep the exact bytes, not a text copy.
+  - Exact command / script, e.g.
+      .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Finalized
+  - Compiler version: EiffelStudio and the MSVC build tools.
+  - Assertion settings and build mode: assertions On or Off, Workbench or
+    Finalized.
+  - Loaded library: which DLL ran, e.g. xpact.dll or xpact_assertions.dll.
+    Some scripts still load the assertions-off DLL by default.
+  - Callback configuration: no callbacks, or start/end/text callbacks.
+  - Chunk sizes: whether the input was parsed whole or in chunks, and the
+    split points.
+  - Expected vs. actual outcome: write the expectation down before you run it.
+  - Error output: the full contract violation or error text.
+  - Exit status: a failed test must return a nonzero exit code.
+
+The docs also ask you to:
+  - Keep what you actually saw separate from your guesses about the cause.
+  - Never switch off a contract just to make a test pass.
+  - If the build itself fails, describe the exact step that broke rather than
+    falling back to an old binary.
+
+Extra items in some cases
+  - W3C conformance runs (w3c-xml-conformance.md): attach results.tsv,
+    summary.json, summary.md and junit.xml from
+    build/benchmarks/w3c-xml-conformance/. Note the source_mode. The suite
+    archive's SHA-256 should be
+    f9510b3532926e1b4c2e54855b021e4b8a66ec98a5337dcf4ff07e8a41968deb
+  - Drop-in / CPython tests (drop-in-verification.md line 244): include the
+    CPython commit, the patch, the xpact commit, the DLL checksum and the
+    test log.
+  - Benchmarks (task B07): include the parse status, completed iterations,
+    bytes parsed, callback count, input hash and event checksum.
+
+How to get the hashes
+  - Commit hash:  git rev-parse HEAD   (run it in the git clone)
+  - File hash:    Get-FileHash <file> -Algorithm SHA256   (PowerShell)
+
+
+PART 2 - REPORTING TESTS
+------------------------
+
+The docs ask you to report a test run as evidence: which build was tested,
+what actually ran, and what the result was for each case. "The script
+finished" or "it looked green" doesn't count.
+
+1. Report each cell of the test matrix separately
+
+   There are four cells. Each one gets its own result:
+
+   Assertions On,  Workbench:
+     .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Workbench
+   Assertions On,  Finalized:
+     .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Finalized
+   Assertions Off, Workbench:
+     .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode Off -BuildMode Workbench
+   Assertions Off, Finalized:
+     .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode Off -BuildMode Finalized
+
+   Assertions-on is the main target. Assertions-off is an extra check.
+
+2. Header for every test report
+   - Git commit hash of xpact
+   - EiffelStudio and MSVC versions
+   - Assertion setting and build mode
+   - Which DLL was loaded (xpact.dll or xpact_assertions.dll)
+   - The exact command, plus the saved console output
+   - The exit status
+
+3. Report what actually ran, not what is defined
+   - Give counts of passed / failed / errors / skipped, each listed
+     separately. Skipped cases are not passes, and each skip needs a reason.
+   - A count of test definitions or a green manifest is not evidence that
+     the tests passed (xpact-student-introduction.md line 324).
+   - WATCH OUT: in the assertions-off lane, failures are signalled by a
+     "check" instruction, and that is compiled out (TODO_CODE_REVIEW.md
+     line 84). So the exit code can be 0 even when tests failed. Read the
+     output yourself, and say in the report if this happens. It is a known
+     bug.
+
+4. Extra details for each kind of suite
+   - libexpat upstream suite: list the names of the tests that actually
+     failed and compare them with adapters/libexpat/expected-failures.tsv.
+     Report:
+       * unexpected failures and unexpected passes
+       * crashes and incomplete runs, kept separate from ordinary failures
+         (TODO_CODE_REVIEW.md lines 96-105)
+   - W3C conformance: attach the four report files from
+     build/benchmarks/w3c-xml-conformance/:
+       * results.tsv, summary.json, summary.md, junit.xml
+       * The expected profile is 1,727 cases run and 858 skipped for each
+         build.
+       * Note the source_mode, which tells you whether the suite archive was
+         checksum-verified.
+   - Your own test cases (such as <root> or <root><child></root>): for each
+     one, give:
+       * the input or its hash
+       * the expectation, written down before the run
+       * the actual result
+       * the callbacks used (none, or start/end/text)
+       * whether it was parsed whole or in chunks, and the chunk sizes
+
+5. A simple template
+
+   Test run - <date>
+   Commit: <hash>   Compiler: EiffelStudio <ver>, MSVC <ver>
+   Cell: Assertions On / Finalized   Library: build\native-eiffel\xpact_assertions.dll
+   Command: .\scripts\run_eiffel_test_matrix.ps1 -AssertionMode On -BuildMode Finalized
+   Exit status: <n>
+
+   Results: <passed> passed, <failed> failed, <errors> errors, <skipped> skipped (reasons: ...)
+   Failures:
+     - <test name>: expected <x>, got <y>; output: <excerpt>; repro input: <file/hash>
+   Unexpected passes: <none / list>
+   Observations (confirmed): ...
+   Possible explanations (unconfirmed): ...
+   Attached: console log, results.tsv, summary.json, summary.md, junit.xml
+
+   For any failure in the list, also include the error-report details from
+   Part 1: the smallest input that reproduces it, the exact command, the
+   commit and the error output.
+
+6. Weekly note
+   Write about half a page each week: what you tried, what the evidence
+   shows, what is blocked, and what you will do next
+   (xpact-student-introduction.md line 159).

@@ -1,3 +1,42 @@
+# mass-xpact: my student work on xpact
+
+> **This repository is a full copy of [andersoxie/xpact](https://github.com/andersoxie/xpact)**
+> (Anders Persson's project) with its complete history, kept as a record of the work I,
+> **Masoud Dehdar ([@CodTanium](https://github.com/CodTanium))**, did on it as a
+> student assignment in October 2026. The project itself, its design and its
+> original code are Anders Persson's; my work is on the `student-Mass` branch.
+> The original project README follows [below](#xpact).
+
+xpact is an XML parser written in Eiffel with Design by Contract, exposed to C
+programs through an Expat-compatible API (`XML_Parse` and friends). My assignment
+was testing and verification: make the builds reproducible, find and report
+failures, and verify fixes with assertions enabled.
+
+### ✅ What I did
+
+| Area | Result |
+|---|---|
+| **Builds on Windows** | The native Eiffel-backed DLL, smoke tests and test matrix did not build on the student PC. Fixed the include path, the C backend, `PATH` growth and `vswhere` problems, `-keep` for finalized lanes (#2, #4, #7, #10, #48, #51, #53, #55, #73) |
+| **Reliable test results** | Failing tests now exit nonzero in every build (B01, #45); a deliberately failing meta-test proves it (B02, #46); one exception no longer stops the remaining tests (#60) |
+| **Parser correctness** | Strict UTF-8 and XML characters, UTF-16, name rules, DTD declarations, loops that advance on error (#79), CR handling (#28). W3C XML conformance went from 1,491 / 1,444 passed (236 failed, 47 crashes) to **1,727 / 1,727 in both finalized builds**, assertions off and on, on the student PC |
+| **DLL testing** | A C# test program for the xpact DLL: 3,360 cases across whole-input and chunked parsing, finding three parser bugs (#37 → #38, #39, #40) |
+| **Versioning workflow** | Every fix: issue → branch → expected result written first → report with before/after logs → pull request → squash merge, revertable in one commit ([`student/VERSIONING.md`](student/VERSIONING.md), [`student/tools/fix.ps1`](student/tools/fix.ps1)) |
+
+### 📂 Where to look
+
+| Start here | What it holds |
+|---|---|
+| [`reports/README.md`](reports/README.md) | Every fix: issue, pull request, commit and a report with verification and logs |
+| [`archive/github/README.md`](archive/github/README.md) | **All issues and pull requests** of the original repository with every comment (GitHub cannot move them, so they are archived here) |
+| [`student/PLAN.md`](student/PLAN.md) | The 10-week plan and its status |
+| [`student/notes/weekly/`](student/notes/weekly/) | Weekly notes |
+| [`archive/personal-notes/`](archive/personal-notes/README.md) | My working notes from outside git |
+
+Branches: `portfolio` (this page, default) = `student-Mass` + this README and the archive.
+`student-Mass` and `main` are unchanged copies of the original repository's branches.
+
+---
+
 # xpact
 
 xpact is an Eiffel XML parser project inspired by Finnian Reilly's Eiffel.org

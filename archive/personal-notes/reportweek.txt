@@ -1,0 +1,112 @@
+WEEKLY REPORT: 19-23 OCTOBER 2026 (WEEK 3)
+==========================================
+Branch:   student-Mass in the andersoxie/xpact repository
+Activity: about 50 commits, 37 issues opened, 28 of them closed and 9 still open
+
+Legend: [✓] done   [~] PR merged, issue still open   [ ] not done yet
+
+
+IN ONE PARAGRAPH
+----------------
+At the start of the week nothing built on my PC: the native DLL, the smoke
+test and the test matrix all failed. By the end of the week all of them
+build. I also found and fixed a big hidden problem: the test runner could say
+"ok" even when tests failed, and the assertions-on Finalized lane wasn't
+actually checking assertions. Every fix now follows the same steps:
+GitHub issue -> separate branch -> report with before/after logs ->
+pull request -> squash merge. That way each fix can be traced and undone on
+its own. While testing the DLL from a new C# program I found three serious
+parser bugs. They are logged as issues for the parser developer.
+
+
+DONE
+----
+
+1. The build works again
+  [✓] #2 / #10: the scripts couldn't find the Eiffel runtime include folder
+  [✓] #7:  "link response file not found". The cause was the mingw C
+           backend; I switched the build to msc_vc140 and removed the
+           mingw-only precompile line from tests/xpact_native_library.ecf
+  [✓] #4:  importing MSVC more than once made PATH too long for cmd
+  [✓] #51: "vswhere.exe" not found caused the MSVC import to stop
+  [✓] #53: Workbench lanes didn't load MSVC
+  [✓] #55: running the test matrix from outside the repository root ran an
+           old xpact_tests.exe and reported ok
+
+2. Test results can be trusted (group B)
+  [✓] #48: the assertions-on Finalized lane now compiles with -keep, so
+           assertions really are checked
+  [✓] #45 (B01): any test failure now gives a nonzero exit code, in every
+           build
+  [✓] #46 (B02): added a deliberately failing meta-test that can be switched
+           on, to prove failures get reported
+  [✓] #60: when one test throws an exception, it is recorded and the
+           remaining tests still run
+  [✓] #32: the W3C harness tests now pass on Python 3.10
+
+3. Parser fixes
+  [✓] #28: the loop variant in normalized_input failed on every input
+           containing a carriage return (CR). Fixed, with a regression test
+           added
+  [✓] PR #12 (B03, loop variant in direct_start_tag_attributes): merged on
+           23 Oct after review. This fix stops the crash on every "/>" input
+           in xpact_assertions.dll
+
+4. Tests and evidence
+  [✓] #33 (A02): reproduced the assertions-enabled Workbench and Finalized
+           builds
+  [✓] #29: ran the W3C suite with assertions off and on, and saved the
+           results
+  [✓] #37: added a C# test program that calls the xpact DLL directly
+           (tasks C02, C03 and part of C10)
+  [✓] Reran the week 2 baseline in the git clone and added a setup guide
+  [~] #68: A01 evidence completed (tests linked, change-and-predict
+           results). The PR is merged; the issue is still open
+
+5. Workflow and docs
+  [✓] #5 / #14: versioning workflow (fix.ps1) and one folder per fix under
+           reports/issue-NNNN/
+  [✓] #35 / #47: GitHub labels, week milestones and a project board
+  [✓] #34: repaired the repository state left on 21 Oct (an overwritten
+           baseline log, direct pushes, uncommitted docs)
+  [✓] #16, #18, #20, #22, #24, #26, #43, #56, #64, #66: PLAN.md, the student
+           docs and the one-page supervisor summary kept up to date
+  [~] #70: closed the gaps found in the doc checklist audit. The PR is
+           merged; the issue is still open
+
+
+STILL OPEN: PARSER BUGS, FOR THE PARSER DEVELOPER
+-------------------------------------------------
+  [ ] #38 (P0): with a start handler, <root> is accepted and end events are
+                lost (C01)
+  [ ] #39 (P0): invalid UTF-8 is accepted in text, attributes, names,
+                comments, PIs and CDATA
+  [ ] #40 (P0): a non-final chunk ending in "<" crashes xpact_assertions.dll
+  [ ] #3  (P0): B03: postcondition final_finished_or_suspended fails in the
+                GC test. The loop-variant fix is merged, but the C smoke test
+                still crashes, so the cause is not fully confirmed
+  [ ] #13 (P1): XP_GC_CRITICAL_SECTION.execute silently swallows exceptions,
+                which is suspected to be why traces are lost
+
+
+IN REVIEW (PRs OPEN INTO student-Mass)
+--------------------------------------
+  [ ] #73 / PR #75: the Jenkins DLL build can't find the Eiffel include
+                    folder. This is a regression caused by my own fix in
+                    #2/#10
+  [ ] #74 / PR #76: the build scripts force msc_vc140 even on machines set up
+                    with a different MSVC backend
+
+
+NOTE ABOUT main
+---------------
+On 23 Oct, PR #72 merged student-Mass into main. andersoxie opened and
+merged it, not us. I made no changes to main.
+
+
+NEXT WEEK
+---------
+  1. Get PRs #75 and #76 reviewed and merged, then rerun the Jenkins build
+  2. Write small reproduction cases for #38, #39 and #40, ready for the
+     parser developer
+  3. Close #68 and #70 now that their PRs are merged

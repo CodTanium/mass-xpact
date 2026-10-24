@@ -1,0 +1,308 @@
+xpact builds: ECF configurations, targets, scripts, assertions, test results
+===========================================================================
+Source: student-Mass @ 76ac272 (2026-10-22). Read from the .ecf files,
+scripts\*.ps1, ci\Jenkinsfile.all-tests, ci\Jenkinsfile.windows-phase1 and
+.github\workflows.
+
+Arrows:  ECF file → target → (script, ec flags) → build folder → program
+         → assertions → what its output verifies
+
+
+0. Three things that decide whether assertions really run
+---------------------------------------------------------
+- The ECF target says assertions on or off
+  (<assertions precondition= postcondition= check= invariant= loop= ...>).
+  "On" targets switch on all six kinds; "off" targets switch off all six.
+- Workbench build (ec without -finalize) → EIFGENs\<target>\W_code
+  → assertions as the ECF says.
+- Finalized build (ec -finalize) → EIFGENs\<target>\F_code
+  → assertions are DROPPED unless ec also gets -keep (#48).
+  So:  "on" target + -finalize + no -keep → assertions OFF in practice.
+
+
+1. Which .ecf files exist and which targets they build
+------------------------------------------------------
+9 ECF files, 15 targets.
+
+xpact.ecf
+  → target xpact                              assertions ON
+    root XP_CLI.make (command-line parser, console program)
+
+tests\xpact_tests.ecf                         the main Eiffel test suite
+  → target xpact_tests                        assertions OFF
+  → target xpact_tests_assertions             assertions ON
+    both: root XP_TEST_ROOT.make, program xpact_tests.exe
+
+tests\xpact_native_library.ecf                the DLL
+  → target xpact_native_library               assertions OFF
+  → target xpact_native_library_assertions    assertions ON
+    both: root XP_NATIVE_LIBRARY_ROOT, not a console program,
+    links build\native-eiffel\xpact_native.obj and
+    xpact_eiffel_runtime_bridge.obj, no precompile
+
+tests\xpact_native_runtime.ecf                C ABI → Eiffel parser, in one exe
+  → target xpact_native_runtime               assertions ON
+  → target xpact_native_runtime_no_assertions assertions OFF
+    both: root XP_NATIVE_RUNTIME_SMOKE.make, links build\native-runtime\*.obj
+
+tests\xpact_autotest.ecf
+  → target xpact_autotest                     assertions ON
+    root AUTOTEST (EiffelStudio testing library)
+
+benchmarks\xpact_benchmarks.ecf
+  → target xpact_benchmarks                   assertions OFF
+  → target xpact_benchmarks_assertions        assertions ON
+    both: root XP_BENCHMARK_ROOT.make, program xpact_benchmarks.exe
+    (timing, or --conformance-file FILE [--namespaces] for the W3C suite)
+
+student\baseline\event-trace\xp_event_trace.ecf
+  → target xpact_event_trace                  assertions ON
+    root XP_EVENT_TRACE.make (prints every parser event of an input)
+
+examples\contributed\xpact-incremental-example\xpact_example.ecf
+  → target classic                            assertions ON
+    root APPLICATION.make, uses the library below via $XPACT_INCREMENTAL
+
+examples\contributed\xpact-incremental-library\xpact-incremental.ecf
+  → target xpact                              assertions ON
+    library (root all_classes), used by the example above
+
+
+2. Which scripts build which target, and how
+--------------------------------------------
+(W = workbench, F = finalized, F+keep = finalized with assertions kept)
+
+scripts\run_eiffel_test_matrix.ps1 -AssertionMode Off|On|All -BuildMode Workbench|Finalized|All
+  → tests\xpact_tests.ecf
+     Off + Workbench → xpact_tests            W        → assertions OFF
+     Off + Finalized → xpact_tests            F+keep   → assertions OFF
+     On  + Workbench → xpact_tests_assertions W        → assertions ON
+     On  + Finalized → xpact_tests_assertions F+keep   → assertions ON  (since #48)
+  → runs EIFGENs\<target>\W_code|F_code\xpact_tests.exe from the repo root (#55)
+  → throws "Test executable failed for ..." if the exe exits nonzero
+
+scripts\build_native_eiffel.ps1 [-BuildTier Production|Assertions] [-SkipSmoke]
+  → tests\xpact_native_library.ecf, always ec -finalize -keep, MSVC (msc_vc140)
+     Production → xpact_native_library            → build\native-eiffel\xpact.dll            assertions OFF
+     Assertions → xpact_native_library_assertions → build\native-eiffel\xpact_assertions.dll assertions ON
+  → then (unless -SkipSmoke) compiles tests\native\xpact_eiffel_dll_smoke.c
+     against xpact.lib / xpact_assertions.lib and runs
+     xpact_eiffel_dll_smoke.exe / xpact_assertions_eiffel_dll_smoke.exe
+
+scripts\run_native_runtime_smoke.ps1 -AssertionMode Off|On|All
+  → tests\xpact_native_runtime.ecf, Workbench only (ec without -finalize)
+     On  → xpact_native_runtime               W → assertions ON
+     Off → xpact_native_runtime_no_assertions W → assertions OFF
+
+scripts\run_benchmarks.ps1 -EiffelBuild Finalized,FinalizedAssertions,Workbench
+  (default: Finalized, FinalizedAssertions)
+  → benchmarks\xpact_benchmarks.ecf
+     Finalized           → xpact_benchmarks            F        → assertions OFF
+     FinalizedAssertions → xpact_benchmarks_assertions F+keep   → assertions ON
+     Workbench           → xpact_benchmarks_assertions W        → assertions ON
+  → Windows native C ABI rows also use build\native-eiffel\xpact.dll (OFF only)
+
+scripts\run_large_xml_benchmarks.ps1 -EiffelBuild Finalized|Workbench (default Finalized)
+  → benchmarks\xpact_benchmarks.ecf → xpact_benchmarks only → assertions OFF
+     (Finalized: ec -finalize, no -keep; Workbench: ec, no -finalize)
+  → native rows: build\native-eiffel\xpact.dll (OFF)
+
+scripts\run_w3c_conformance.py (W3C suite; builds nothing itself)
+  → you pass --engine NAME=path\xpact_benchmarks.exe
+     usual pair (student\results\w3c-conformance-2026-10-21, reports\issue-0028):
+       Finalized           = xpact_benchmarks            F       → OFF
+       FinalizedAssertions = xpact_benchmarks_assertions F+keep  → ON
+
+scripts\run_libexpat_adapter.ps1
+  → xpact.ecf → target xpact, Workbench (ec -batch) → EIFGENs\xpact\W_code\xpact.exe → ON
+  → -Mode NativeSuite also builds the C side with scripts\build_native.ps1
+
+scripts\run_contributed_examples.ps1
+  → examples\...\xpact_example.ecf → target classic, Workbench → ON
+     (pulls in xpact-incremental.ecf)
+
+scripts\run_phase1.ps1
+  → run_eiffel_test_matrix.ps1 -AssertionMode All -BuildMode All (all 4 lanes)
+  → benchmarks\xpact_benchmarks.ecf → xpact_benchmarks, Workbench → OFF
+
+scripts\run_native_abi_tests.ps1, run_libexpat_adapter.ps1 -Mode NativeSuite
+  → scripts\build_native.ps1 → build\native\xpact.dll
+     NOT an ECF build: the C bridge only, no Eiffel parser behind it
+     (answers error 44 "Eiffel parser bridge is not installed")
+
+scripts\run_chunked_crc_harness.ps1, run_chunked_crc_corpus.ps1,
+scripts\run_incremental_shim_audit.ps1
+  → no ECF build of their own; use build\native-eiffel\xpact.dll → OFF
+     (no option for xpact_assertions.dll; this is A04, on hold)
+
+scripts\package_windows_release.ps1
+  → build_native_eiffel.ps1 (Production and Assertions) → copies
+     xpact.dll and xpact_assertions.dll (+ .lib) into the release
+
+student\baseline\run_baseline.ps1 (A02 baseline steps)
+  → event-trace:           xp_event_trace.ecf → xpact_event_trace W       → ON
+  → matrix-*:              run_eiffel_test_matrix.ps1 lanes
+  → matrix-finalized-keep: ec -finalize -keep xpact_tests_assertions      → ON
+  → native-runtime-smoke:  run_native_runtime_smoke.ps1
+  → assertions-dll:        build_native_eiffel.ps1 -BuildTier Assertions
+
+tests\dotnet\XpactDllTests (C# DLL test program, #37)
+  → builds no ECF; loads a DLL by full path (--dll, default
+     build\native-eiffel\xpact_assertions.dll → ON) and prints its path and SHA-256
+
+Not built by any script: tests\xpact_autotest.ecf (target xpact_autotest).
+It was only run by hand in week 1 (student\history\xpact-error-report.md).
+
+
+3. Which CI jobs use which build
+--------------------------------
+ci\Jenkinsfile.all-tests
+  stage "Eiffel Regression Matrix" (axes ASSERTIONS Off|On × BUILD_MODE Workbench|Finalized)
+    → run_eiffel_test_matrix.ps1 -AssertionMode $ASSERTIONS -BuildMode $BUILD_MODE
+    → the same 4 lanes as above, one Jenkins cell each
+  stage "Windows Native Tests"
+    → build_native_eiffel.ps1 (xpact.dll, with C smoke)
+    → build_native_eiffel.ps1 -BuildTier Assertions -SkipSmoke (xpact_assertions.dll, NO smoke)
+    → run_native_runtime_smoke.ps1 (both targets)
+    → run_native_abi_tests.ps1 -Target Windows (bridge-only build\native\xpact.dll)
+    → run_chunked_crc_corpus.ps1, run_incremental_shim_audit.ps1 (xpact.dll, OFF)
+  stage "WSL ABI Tests"     → run_native_abi_tests.ps1 -Target Wsl
+  stage "libexpat Adapter"  → build_native_eiffel.ps1 -SkipSmoke, run_libexpat_adapter.ps1
+  stage "Contributed Examples" → run_contributed_examples.ps1
+  stage "Benchmarks"        → run_benchmarks.ps1 (Finalized, FinalizedAssertions)
+  stage "Large XML Benchmarks" → run_large_xml_benchmarks.ps1
+  stage "Package Windows Release" → package_windows_release.ps1
+
+ci\Jenkinsfile.windows-phase1
+  stage "Eiffel Tests"
+    → ec -batch -config tests\xpact_tests.ecf -target xpact_tests (Workbench)
+    → EIFGENs\xpact_tests\W_code\xpact_tests.exe → assertions OFF only
+  then the same DLL, ABI, CRC, shim, libexpat, examples, package and
+  benchmark stages as above, plus CPython baseline/replacement stages
+
+.github\workflows\python-harness.yml
+  → python -m unittest discover -s tests/python -p test_w3c_conformance.py
+  → no Eiffel build at all (tests the W3C runner script only)
+
+Note: in CI the assertions DLL is built with -SkipSmoke, so its C smoke test
+(the one that crashes 0xC0000028, draft 07) never runs in Jenkins.
+
+
+4. Assertions on / off: summary
+-------------------------------
+ON  (all six kinds):
+  xpact (xpact.ecf)
+  xpact_tests_assertions
+  xpact_native_library_assertions   → xpact_assertions.dll
+  xpact_native_runtime
+  xpact_autotest
+  xpact_benchmarks_assertions
+  xpact_event_trace
+  classic (example) and xpact (incremental library)
+
+OFF:
+  xpact_tests
+  xpact_native_library              → xpact.dll
+  xpact_native_runtime_no_assertions
+  xpact_benchmarks
+
+Watch out:
+  ON target + ec -finalize without -keep → effectively OFF.
+  Today every finalized build of an ON target uses -keep:
+    run_eiffel_test_matrix.ps1 (since #48), build_native_eiffel.ps1,
+    run_benchmarks.ps1 (FinalizedAssertions).
+  The only finalized build without -keep is run_large_xml_benchmarks.ps1, and
+  it builds an OFF target, so nothing is lost there.
+
+
+5. What the output of each test verifies
+----------------------------------------
+xpact_tests.exe (run_eiffel_test_matrix.ps1, Jenkins matrix)
+  → 43 tests in XP_TEST_ROOT.make: callbacks, well-formedness errors, DTD
+    and entity declarations, external-entity policy, tokenizer, positions,
+    CR line ends (#28), GC suspension (B03), native bridge, and files of the
+    repo (API manifest, libexpat adapter, CI matrix, benchmark publication)
+  → output:
+      "FAIL: <label>"                          one check failed
+      "FAIL: <test> raised an exception" + trace   a contract failure (#60)
+      "xpact Phase 1 tests: <n> run, <k> raised an exception"
+      "xpact Phase 1 tests: FAILED" → exit 1   (any failure, every build, #45)
+      "xpact Phase 1 tests: ok"     → exit 0
+  → XPACT_META_FAIL=assert|exception makes it fail on purpose (B02, #46)
+  → today: assertions OFF lanes ok; assertions ON lanes fail only on B03 (#3, on hold)
+
+xpact_native_runtime / _no_assertions (run_native_runtime_smoke.ps1)
+  → the C ABI (XML_ParserCreate, XML_Parse, XML_GetErrorCode, XML_ParserFree)
+    reaches the Eiffel parser in the same process, parses
+    "<root><child>text</child></root>", and the bridge releases the handle
+  → "xpact native runtime smoke: ok" → 0, or "FAILED" → 1 (#45)
+  → XPACT_META_FAIL set → fails on purpose (#46)
+
+xpact_eiffel_dll_smoke.exe / xpact_assertions_eiffel_dll_smoke.exe
+(build_native_eiffel.ps1)
+  → a C program against the real DLL: ~380 checks on the Expat-style API
+    (handlers, DOCTYPE/ATTLIST/ELEMENT/ENTITY/NOTATION callbacks, external
+    entities, foreign DTD, hash salt, byte-at-a-time parsing, BOM, reset, ...)
+  → "xpact Eiffel DLL smoke: ok" → 0
+  → xpact.dll: ok. xpact_assertions.dll: crashes 0xC0000028 in the
+    byte-at-a-time hash-collision test (draft 07; #40 is the chunk-split crash)
+
+XpactDllTests (C#, tests\dotnet)
+  → 3,360 cases against one DLL: every input × 6 callback sets × whole and
+    every split; one line per case with result, error code and events
+  → found #38 (start handler), #39 (invalid UTF-8), #40 (chunk ending in '<')
+
+xpact_benchmarks.exe
+  → timing mode (run_benchmarks.ps1, run_large_xml_benchmarks.ps1): time and
+    throughput per input; with assertions ON it also checks contracts while timing
+  → --conformance-file mode (run_w3c_conformance.py): ACCEPT/REJECT per W3C case
+    → results.tsv, summary.json/md, junit.xml in build\benchmarks\w3c-xml-conformance
+    → 2026-10-22 after #28: OFF 1,491 passed / 236 failed / 0 crashes;
+                            ON  1,444 passed / 236 failed / 47 crashes (DTD parsing, on hold)
+
+xpact.exe (xpact.ecf, run_libexpat_adapter.ps1)
+  → runs the libexpat test manifest through the xpact CLI, compares failures
+    with adapters\libexpat\expected-failures.tsv; unexpected passes or
+    failures are errors
+
+xpact_event_trace.exe (run_baseline.ps1 step event-trace)
+  → prints the event sequence for the inputs in student\baseline\inputs
+    (A01/A02 evidence: what the parser reports, in order)
+
+xpact_example.exe (run_contributed_examples.ps1)
+  → the contributed incremental example still builds and runs against the
+    contributed library
+
+xpact_autotest.exe
+  → EiffelStudio AutoTest suite; not run by any script or CI job
+
+
+6. Everything in one picture
+----------------------------
+xpact_tests.ecf ─┬→ xpact_tests ────────────┬→ W  ─→ run_eiffel_test_matrix (Off/W)   → OFF → xpact_tests.exe → ok
+                 │                          └→ F  ─→ run_eiffel_test_matrix (Off/F)   → OFF → xpact_tests.exe → ok
+                 │                             also Jenkins phase1 "Eiffel Tests" (W) → OFF
+                 └→ xpact_tests_assertions ─┬→ W  ─→ run_eiffel_test_matrix (On/W)    → ON  → xpact_tests.exe → FAILED (B03)
+                                            └→ F+keep → run_eiffel_test_matrix (On/F) → ON  → xpact_tests.exe → FAILED (B03)
+
+xpact_native_library.ecf ─┬→ xpact_native_library ─────────→ F+keep → build_native_eiffel (Production) → OFF → xpact.dll
+                          │                                     → C smoke → ok; used by CRC, shim, benchmarks, C# tests (--dll)
+                          └→ xpact_native_library_assertions → F+keep → build_native_eiffel (Assertions) → ON → xpact_assertions.dll
+                                                                → C smoke → crash 0xC0000028 (skipped in CI); C# tests default
+
+xpact_native_runtime.ecf ─┬→ xpact_native_runtime ───────────→ W → run_native_runtime_smoke (On)  → ON  → smoke ok
+                          └→ xpact_native_runtime_no_assertions → W → run_native_runtime_smoke (Off) → OFF → smoke ok
+
+xpact_benchmarks.ecf ─┬→ xpact_benchmarks ───────────┬→ F      → run_benchmarks (Finalized), run_large_xml (Finalized) → OFF → timings
+                      │                              ├→ W      → run_phase1, run_large_xml (Workbench)               → OFF
+                      │                              └→ F      → run_w3c_conformance.py "Finalized"                  → OFF → W3C 1,491 pass
+                      └→ xpact_benchmarks_assertions ┬→ F+keep → run_benchmarks (FinalizedAssertions)                → ON  → timings
+                                                     ├→ W      → run_benchmarks (Workbench)                          → ON
+                                                     └→ F+keep → run_w3c_conformance.py "FinalizedAssertions"        → ON  → W3C 1,444 pass, 47 crash
+
+xpact.ecf → xpact → W → run_libexpat_adapter → ON → xpact.exe → libexpat manifest vs expected failures
+xp_event_trace.ecf → xpact_event_trace → W → run_baseline (event-trace) → ON → event list
+xpact_example.ecf → classic (+ xpact-incremental.ecf) → W → run_contributed_examples → ON → example runs
+xpact_autotest.ecf → xpact_autotest → (no script) → ON → not run
+
+build_native.ps1 (no ECF) → build\native\xpact.dll (C bridge only, no parser) → run_native_abi_tests, libexpat NativeSuite
