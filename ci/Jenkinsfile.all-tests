@@ -909,6 +909,12 @@ pipeline {
         deleteDir()
         unstash 'xpact-source'
         script {
+          runWithJenkinsTestResult('libexpat adapter', 'PowerShell runner regression tests') {
+            powershell '''
+              $ErrorActionPreference = "Stop"
+              python -m unittest discover -s tests/python -p test_libexpat_adapter.py
+            '''
+          }
           if (powershell(returnStatus: true, script: '''
             if (Test-Path -LiteralPath "${env:EXPAT_SOURCE_DIR}" -PathType Container) { exit 0 }
             exit 1

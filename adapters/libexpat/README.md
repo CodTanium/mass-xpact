@@ -64,6 +64,20 @@ contains specific source/name patterns for the remaining red parity gaps, while
 Windows-only release scope. If the native suite passes while expected failures
 remain, the runner fails and requires the list to be updated. Internally the
 runner still configures the CMake adapter, builds the upstream `runtests`
-executable, and runs it through `ctest --output-on-failure`.
+executable, and runs it through `ctest --verbose`.
+
+An expected-failure result is accepted only when the upstream runner reports a
+complete test summary and every reported failure matches the configured
+source/name patterns. Test sources are resolved from the manifest because an
+assertion can originate in a shared helper. Crashes, incomplete runs, and
+unlisted failures fail the stage. CTest output is printed in Jenkins and saved
+to `libexpat-native-suite.log`; a validated expected-failure result returns a
+successful process status to Jenkins.
+
+Run the orchestration regression tests without building Eiffel or CMake:
+
+```powershell
+python -m unittest discover -s tests/python -p test_libexpat_adapter.py
+```
 
 See `docs/libexpat-parity.md` for the current Windows Phase 1 parity summary.
