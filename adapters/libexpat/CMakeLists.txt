@@ -102,6 +102,10 @@ target_compile_definitions(xpact_libexpat_runtests PRIVATE
 	XML_GE=1
 	XML_CONTEXT_BYTES=1024
 	XML_Parse=xpact_adapter_XML_Parse
+	XML_ParserCreate=xpact_adapter_XML_ParserCreate
+	XML_ParserCreateNS=xpact_adapter_XML_ParserCreateNS
+	XML_ParserCreate_MM=xpact_adapter_XML_ParserCreate_MM
+	XML_ParserReset=xpact_adapter_XML_ParserReset
 )
 target_link_libraries(xpact_libexpat_runtests PRIVATE xpact_expat)
 
