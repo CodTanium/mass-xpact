@@ -412,7 +412,7 @@ function Invoke-NativeSuite {
 
 $ExpatRoot = Resolve-ExistingDirectory $ExpatSourceDir "Expat source directory"
 $Layout = Get-ExpatLayout $ExpatRoot
-$OutputRoot = Join-Path $RepoRoot $OutputDir
+$OutputRoot = if ([System.IO.Path]::IsPathRooted($OutputDir)) { $OutputDir } else { Join-Path $RepoRoot $OutputDir }
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
 
 if ($Mode -eq "All" -or $Mode -eq "Manifest") {
