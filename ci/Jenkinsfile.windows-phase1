@@ -685,6 +685,15 @@ pipeline {
     booleanParam(name: 'RUN_BENCHMARKS',
                  defaultValue: true,
                  description: 'Run same-machine benchmarks and W3C XML conformance tests.')
+    booleanParam(name: 'RUN_WSL_EIFFEL_BENCHMARKS',
+                 defaultValue: false,
+                 description: 'Run separate Linux Eiffel/GCC and libexpat benchmarks inside WSL2. Requires Linux EiffelStudio.')
+    string(name: 'WSL_DISTRIBUTION',
+           defaultValue: '',
+           description: 'Optional WSL2 distribution for Eiffel/GCC benchmarks. Leave empty to use the default distribution.')
+    string(name: 'WSL_EIFFEL_ENVIRONMENT',
+           defaultValue: '',
+           description: 'Optional Linux path to the EiffelStudio setup.rc file for WSL benchmarks.')
     string(name: 'W3C_SUITE_DIRECTORY',
            defaultValue: '',
            description: 'Optional prepared W3C XML suite directory for offline benchmarks. Leave empty to download the pinned, checksum-verified suite.')
@@ -997,6 +1006,59 @@ pipeline {
             linkBenchmarkReportInBuildDescription('build/benchmarks/benchmark-plots.html', 'Benchmark Plots')
             publishJenkinsTestResults()
           }
+        }
+      }
+    }
+
+    stage('WSL Eiffel GCC Benchmarks') {
+      when { expression { return params.RUN_WSL_EIFFEL_BENCHMARKS } }
+      steps {
+        dir('build/wsl-benchmarks') {
+          deleteDir()
+        }
+        script {
+          runWithJenkinsTestResult('xpact WSL Eiffel GCC benchmarks', 'Linux benchmark publication') {
+            powershell '''
+              $ErrorActionPreference = "Stop"
+              python -m unittest discover -s tests/python -p test_wsl_benchmarks.py
+              if ($LASTEXITCODE -ne 0) {
+                throw "WSL benchmark runner unit tests failed."
+              }
+              $BenchmarkArguments = @{}
+              if (-not [string]::IsNullOrWhiteSpace($env:WSL_DISTRIBUTION)) {
+                $BenchmarkArguments.Distribution = $env:WSL_DISTRIBUTION
+              }
+              if (-not [string]::IsNullOrWhiteSpace($env:WSL_EIFFEL_ENVIRONMENT)) {
+                $BenchmarkArguments.EiffelEnvironment = $env:WSL_EIFFEL_ENVIRONMENT
+              }
+              .\\scripts\\run_wsl_benchmarks.ps1 @BenchmarkArguments
+            '''
+          }
+        }
+      }
+      post {
+        always {
+          script {
+            writeBenchmarkJUnitReport('build/wsl-benchmarks/benchmark-results.tsv',
+                                      'xpact WSL Eiffel GCC benchmark rows',
+                                      'wsl-eiffel-gcc-benchmarks')
+            publishBenchmarkPlots(writeBenchmarkPlotCsvFiles('build/wsl-benchmarks/benchmark-results.tsv',
+                                                             'wsl-eiffel-gcc-benchmarks',
+                                                             'WSL Eiffel GCC Benchmark Trends'))
+            if (fileExists('build/wsl-benchmarks/benchmark-plots.html')) {
+              publishBenchmarkHtmlReport('build/wsl-benchmarks', 'benchmark-plots.html', 'WSL Eiffel GCC Benchmark Plots')
+              linkBenchmarkReportInBuildDescription('build/wsl-benchmarks/benchmark-plots.html', 'WSL Eiffel GCC Benchmark Plots')
+            }
+            publishJenkinsTestResults()
+          }
+          archiveArtifacts artifacts: '''
+            build/wsl-benchmarks/*.tsv,
+            build/wsl-benchmarks/*.csv,
+            build/wsl-benchmarks/*.html,
+            build/wsl-benchmarks/summary.md,
+            build/wsl-benchmarks/metadata.json,
+            build/wsl-benchmarks/logs/**
+          ''', allowEmptyArchive: true
         }
       }
     }
