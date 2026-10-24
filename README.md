@@ -163,6 +163,16 @@ The suite runs by default in both Jenkins benchmark pipelines. See
 [W3C conformance benchmarks](docs/w3c-xml-conformance.md) for the supported
 profile, offline setup, and detailed reports.
 
+Run the additional Eiffel/GCC comparison inside WSL2 (requires Linux
+EiffelStudio in that distribution):
+
+```powershell
+.\scripts\run_wsl_benchmarks.ps1 -Distribution Ubuntu
+```
+
+See [WSL2 Eiffel/GCC benchmarks](docs/wsl-benchmarks.md) for setup, timing
+methodology, and the optional Jenkins lane.
+
 Run opt-in large XML benchmarks with pre-decompressed real XML files:
 
 ```powershell
