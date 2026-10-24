@@ -35,6 +35,9 @@ Outputs are written under `build\libexpat-adapter`:
 The corpus runner records accept/reject results; it does not infer conformance
 from arbitrary fixture names.
 
+Use `-OutputDir` to choose another output directory. Relative paths are resolved
+from the xpact repository root; absolute paths are used as supplied by Jenkins.
+
 ## Native C Suite With Expected Failures
 
 For the current Windows Eiffel-backed native library:
