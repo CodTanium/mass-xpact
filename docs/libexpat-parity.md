@@ -20,7 +20,7 @@ The adapter expands those rows against an upstream Expat 2.8.1 checkout:
 The current upstream manifest has 399 `START_TEST(...)` entries. The explicit
 expected-failure patterns expand to 86 named upstream tests in the downloaded
 R_2_8_1 sources used for this checkpoint. All 86 are C allocator
-failure-injection rows that are intentionally skipped for the Eiffel release
+failure-injection rows that are recorded as expected failures for the Eiffel release
 scope because Eiffel parser storage is not a caller-managed allocation
 contract.
 
@@ -220,13 +220,21 @@ The Windows release has green evidence for:
 
 The remaining red rows are allocator-injection rows, not a suite-wide failure:
 
-- C allocator hook failure-injection tests, which are skipped for the current
+- C allocator hook failure-injection tests, which are expected to fail for the current
   Eiffel release scope because they exercise libexpat's manual allocation
   contract rather than Eiffel-owned parser storage.
 
 ## Native Suite
 
 The upstream native C suite now configures, builds, links, and launches against
-the Windows Eiffel-backed `xpact.dll` through `adapters/libexpat`. It currently
-fails inside the remaining expected-failure surface, and the run log is written
-to `libexpat-native-suite.log` beside the manifest expansion.
+the Windows Eiffel-backed `xpact.dll` through `adapters/libexpat`. The run log is
+written to `libexpat-native-suite.log` beside the manifest expansion and printed
+in Jenkins. Only a completed run whose observed failures all match the expected
+patterns is accepted. An expanded expected-failure list alone does not establish
+that a failed run is expected.
+
+Jenkins build 67 crashed with an access violation before completing the suite.
+A diagnostic run reached `test_alloc_dtd_default_handling` before that crash.
+Excluding allocator tests also exposed ordinary parser failures and another
+crash, so the full native suite has not been verified to pass. The green rows
+above record their individual evidence and do not establish a passing full run.
