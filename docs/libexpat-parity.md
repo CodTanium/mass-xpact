@@ -248,5 +248,25 @@ of corrupting the following test's GC state. A 399-test diagnostic sweep with a
 deliberately short five-second child limit completed in 87 seconds: 267 passed,
 121 reported assertions, and 11 timed out, with no process exceptions. That
 short limit is diagnostic evidence, not the configured 120-second release gate.
-The full native suite still has unlisted compatibility failures. The green rows
-above record their individual evidence and do not establish a passing full run.
+
+The 2026-10-24 full release-gate run against the rebuilt Windows DLL completed
+all 399 tests in 380.9 seconds: 361 passed and 38 reported allocator-injection
+assertions covered by the existing expected-failure patterns. There were no
+unlisted failures, child crashes, or timeouts. The Windows PowerShell 5.1 adapter
+validated the completed summary and returned exit code 0. The expected-failure
+list and the 120-second child / 1800-second suite limits were unchanged.
+
+The native parser keeps its objects strongly rooted until the C handle is freed.
+Content models use one caller-owned allocation, including their name strings.
+Incremental parsing now preserves partial encoded characters, external-child
+declarations, literal default output, and callback positions across replay. A
+completed DTD can be reused when its callbacks are unobserved; source comparison,
+policy changes, reset, errors, and final completion control cache invalidation.
+External-child replay retains detached declaration deltas and releases them at
+terminal completion or reset.
+
+Additional verification for that source cohort passed all four Eiffel test
+matrix cells (52 tests each), production and assertion DLL C smoke suites,
+Windows public/bridge ABI smokes, and both W3C finalized builds (1,727 applicable
+cases each, zero failures/errors). The adapter's 13 Python regressions and the
+W3C runner's 28 Python regressions also passed.
