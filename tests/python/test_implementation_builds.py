@@ -79,8 +79,8 @@ class PinnedDependencyTests(unittest.TestCase):
 
     @staticmethod
     def git(*arguments, cwd):
-        result = subprocess.run([GIT, "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false",
-                                 *arguments], cwd=cwd, stdout=subprocess.PIPE,
+        result = subprocess.run([GIT, "-c", "core.longpaths=true", "-c", "core.autocrlf=false",
+                                 "-c", "commit.gpgsign=false", *arguments], cwd=cwd, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, encoding="utf-8", errors="replace")
         if result.returncode:
             raise AssertionError("Fixture Git failed: {}\n{}".format(arguments, result.stderr))
@@ -121,6 +121,44 @@ class PinnedDependencyTests(unittest.TestCase):
         second = self.prepare(offline=True)
         self.assertEqual(first["source_sha256"], second["source_sha256"])
         self.assertFalse(any(arguments[0] == "fetch" for arguments, _ in self.commands))
+        self.assert_no_owned_staging()
+
+    @unittest.skipUnless(os.name == "nt", "Windows Git path-length regression")
+    def test_long_checkout_path_preserves_verification_and_dirty_recovery(self):
+        relative_object = (Path("build/dependencies/xpact-core") / self.revision
+                           / ".git/objects" / self.revision[:2] / self.revision[2:])
+        base = self.directory / "jenkins workspace"
+        padding = max(0, 270 - len(str(base / relative_object)))
+        self.project = self.directory / ("jenkins workspace" + "x" * padding)
+        (self.project / "dependencies").mkdir(parents=True)
+        self.lock_path = self.project / "dependencies/xpact-core.json"
+        self.write_lock()
+        self.cache_root = self.project / "build/dependencies/xpact-core"
+        self.destination = self.cache_root / self.revision
+        loose_object = self.project / relative_object
+        self.assertGreater(len(str(loose_object)), 260)
+
+        def transport(arguments, cwd):
+            result = self.local_transport(arguments, cwd)
+            if arguments[0] == "init":
+                # Force the Windows default locally, independent of the user's
+                # configuration. Production Git must opt in per invocation.
+                self.git("config", "core.longpaths", "false", cwd=cwd)
+            return result
+
+        with mock.patch.object(dependency, "run_git", side_effect=transport):
+            first = dependency.prepare_dependency(self.project)
+        self.assertTrue(loose_object.is_file())
+        self.assertEqual(self.git("config", "--local", "--get", "core.longpaths", cwd=self.destination), "false")
+        self.assertEqual(self.prepare(offline=True)["source_sha256"], first["source_sha256"])
+        source = self.destination / self.library
+        original = source.read_bytes()
+        source.write_bytes(b"modified long-path source must remain\n")
+        with self.assertRaises(dependency.DependencyError):
+            self.prepare(offline=True)
+        self.assertEqual(source.read_bytes(), b"modified long-path source must remain\n")
+        source.write_bytes(original)
+        self.assertEqual(self.prepare(offline=True)["source_sha256"], first["source_sha256"])
         self.assert_no_owned_staging()
 
     def test_offline_missing_checkout_never_fetches_or_creates_source(self):

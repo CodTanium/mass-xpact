@@ -61,8 +61,10 @@ def run_git(arguments: list[str], cwd: Path) -> str:
     environment["GIT_NO_REPLACE_OBJECTS"] = "1"
     environment["GIT_TERMINAL_PROMPT"] = "0"
     environment["GCM_INTERACTIVE"] = "never"
-    command = ["git", "-c", "core.autocrlf=false", "-c", "core.fsmonitor=false",
-               "-c", "core.hooksPath=", *map(str, arguments)]
+    # Jenkins workspaces can put loose Git objects beyond Windows MAX_PATH,
+    # especially after publishing staging under the full revision directory.
+    command = ["git", "-c", "core.longpaths=true", "-c", "core.autocrlf=false",
+               "-c", "core.fsmonitor=false", "-c", "core.hooksPath=", *map(str, arguments)]
     try:
         result = subprocess.run(command, cwd=cwd, env=environment, capture_output=True,
                                 encoding="utf-8", errors="surrogateescape", check=False,
