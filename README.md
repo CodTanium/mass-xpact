@@ -99,6 +99,11 @@ Start here, then read:
 
 ## Build And Verify
 
+For independent builds of our parser and a pinned Finnian Xpact-core revision,
+see [Pinned implementation builds](docs/implementation-builds.md). This first
+integration step provides isolated build probes and provenance; shared test
+and benchmark execution follows separately.
+
 Compile and run the Eiffel regression matrix, both with and without Eiffel
 runtime assertions:
 
