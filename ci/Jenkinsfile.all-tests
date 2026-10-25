@@ -695,14 +695,14 @@ pipeline {
                  defaultValue: true,
                  description: 'Run same-machine benchmarks and W3C XML conformance tests.')
     booleanParam(name: 'RUN_WSL_EIFFEL_BENCHMARKS',
-                 defaultValue: false,
+                 defaultValue: true,
                  description: 'Run separate Linux Eiffel/GCC and libexpat benchmarks inside WSL2. Requires Linux EiffelStudio.')
     string(name: 'WSL_DISTRIBUTION',
-           defaultValue: '',
+           defaultValue: 'Ubuntu',
            description: 'Optional WSL2 distribution for Eiffel/GCC benchmarks. Leave empty to use the default distribution.')
     string(name: 'WSL_EIFFEL_ENVIRONMENT',
-           defaultValue: '',
-           description: 'Optional Linux path to the EiffelStudio setup.rc file for WSL benchmarks.')
+           defaultValue: '/mnt/c/Users/ander/Documents/xpact/build/wsl-toolchain/eiffel-env.sh',
+           description: 'Linux path to a Bash environment file for WSL EiffelStudio. Leave empty to use the login environment.')
     string(name: 'W3C_SUITE_DIRECTORY',
            defaultValue: '',
            description: 'Optional prepared W3C XML suite directory for offline benchmarks. Leave empty to download the pinned, checksum-verified suite.')
