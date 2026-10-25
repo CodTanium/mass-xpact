@@ -7624,8 +7624,10 @@ feature {NONE} -- State
 				if lazy_position_accounting then
 					current_position_index := l_index
 				else
-					if current_position_index <= 0 or else l_index < current_position_index then
+					if current_position_index <= 0 then
 						recompute_position_from_start (l_index)
+					elseif l_index < current_position_index then
+						retreat_position_to (l_index)
 					else
 						advance_position_to (l_index)
 					end
@@ -7698,6 +7700,50 @@ feature {NONE} -- State
 				i := i + 1
 			variant
 				a_index - i
+			end
+		ensure
+			line_positive: current_line_number >= 1
+			column_non_negative: current_column_number >= 0
+		end
+
+	retreat_position_to (a_index: INTEGER)
+			-- Move line and column counters backwards without rescanning the document prefix.
+		require
+			index_in_bounds: a_index >= 1 and a_index <= position_input.count + 1
+			backward: current_position_index > a_index
+			current_index_in_bounds: current_position_index <= position_input.count + 1
+			eager_positions: not lazy_position_accounting
+		local
+			i: INTEGER
+			l_distance: INTEGER
+			l_newlines: INTEGER
+		do
+			l_distance := current_position_index - a_index
+			if l_distance <= current_column_number then
+					-- The target is at or after the start of the current line.
+				current_column_number := current_column_number - l_distance
+			else
+				from
+					i := current_position_index - 1
+				invariant
+					index_in_bounds: i >= a_index - 1 and i < current_position_index
+					newlines_non_negative: l_newlines >= 0
+				until
+					i < a_index
+				loop
+					if position_input.item (i) = '%N' then
+						l_newlines := l_newlines + 1
+					end
+					i := i - 1
+				variant
+					i - a_index + 1
+				end
+				current_line_number := current_line_number - l_newlines
+				if a_index = 1 then
+					current_column_number := 0
+				else
+					current_column_number := a_index - 1 - position_input.last_index_of ('%N', a_index - 1)
+				end
 			end
 		ensure
 			line_positive: current_line_number >= 1

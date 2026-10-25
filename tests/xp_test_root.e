@@ -53,6 +53,8 @@ feature {NONE} -- Initialization
 			run_test ("test_expat_port_parse_session_spike", agent test_expat_port_parse_session_spike)
 			run_test ("test_position_accounting", agent test_position_accounting)
 			run_test ("test_handler_position_accounting", agent test_handler_position_accounting)
+			run_test ("test_backward_callback_positions", agent test_backward_callback_positions)
+			run_test ("test_backward_positions_after_entity_and_reuse", agent test_backward_positions_after_entity_and_reuse)
 			run_test ("test_cr_line_ends_with_deferred_positions", agent test_cr_line_ends_with_deferred_positions)
 			run_test ("test_garbage_collection_suspension", agent test_garbage_collection_suspension)
 			run_test ("test_native_eiffel_bridge_parser", agent test_native_eiffel_bridge_parser)
@@ -1400,6 +1402,71 @@ feature {NONE} -- Tests
 			l_expected_event.append (":11")
 			assert ("entity reference context document parses", l_parser.parse (l_reference_input))
 			assert ("entity reference text byte info inside handler", l_handler.events.i_th (2).same_string (l_expected_event))
+		end
+
+	test_backward_callback_positions
+			-- Closing-tag whitespace can advance across a line before the callback
+			-- returns to the '<'. Positions count normalized UTF-8 bytes.
+		local
+			l_handler: XP_POSITION_COLLECTING_HANDLER
+			l_parser: XP_PARSER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			l_handler.set_parser (l_parser)
+			assert ("multiline closing tags parse", l_parser.parse ("<r>%R%N  <a>%/195/%/169/&amp;</a %R%N >%R  <b>ok</b%R >%R%N</r>"))
+			assert ("multiline closing tag callback count", l_handler.events.count = 8)
+			if l_handler.events.count = 8 then
+				assert ("rewind callback root start", l_handler.events.i_th (1).same_string ("start:r:1:0:0:0"))
+				assert ("rewind callback a start", l_handler.events.i_th (2).same_string ("start:a:2:2:6:0"))
+				assert ("UTF-8 and reference text byte position", l_handler.events.i_th (3).same_string ("text:%/195/%/169/&:2:5:9:3"))
+				assert ("a callback rewinds across normalized CR LF", l_handler.events.i_th (4).same_string ("end:a:2:12:16:0"))
+				assert ("b starts after normalized lone CR", l_handler.events.i_th (5).same_string ("start:b:4:2:26:0"))
+				assert ("b text callback byte position", l_handler.events.i_th (6).same_string ("text:ok:4:5:29:2"))
+				assert ("b callback rewinds across normalized lone CR", l_handler.events.i_th (7).same_string ("end:b:4:7:31:0"))
+				assert ("root callback rewinds to beginning of line", l_handler.events.i_th (8).same_string ("end:r:6:0:38:0"))
+			end
+			assert ("rewind callback final line and column", l_parser.current_line_number = 6 and then l_parser.current_column_number = 4)
+			assert ("rewind callback final bytes", l_parser.current_byte_index = 42 and then l_parser.current_byte_count = 0)
+
+			l_handler.events.wipe_out
+			assert ("multiline external fragment parses after positioned document", l_parser.parse_external_entity ("A%NB"))
+			assert ("external fragment callback rewinds to first byte", l_handler.events.count = 1 and then l_handler.events.first.same_string ("text:A%NB:1:0:0:3"))
+			assert ("external fragment final line and column", l_parser.current_line_number = 2 and then l_parser.current_column_number = 1)
+			assert ("external fragment final bytes", l_parser.current_byte_index = 3 and then l_parser.current_byte_count = 0)
+		end
+
+	test_backward_positions_after_entity_and_reuse
+			-- An entity moves the no-op path to eager positions; later end tags
+			-- and malformed multiline terminators must survive repeated recovery.
+		local
+			l_handler: XP_NULL_EVENT_HANDLER
+			l_parser: XP_PARSER
+			l_input, l_error_input: STRING_8
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			create l_input.make_from_string ("<r>&amp;%N")
+			from i := 1 until i > 100 loop
+				l_input.append ("  <n>x</n %N >%N")
+				i := i + 1
+			end
+			l_input.append ("</r>")
+			l_error_input := l_input.substring (1, l_input.count - 4) + "</wrong%N>"
+			from i := 1 until i > 2 loop
+				assert ("entity then repeated multiline closing tags parse", l_parser.parse (l_input))
+				assert ("entity rewind parse clears diagnostics", not l_parser.has_error and then l_parser.last_error.is_empty)
+				assert ("entity rewind final line and column", l_parser.current_line_number = 202 and then l_parser.current_column_number = 4)
+				assert ("entity rewind final bytes", l_parser.current_byte_index = l_input.count and then l_parser.current_byte_count = 0)
+				assert ("entity rewind mismatch rejected", not l_parser.parse (l_error_input))
+				assert ("entity rewind mismatch diagnostic", l_parser.last_error.same_string ("mismatched end tag"))
+				assert ("mismatch rewinds to name on previous line", l_parser.current_line_number = 202 and then l_parser.current_column_number = 2)
+				assert ("entity rewind mismatch bytes", l_parser.current_byte_index = l_input.count - 2 and then l_parser.current_byte_count = 0)
+				i := i + 1
+			end
+			assert ("short document recovers after repeated rewind failures", l_parser.parse ("<short/>"))
+			assert ("short recovery resets positions", l_parser.current_line_number = 1 and then l_parser.current_column_number = 8 and then l_parser.current_byte_index = 8)
 		end
 
 	test_cr_line_ends_with_deferred_positions
