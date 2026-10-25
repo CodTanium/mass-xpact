@@ -117,12 +117,29 @@ table above compares only xpact's direct Eiffel parser.
 
 ## Jenkins
 
-Both Jenkins pipelines have an opt-in `RUN_WSL_EIFFEL_BENCHMARKS` parameter.
-Set `WSL_DISTRIBUTION` and, if needed, `WSL_EIFFEL_ENVIRONMENT` for the Jenkins
-account's WSL installation. The separate stage publishes its own benchmark
-tests, plots, toolchain metadata and logs. It does not require the Windows
-benchmark stage to be enabled. Missing Linux prerequisites fail the selected
-stage instead of silently reporting a skipped measurement.
+Both Jenkins pipelines enable the WSL Eiffel/GCC benchmarks by default, using
+the settings verified in Jenkins build #74:
+
+| Parameter | Default |
+|---|---|
+| `RUN_WSL_EIFFEL_BENCHMARKS` | `true` |
+| `WSL_DISTRIBUTION` | `Ubuntu` |
+| `WSL_EIFFEL_ENVIRONMENT` | `/mnt/c/Users/ander/Documents/xpact/build/wsl-toolchain/eiffel-env.sh` |
+
+These settings target the built-in Windows agent's existing Linux EiffelStudio
+installation. Override the distribution and environment file for another host.
+The environment file and toolchain are outside the Jenkins workspace and must
+remain available to the Jenkins account. Clear `WSL_EIFFEL_ENVIRONMENT` only
+when the Linux login environment already exposes the compiler, or set
+`RUN_WSL_EIFFEL_BENCHMARKS=false` to disable this stage.
+
+Jenkins refreshes the parameter defaults when it runs the updated Jenkinsfile.
+Values already submitted for a build remain unchanged.
+
+The separate stage publishes its own benchmark tests, plots, toolchain metadata
+and logs. It does not require the Windows benchmark stage to be enabled.
+Missing Linux prerequisites fail the selected stage instead of silently
+reporting a skipped measurement.
 
 The portable runner tests need no EiffelStudio installation:
 
