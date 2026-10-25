@@ -10,6 +10,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import stat
 import subprocess
@@ -288,14 +289,21 @@ class IsolatedBuildTests(unittest.TestCase):
         self.directory = Path(self.temporary.name)
         self.root = self.directory / "repository with spaces"
         for relative in ("scripts", "dependencies", "src",
-                         "tools/implementation_probe/xpact", "tools/implementation_probe/xpact_core"):
+                         "tools/implementation_probe/xpact", "tools/implementation_probe/xpact_core",
+                         "benchmarks/dual_catalog/shared", "benchmarks/dual_catalog/xpact",
+                         "benchmarks/dual_catalog/xpact_core"):
             (self.root / relative).mkdir(parents=True, exist_ok=True)
         for relative in ("scripts/build_implementations.py", "scripts/prepare_xpact_core.py",
                          "dependencies/xpact-core.json", "src/parser.e",
                          "tools/implementation_probe/xpact/probe.e",
                          "tools/implementation_probe/xpact/probe.ecf",
                          "tools/implementation_probe/xpact_core/probe.e",
-                         "tools/implementation_probe/xpact_core/probe.ecf"):
+                         "tools/implementation_probe/xpact_core/probe.ecf",
+                         "benchmarks/dual_catalog/shared/dc_fixture.e",
+                         "benchmarks/dual_catalog/xpact/backend.e",
+                         "benchmarks/dual_catalog/xpact/catalog.ecf",
+                         "benchmarks/dual_catalog/xpact_core/backend.e",
+                         "benchmarks/dual_catalog/xpact_core/catalog.ecf"):
             (self.root / relative).write_bytes(b"fixture build input\n")
         self.revision = "a" * 40
         self.configuration = "finalized/assertions-on/msvc-x64"
@@ -337,7 +345,8 @@ class IsolatedBuildTests(unittest.TestCase):
             return "compiled pinned codec helper"
         if command[0] == "fixture-ec":
             project = Path(command[command.index("-project_path") + 1])
-            code = project / "EIFGENs/probe/F_code"
+            target = command[command.index("-target") + 1]
+            code = project / "EIFGENs" / target / "F_code"
             code.mkdir(parents=True)
             (code / "Makefile").write_text("CC = {}\nCFLAGS = -O2\n".format(self.generated_cc),
                                             encoding="utf-8")
@@ -346,17 +355,25 @@ class IsolatedBuildTests(unittest.TestCase):
             code = Path(cwd)
             implementation = code.parents[3].name
             if not self.omit_binary:
-                (code / (implementation.replace("-", "_") + "_build_probe.exe")).write_bytes(
+                suffix = "_build_probe.exe" if code.parent.name == "probe" else "_catalog_benchmark.exe"
+                (code / (implementation.replace("-", "_") + suffix)).write_bytes(
                     b"MZ isolated executable fixture")
             if self.mutate_source:
                 (self.root / "src/parser.e").write_bytes(b"source changed during compilation\n")
             return "linked fixture"
-        if command[0].endswith("_build_probe.exe"):
+        if command[0].endswith(("_build_probe.exe", "_catalog_benchmark.exe")):
             implementation = Path(command[0]).parents[4].name
+            if command[0].endswith("_catalog_benchmark.exe") and self.probe_output is None:
+                self.assertEqual(command[1:], ["--identity"])
+                metadata = Path(command[0]).parents[4] / "metadata/xp_build_identity.e"
+                configuration = re.search(r'build_configuration: STRING = "([^"]+)"',
+                                          metadata.read_text(encoding="utf-8"))[1]
+                return "\t".join(("XPACT_CATALOG_IDENTITY", implementation, self.revision,
+                                  configuration, builds.GC_POLICIES[implementation]))
             return self.marker(implementation) if self.probe_output is None else self.probe_output
         raise AssertionError("Unexpected command: " + repr(command))
 
-    def build(self, run_name, implementation="xpact"):
+    def build(self, run_name, implementation="xpact", **kwargs):
         run = self.directory / run_name
         run.mkdir(exist_ok=True)
         with mock.patch.object(builds, "run_checked", side_effect=self.fake_command), \
@@ -365,7 +382,8 @@ class IsolatedBuildTests(unittest.TestCase):
                 mock.patch.object(builds, "prepare_dependency", return_value=self.core_source), \
                 contextlib.redirect_stdout(io.StringIO()):
             return builds.build_one(self.root, run, implementation, self.tools,
-                                    self.environment, {"fixture": "compiler metadata"}, offline=True)
+                                    self.environment, {"fixture": "compiler metadata"}, offline=True,
+                                    **kwargs)
 
     def manifest(self, run_name, implementation="xpact"):
         return self.directory / run_name / implementation / "build.json"
@@ -478,6 +496,55 @@ class IsolatedBuildTests(unittest.TestCase):
         self.fail_tool = None
         self.assertEqual(self.build("codec-recovered", "xpact-core")["status"], "verified")
         self.assertEqual(self.helper_source.read_bytes(), original_source)
+
+    def test_catalog_discards_assertions_and_uses_own_project_identity_and_gc_policy(self):
+        self.build("catalog-off", profile="catalog", assertions=False)
+        own = json.loads(self.manifest("catalog-off").read_text(encoding="utf-8"))
+        command = own["build"]["command"]
+        self.assertIn("-finalize", command)
+        self.assertNotIn("-keep", command)
+        self.assertEqual(command[command.index("-target") + 1], "catalog")
+        self.assertIn("benchmarks/dual_catalog/xpact/catalog.ecf",
+                      Path(command[command.index("-config") + 1]).as_posix())
+        self.assertEqual(own["profile"], "catalog")
+        self.assertFalse(own["build"]["assertions"])
+        self.assertEqual(own["gc_policy"], "normal")
+        self.assertEqual(own["build"]["configuration"], "finalized/assertions-off/msvc-x64")
+        self.assertIn("xpact_catalog_benchmark.exe", own["executable"])
+        self.assertTrue((self.manifest("catalog-off").parent / "identity.log").is_file())
+        self.build("catalog-core-off", "xpact-core", profile="catalog", assertions=False)
+        core = json.loads(self.manifest("catalog-core-off", "xpact-core").read_text(encoding="utf-8"))
+        self.assertEqual(core["gc_policy"], "core-managed-off-full-collect")
+        self.assertNotIn("-keep", core["build"]["command"])
+
+    def test_catalog_audit_cannot_replace_assertions_discarded_artifact(self):
+        self.build("measurement", profile="catalog", assertions=False)
+        previous = self.manifest("measurement").read_bytes()
+        self.build("audit", profile="catalog", assertions=True)
+        audit = json.loads(self.manifest("audit").read_text(encoding="utf-8"))
+        self.assertIn("-keep", audit["build"]["command"])
+        command = audit["build"]["command"]
+        self.assertEqual(command[command.index("-target") + 1], "catalog_assertions")
+        self.assertTrue(audit["build"]["assertions"])
+        self.assertEqual(audit["build"]["configuration"], "finalized/assertions-on/msvc-x64")
+        self.assertNotEqual(audit["executable"], json.loads(previous)["executable"])
+        self.assertEqual(self.manifest("measurement").read_bytes(), previous)
+
+    def test_catalog_shared_source_and_runner_changes_invalidate_fingerprint(self):
+        original = builds.source_fingerprint(self.root, "xpact", "catalog")
+        (self.root / "benchmarks/dual_catalog/shared/dc_fixture.e").write_bytes(b"different XML fixture\n")
+        changed = builds.source_fingerprint(self.root, "xpact", "catalog")
+        self.assertNotEqual(original, changed)
+        (self.root / "scripts/run_dual_catalog.py").write_bytes(b"new orchestration\n")
+        self.assertNotEqual(changed, builds.source_fingerprint(self.root, "xpact", "catalog"))
+
+    def test_catalog_wrong_identity_or_gc_policy_never_publishes_manifest(self):
+        for index, output in enumerate((self.marker(),
+                "XPACT_CATALOG_IDENTITY\txpact\t{}\tfinalized/assertions-off/msvc-x64\tcore-managed-off-full-collect".format(self.revision))):
+            self.probe_output = output
+            with self.assertRaises(builds.BuildError):
+                self.build("bad-catalog-" + str(index), profile="catalog", assertions=False)
+            self.assertFalse(self.manifest("bad-catalog-" + str(index)).exists())
 
     def test_main_keeps_other_backend_result_after_failure_and_next_run_preserves_evidence(self):
         original_build = builds.build_one

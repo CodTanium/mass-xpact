@@ -104,6 +104,10 @@ see [Pinned implementation builds](docs/implementation-builds.md). This first
 integration step provides isolated build probes and provenance; shared test
 and benchmark execution follows separately.
 
+The first complete comparison path is [the focused dual catalog lane](docs/dual-catalog-lane.md):
+`scripts/run_dual_catalog.ps1` qualifies both implementations, then measures only
+the finalized, assertion-discarded 100-item catalog configuration.
+
 Compile and run the Eiffel regression matrix, both with and without Eiffel
 runtime assertions:
 
