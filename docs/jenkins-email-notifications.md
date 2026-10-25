@@ -28,6 +28,26 @@ address; it is separate from `EMAIL_RECIPIENTS`.
 
 ## Verification without sending email
 
+The calculated parameter default uses a quoted Groovy interpolated string.
+Keep the quotes: a bare `.trim()` expression is accepted by ordinary Groovy
+but rejected by Jenkins' Declarative parser before any stages can run.
+
+On Windows, use an extracted Jenkins WAR and installed plugin libraries to run
+the offline Declarative regression and the notification behavior tests:
+
+```powershell
+.\scripts\test_jenkins_pipelines.ps1 `
+  -JenkinsWarDirectory 'C:\Jenkins\war' `
+  -JenkinsPluginsDirectory 'C:\Jenkins\home\plugins' `
+  -JavaPath 'C:\path\to\jdk\bin\java.exe'
+```
+
+The parser check rejects the original expression and accepts both corrected
+complete Jenkinsfiles. It uses the installed Declarative parser and validator
+with process-local metadata for the agents, parameters, and options used here.
+It does not start Jenkins or validate runtime steps, SCM integration, or CPS
+execution. Java argument files are written under the ignored `build` directory.
+
 `tests/jenkins/test_email_notifications.groovy` loads both complete Jenkinsfiles
 with stubbed Pipeline steps and a stubbed mail sender. Run it with a Groovy
 runtime from the repository root:
@@ -38,4 +58,5 @@ groovy tests/jenkins/test_email_notifications.groovy
 
 It verifies result filtering, empty and retained recipient values, one send per
 build, publication ordering, mail failures, and interruption propagation.
-The test does not contact Jenkins or an SMTP server.
+The test does not contact Jenkins or an SMTP server. It checks behavior with
+stubbed steps; it does not validate the Declarative model or prove SMTP delivery.

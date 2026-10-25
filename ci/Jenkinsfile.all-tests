@@ -702,7 +702,7 @@ pipeline {
 
   parameters {
     string(name: 'EMAIL_RECIPIENTS',
-           defaultValue: (params.EMAIL_RECIPIENTS ?: '').trim(),
+           defaultValue: "${(params.EMAIL_RECIPIENTS ?: '').trim()}",
            trim: true,
            description: 'Comma-separated email addresses for failed or unstable builds. Retained as the next build default; leave empty to disable notifications.')
     string(name: 'EXPAT_SOURCE_DIR',
