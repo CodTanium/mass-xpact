@@ -769,8 +769,8 @@ pipeline {
                   if (-not (Test-Path sonar-project.properties)) {
                     throw "sonar-project.properties was not found."
                   }
-                  Select-String -Path sonar-project.properties -Pattern '^sonar\.projectKey='
-                  & "$env:SONAR_SCANNER_HOME\bin\sonar-scanner.bat"
+                  Select-String -Path sonar-project.properties -Pattern '^sonar\\.projectKey='
+                  & "$env:SONAR_SCANNER_HOME\\bin\\sonar-scanner.bat"
                   if ($LASTEXITCODE -ne 0) { throw "SonarQube analysis failed with exit code $LASTEXITCODE" }
                 '''
               }
