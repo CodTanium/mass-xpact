@@ -18,6 +18,10 @@ Base Extension, Time and bundled MSVC zlib, and Visual Studio C++ x64 tools.
 `ec` and `finish_freezing` must be on `PATH`. The PowerShell wrapper loads the
 MSVC environment; the Python runner selects Eiffel's `msc_vc140` backend.
 
+Dependency Git commands enable `core.longpaths=true` for that invocation, so
+deep Jenkins workspace paths remain readable after a checkout moves into its
+40-character revision directory. No global Git setting is changed.
+
 From the repository root:
 
 ```powershell
