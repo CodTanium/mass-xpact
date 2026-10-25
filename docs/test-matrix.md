@@ -55,6 +55,12 @@ in Jenkins, and fails on unexpected parser results. Runner unit tests execute
 before the benchmarks. Unsupported catalog configurations are reported as
 skipped cases rather than passes.
 
+The same parameter also enables [both implementations in the focused catalog
+and W3C lanes](dual-implementation-jenkins.md). A separate stage publishes the
+paired catalog performance plots and W3C outcome plots before the existing
+benchmark tiers. Core failures remain in those comparisons; only our tests enter
+the Jenkins Test Result summary and decide its test pass/fail status.
+
 By default the runner downloads the pinned W3C archive and verifies its SHA-256
 checksum. Set the Jenkins `W3C_SUITE_DIRECTORY` parameter to an existing suite
 directory for offline agents; this directory must be outside workspaces that

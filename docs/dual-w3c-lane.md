@@ -108,10 +108,17 @@ useful comparison, but does not establish a green conformance baseline.
 
 ## CI and runner verification
 
+Both main Jenkins pipelines now run this lane and the dual catalog lane under
+`RUN_BENCHMARKS`, with both implementations in the plots. See
+[Dual implementations in Jenkins and plots](dual-implementation-jenkins.md)
+for execution, failure handling and metrics.
+Only our results enter the Jenkins Test Result summary and decide its test
+pass/fail status; core still runs and remains in the plots and detailed reports.
+
 The standalone [Windows Jenkins pipeline](../ci/Jenkinsfile.dual-w3c) selects only
 this lane. Configure a Pipeline-from-SCM job using that script path. It runs the
-runner checks, publishes JUnit and archives reports and per-case output even
-when parser results fail. No existing GitHub Actions workflow is changed.
+runner checks, publishes our filtered JUnit and archives both implementations'
+reports and per-case output even when parser results fail. No existing GitHub Actions workflow is changed.
 Jenkins controller execution is separate from local verification.
 
 ```powershell
