@@ -108,6 +108,10 @@ The first complete comparison path is [the focused dual catalog lane](docs/dual-
 `scripts/run_dual_catalog.ps1` qualifies both implementations, then measures only
 the finalized, assertion-discarded 100-item catalog configuration.
 
+The [dual W3C lane](docs/dual-w3c-lane.md), `scripts/run_dual_w3c.ps1`, runs the
+same applicable conformance cases with both implementations in that configuration
+and reports their acceptance/rejection results side by side.
+
 Compile and run the Eiffel regression matrix, both with and without Eiffel
 runtime assertions:
 

@@ -291,7 +291,8 @@ class IsolatedBuildTests(unittest.TestCase):
         for relative in ("scripts", "dependencies", "src",
                          "tools/implementation_probe/xpact", "tools/implementation_probe/xpact_core",
                          "benchmarks/dual_catalog/shared", "benchmarks/dual_catalog/xpact",
-                         "benchmarks/dual_catalog/xpact_core"):
+                         "benchmarks/dual_catalog/xpact_core", "benchmarks/dual_w3c/shared",
+                         "benchmarks/dual_w3c/xpact", "benchmarks/dual_w3c/xpact_core"):
             (self.root / relative).mkdir(parents=True, exist_ok=True)
         for relative in ("scripts/build_implementations.py", "scripts/prepare_xpact_core.py",
                          "dependencies/xpact-core.json", "src/parser.e",
@@ -303,7 +304,12 @@ class IsolatedBuildTests(unittest.TestCase):
                          "benchmarks/dual_catalog/xpact/backend.e",
                          "benchmarks/dual_catalog/xpact/catalog.ecf",
                          "benchmarks/dual_catalog/xpact_core/backend.e",
-                         "benchmarks/dual_catalog/xpact_core/catalog.ecf"):
+                         "benchmarks/dual_catalog/xpact_core/catalog.ecf",
+                         "benchmarks/dual_w3c/shared/dw_root.e",
+                         "benchmarks/dual_w3c/xpact/backend.e",
+                         "benchmarks/dual_w3c/xpact/conformance.ecf",
+                         "benchmarks/dual_w3c/xpact_core/backend.e",
+                         "benchmarks/dual_w3c/xpact_core/conformance.ecf"):
             (self.root / relative).write_bytes(b"fixture build input\n")
         self.revision = "a" * 40
         self.configuration = "finalized/assertions-on/msvc-x64"
@@ -355,20 +361,26 @@ class IsolatedBuildTests(unittest.TestCase):
             code = Path(cwd)
             implementation = code.parents[3].name
             if not self.omit_binary:
-                suffix = "_build_probe.exe" if code.parent.name == "probe" else "_catalog_benchmark.exe"
+                if code.parent.name == "probe":
+                    suffix = "_build_probe.exe"
+                elif code.parent.name.startswith("conformance"):
+                    suffix = "_w3c_conformance.exe"
+                else:
+                    suffix = "_catalog_benchmark.exe"
                 (code / (implementation.replace("-", "_") + suffix)).write_bytes(
                     b"MZ isolated executable fixture")
             if self.mutate_source:
                 (self.root / "src/parser.e").write_bytes(b"source changed during compilation\n")
             return "linked fixture"
-        if command[0].endswith(("_build_probe.exe", "_catalog_benchmark.exe")):
+        if command[0].endswith(("_build_probe.exe", "_catalog_benchmark.exe", "_w3c_conformance.exe")):
             implementation = Path(command[0]).parents[4].name
-            if command[0].endswith("_catalog_benchmark.exe") and self.probe_output is None:
+            if command[0].endswith(("_catalog_benchmark.exe", "_w3c_conformance.exe")) and self.probe_output is None:
                 self.assertEqual(command[1:], ["--identity"])
                 metadata = Path(command[0]).parents[4] / "metadata/xp_build_identity.e"
                 configuration = re.search(r'build_configuration: STRING = "([^"]+)"',
                                           metadata.read_text(encoding="utf-8"))[1]
-                return "\t".join(("XPACT_CATALOG_IDENTITY", implementation, self.revision,
+                marker = "XPACT_W3C_IDENTITY" if command[0].endswith("_w3c_conformance.exe") else "XPACT_CATALOG_IDENTITY"
+                return "\t".join((marker, implementation, self.revision,
                                   configuration, builds.GC_POLICIES[implementation]))
             return self.marker(implementation) if self.probe_output is None else self.probe_output
         raise AssertionError("Unexpected command: " + repr(command))
@@ -545,6 +557,72 @@ class IsolatedBuildTests(unittest.TestCase):
             with self.assertRaises(builds.BuildError):
                 self.build("bad-catalog-" + str(index), profile="catalog", assertions=False)
             self.assertFalse(self.manifest("bad-catalog-" + str(index)).exists())
+
+    def test_w3c_profile_routes_both_backends_to_assertion_discarded_conformance_targets(self):
+        for implementation in ("xpact", "xpact-core"):
+            with self.subTest(implementation=implementation):
+                run = "w3c-off-" + implementation
+                self.build(run, implementation, profile="w3c", assertions=False)
+                artifact = json.loads(self.manifest(run, implementation).read_text(encoding="utf-8"))
+                command = artifact["build"]["command"]
+                self.assertEqual(command[command.index("-target") + 1], "conformance")
+                config = Path(command[command.index("-config") + 1]).as_posix()
+                self.assertIn("benchmarks/dual_w3c/" + implementation.replace("-", "_") + "/conformance.ecf", config)
+                self.assertIn("-finalize", command)
+                self.assertNotIn("-keep", command)
+                self.assertEqual(artifact["profile"], "w3c")
+                self.assertFalse(artifact["build"]["assertions"])
+                self.assertEqual(artifact["gc_policy"], builds.GC_POLICIES[implementation])
+                self.assertTrue(artifact["executable"].endswith(
+                    implementation.replace("-", "_") + "_w3c_conformance.exe"))
+                self.assertTrue((self.manifest(run, implementation).parent / "identity.log").is_file())
+
+    def test_w3c_audit_and_measurement_are_isolated_with_matching_source_fingerprints(self):
+        self.build("w3c-measurement", "xpact-core", profile="w3c", assertions=False)
+        previous = self.manifest("w3c-measurement", "xpact-core").read_bytes()
+        self.build("w3c-audit", "xpact-core", profile="w3c", assertions=True)
+        audit = json.loads(self.manifest("w3c-audit", "xpact-core").read_text(encoding="utf-8"))
+        measured = json.loads(previous)
+        command = audit["build"]["command"]
+        self.assertEqual(command[command.index("-target") + 1], "conformance_assertions")
+        self.assertIn("-keep", command)
+        self.assertTrue(audit["build"]["assertions"])
+        self.assertEqual(audit["build_inputs_sha256"], measured["build_inputs_sha256"])
+        self.assertNotEqual(audit["executable"], measured["executable"])
+        self.assertEqual(self.manifest("w3c-measurement", "xpact-core").read_bytes(), previous)
+
+    def test_w3c_identity_failure_cannot_reuse_catalog_or_other_backend_success(self):
+        self.build("w3c-previous", profile="w3c", assertions=False)
+        previous = self.manifest("w3c-previous").read_bytes()
+        config = "finalized/assertions-off/msvc-x64"
+        bad = (
+            "\t".join(("XPACT_CATALOG_IDENTITY", "xpact", self.revision, config, "normal")),
+            "\t".join(("XPACT_W3C_IDENTITY", "xpact-core", self.revision, config, "normal")),
+            "\t".join(("XPACT_W3C_IDENTITY", "xpact", self.revision, config, "core-managed-off-full-collect")),
+        )
+        for index, output in enumerate(bad):
+            with self.subTest(output=output):
+                self.probe_output = output
+                run = "wrong-w3c-identity-" + str(index)
+                with self.assertRaises(builds.BuildError):
+                    self.build(run, profile="w3c", assertions=False)
+                self.assertFalse(self.manifest(run).exists())
+                self.assertEqual(self.manifest("w3c-previous").read_bytes(), previous)
+        self.probe_output = None
+        self.assertEqual(self.build("w3c-recovered", profile="w3c", assertions=False)["status"], "verified")
+
+    def test_w3c_source_fingerprint_covers_its_harness_and_canonical_runner_only(self):
+        initial = builds.source_fingerprint(self.root, "xpact", profile="w3c")
+        (self.root / "benchmarks/dual_catalog/shared/dc_fixture.e").write_bytes(b"unrelated catalog change\n")
+        self.assertEqual(initial, builds.source_fingerprint(self.root, "xpact", profile="w3c"))
+        (self.root / "benchmarks/dual_w3c/shared/dw_root.e").write_bytes(b"changed raw-file handling\n")
+        changed = builds.source_fingerprint(self.root, "xpact", profile="w3c")
+        self.assertNotEqual(initial, changed)
+        (self.root / "scripts/run_w3c_conformance.py").write_bytes(b"changed canonical verdict importer\n")
+        canonical = builds.source_fingerprint(self.root, "xpact", profile="w3c")
+        self.assertNotEqual(changed, canonical)
+        (self.root / "scripts/run_dual_w3c.py").write_bytes(b"changed W3C orchestration\n")
+        self.assertNotEqual(canonical, builds.source_fingerprint(self.root, "xpact", profile="w3c"))
 
     def test_main_keeps_other_backend_result_after_failure_and_next_run_preserves_evidence(self):
         original_build = builds.build_one

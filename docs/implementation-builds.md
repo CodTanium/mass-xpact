@@ -8,6 +8,8 @@ The next step is the [coverage inventory](implementation-coverage.md), which
 maps existing cases and workloads to their shared or backend-specific coverage.
 The [focused dual catalog lane](dual-catalog-lane.md) uses the same build
 infrastructure for assertion-enabled audits and assertion-discarded benchmarks.
+The [dual W3C lane](dual-w3c-lane.md) uses separate harnesses for original-byte
+conformance cases with the same pinned dependency and isolated build provenance.
 
 ## Build both implementations
 

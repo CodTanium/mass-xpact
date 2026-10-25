@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build isolated parser probes or catalog executables and record provenance."""
+"""Build isolated parser probes, catalog or W3C executables and record provenance."""
 
 import argparse
 from datetime import datetime, timezone
@@ -55,6 +55,9 @@ def source_fingerprint(repo_root, implementation, profile="probe"):
     elif profile == "catalog":
         source = root / "benchmarks/dual_catalog"
         directories = [source / "shared", source / implementation.replace("-", "_")]
+    elif profile == "w3c":
+        source = root / "benchmarks/dual_w3c"
+        directories = [source / "shared", source / implementation.replace("-", "_")]
     else:
         raise BuildError("Unknown build profile: " + str(profile))
     paths = [path for directory in directories for pattern in ("*.e", "*.ecf")
@@ -64,6 +67,10 @@ def source_fingerprint(repo_root, implementation, profile="probe"):
     if profile == "catalog":
         paths += [root / relative for relative in ("scripts/run_dual_catalog.py",
                   "scripts/run_dual_catalog.ps1", "scripts/compare_eiffel_benchmarks.py")
+                  if (root / relative).is_file()]
+    elif profile == "w3c":
+        paths += [root / relative for relative in ("scripts/run_dual_w3c.py",
+                  "scripts/run_dual_w3c.ps1", "scripts/run_w3c_conformance.py")
                   if (root / relative).is_file()]
     if implementation == "xpact":
         paths += list((root / "src").rglob("*.e"))
@@ -162,6 +169,15 @@ def validate_catalog_identity(output, implementation, revision, configuration):
     return GC_POLICIES[implementation]
 
 
+def validate_w3c_identity(output, implementation, revision, configuration):
+    expected = "\t".join(("XPACT_W3C_IDENTITY", implementation, revision,
+                           configuration, GC_POLICIES[implementation]))
+    if output.splitlines() != [expected]:
+        raise BuildError("W3C executable did not confirm the expected identity/GC policy: "
+                         + repr(output))
+    return GC_POLICIES[implementation]
+
+
 def makefile_settings(code_directory):
     path = code_directory / "Makefile"
     assignments = {}
@@ -176,7 +192,7 @@ def makefile_settings(code_directory):
 
 def build_one(repo_root, run_root, implementation, tools, environment, compiler_metadata,
               *, offline=False, profile="probe", assertions=True):
-    if implementation not in GC_POLICIES or profile not in ("probe", "catalog"):
+    if implementation not in GC_POLICIES or profile not in ("probe", "catalog", "w3c"):
         raise BuildError("Unknown implementation or build profile")
     if type(assertions) is not bool:
         raise BuildError("assertions must be a boolean")
@@ -218,15 +234,19 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
                         "object": str(helper_object), "object_sha256": file_sha256(helper_object),
                         "command": helper_command})
         build_environment["XPACT_SHIFT_JIS_OBJECT"] = str(helper_object)
-    name = implementation.replace("-", "_") + ("_build_probe" if profile == "probe" else "_catalog_benchmark")
+    suffix = {"probe": "_build_probe", "catalog": "_catalog_benchmark", "w3c": "_w3c_conformance"}[profile]
+    name = implementation.replace("-", "_") + suffix
     project = destination / "project"
     project.mkdir()
     if profile == "probe":
         ecf = root / "tools/implementation_probe" / implementation.replace("-", "_") / "probe.ecf"
         target = "probe"
-    else:
+    elif profile == "catalog":
         ecf = root / "benchmarks/dual_catalog" / implementation.replace("-", "_") / "catalog.ecf"
         target = "catalog_assertions" if assertions else "catalog"
+    else:
+        ecf = root / "benchmarks/dual_w3c" / implementation.replace("-", "_") / "conformance.ecf"
+        target = "conformance_assertions" if assertions else "conformance"
     command = [tools["ec"], "-batch", "-clean", "-finalize"]
     if assertions:
         command.append("-keep")
@@ -240,12 +260,14 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
     if not executable.is_file():
         raise BuildError("Expected isolated executable was not created: " + str(executable))
     flags = makefile_settings(code)
-    verification_command = [executable] + (["--identity"] if profile == "catalog" else [])
+    verification_command = [executable] + (["--identity"] if profile != "probe" else [])
     output = run_checked(verification_command, cwd=destination, env=build_environment,
-                         log_path=destination / ("identity.log" if profile == "catalog" else "probe.log"),
+                         log_path=destination / ("probe.log" if profile == "probe" else "identity.log"),
                          timeout=30)
     if profile == "catalog":
         validate_catalog_identity(output, implementation, revision, configuration)
+    elif profile == "w3c":
+        validate_w3c_identity(output, implementation, revision, configuration)
     else:
         validate_probe(output, implementation, revision, configuration)
     if source_fingerprint(root, implementation, profile) != fingerprint:
@@ -267,7 +289,7 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
         "executable": str(executable), "executable_sha256": file_sha256(executable),
         "probe_output": output,
     }
-    if profile == "catalog":
+    if profile != "probe":
         metadata["gc_policy"] = GC_POLICIES[implementation]
     write_json_atomic(manifest, metadata)
     print("Verified {}: {}".format(implementation, manifest), flush=True)
@@ -278,7 +300,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--implementation", choices=("both", "xpact", "xpact-core"), default="both")
     parser.add_argument("--offline", action="store_true", help="Require an already verified core checkout")
-    parser.add_argument("--profile", choices=("probe", "catalog"), default="probe")
+    parser.add_argument("--profile", choices=("probe", "catalog", "w3c"), default="probe")
     parser.add_argument("--assertions", choices=("on", "off"), default="on")
     args = parser.parse_args(argv)
     root = Path(__file__).resolve().parents[1]
