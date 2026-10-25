@@ -670,6 +670,28 @@ def publishJenkinsTestResults() {
   '''
 }
 
+def notifyBuildResultByEmail() {
+  def result = currentBuild.currentResult
+  if (!(result in ['FAILURE', 'UNSTABLE'])) {
+    return
+  }
+  def recipients = (params.EMAIL_RECIPIENTS ?: '').trim()
+  if (!recipients) {
+    echo 'EMAIL_RECIPIENTS is empty; skipping the build-result email.'
+    return
+  }
+  catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', catchInterruptions: false,
+             message: 'Could not send the build-result email; preserving the original build result.') {
+    mail to: recipients,
+         subject: "${env.JOB_NAME} #${env.BUILD_NUMBER}: ${result}",
+         body: """Result: ${result}
+Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}
+Build page: ${env.BUILD_URL}
+Console: ${env.BUILD_URL}console
+"""
+  }
+}
+
 pipeline {
   agent none
 
@@ -679,6 +701,10 @@ pipeline {
   }
 
   parameters {
+    string(name: 'EMAIL_RECIPIENTS',
+           defaultValue: (params.EMAIL_RECIPIENTS ?: '').trim(),
+           trim: true,
+           description: 'Comma-separated email addresses for failed or unstable builds. Retained as the next build default; leave empty to disable notifications.')
     string(name: 'EXPAT_SOURCE_DIR',
            defaultValue: 'C:\\src\\libexpat-R_2_8_1\\expat',
            description: 'Path to the upstream Expat source tree. libexpat adapter stages are marked unstable when this path does not exist.')
@@ -769,8 +795,8 @@ pipeline {
                   if (-not (Test-Path sonar-project.properties)) {
                     throw "sonar-project.properties was not found."
                   }
-                  Select-String -Path sonar-project.properties -Pattern '^sonar\.projectKey='
-                  & "$env:SONAR_SCANNER_HOME\bin\sonar-scanner.bat"
+                  Select-String -Path sonar-project.properties -Pattern '^sonar\\.projectKey='
+                  & "$env:SONAR_SCANNER_HOME\\bin\\sonar-scanner.bat"
                   if ($LASTEXITCODE -ne 0) { throw "SonarQube analysis failed with exit code $LASTEXITCODE" }
                 '''
               }
@@ -1168,6 +1194,14 @@ pipeline {
         always {
           archiveArtifacts artifacts: 'dist/*.zip,dist/*.txt', allowEmptyArchive: true
         }
+      }
+    }
+  }
+
+  post {
+    cleanup {
+      script {
+        notifyBuildResultByEmail()
       }
     }
   }
