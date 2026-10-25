@@ -60,6 +60,7 @@ class Result:
     elapsed_ms: float = 0.0
     message: str = ""
     known: str = ""
+    exit_code: int | None = None
 
 
 def contained_path(root: Path, candidate: Path) -> Path:
@@ -212,7 +213,8 @@ def load_catalog(suite_dir: Path) -> list[Case]:
     return cases
 
 
-def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir: Path) -> Result:
+def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir: Path,
+             *, diagnostic_dir: Path | None = None) -> Result:
     result = Result(engine, case.id, str(case.path), case.kind, case.expected, "not-run", "skipped")
     if case.skip_reason:
         result.message = case.skip_reason
@@ -225,10 +227,13 @@ def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir
     if case.namespaces:
         command.append("--namespaces")
     started = time.perf_counter()
+    stdout_bytes, stderr_bytes = b"", b""
     try:
         completed = subprocess.run(command, capture_output=True, timeout=timeout, cwd=work_dir)
-        stdout = completed.stdout.decode("utf-8", errors="replace")
-        stderr = completed.stderr.decode("utf-8", errors="replace")
+        result.exit_code = completed.returncode
+        stdout_bytes, stderr_bytes = completed.stdout, completed.stderr
+        stdout = stdout_bytes.decode("utf-8", errors="replace")
+        stderr = stderr_bytes.decode("utf-8", errors="replace")
         markers = [line for line in stdout.splitlines() if line.startswith("XPACT_CONFORMANCE\t")]
         result.message = (stdout + stderr)[-12000:].strip()
         if markers == ["XPACT_CONFORMANCE\tACCEPT"] and completed.returncode == 0:
@@ -243,13 +248,22 @@ def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir
         result.status = "passed" if result.actual == case.expected else "failed"
         if result.status == "failed":
             result.message = f"Expected {case.expected}, got {result.actual}. {case.description}\n{result.message}"
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as error:
+        stdout_bytes, stderr_bytes = error.output or b"", error.stderr or b""
         result.status, result.actual = "error", "timeout"
         result.message = f"Parser exceeded the per-case timeout of {timeout:g} seconds"
     except OSError as error:
         result.status, result.actual, result.message = "error", "process-error", str(error)
     finally:
         result.elapsed_ms = round((time.perf_counter() - started) * 1000, 3)
+        if diagnostic_dir is not None:
+            # Persistence errors are harness errors, never parser verdicts.
+            diagnostic_dir.mkdir(parents=True, exist_ok=True)
+            (diagnostic_dir / "stdout.bin").write_bytes(stdout_bytes)
+            (diagnostic_dir / "stderr.bin").write_bytes(stderr_bytes)
+            (diagnostic_dir / "result.json").write_text(
+                json.dumps({"command": command, "result": tsv_row(result)}, indent=2) + "\n",
+                encoding="utf-8")
     return result
 
 
