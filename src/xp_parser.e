@@ -1271,6 +1271,7 @@ feature {NONE} -- Markup parsing
 			l_first_name_end: INTEGER
 			l_name_starts: detachable ARRAYED_LIST [INTEGER]
 			l_name_ends: detachable ARRAYED_LIST [INTEGER]
+			l_name_set: detachable XP_ATTRIBUTE_NAME_RANGE_SET
 			l_unsupported: BOOLEAN
 			l_duplicate: BOOLEAN
 		do
@@ -1295,14 +1296,24 @@ feature {NONE} -- Markup parsing
 							l_first_name_start := last_attribute_name_start
 							l_first_name_end := last_attribute_name_end
 						else
-							l_duplicate := input_ranges_same (a_input, last_attribute_name_start, last_attribute_name_end, l_first_name_start, l_first_name_end)
-							if not l_duplicate and then attached l_name_starts as l_attached_starts and then attached l_name_ends as l_attached_ends then
-								l_duplicate := has_attribute_name_range (a_input, last_attribute_name_start, last_attribute_name_end, l_attached_starts, l_attached_ends)
+							if attached l_name_set as l_attached_set then
+								l_duplicate := l_attached_set.has_or_insert (a_input, last_attribute_name_start, last_attribute_name_end)
+							elseif l_count = 16 and then attached l_name_starts as l_attached_starts and then attached l_name_ends as l_attached_ends then
+								create l_name_set.make (a_input, l_first_name_start, l_first_name_end, l_attached_starts, l_attached_ends)
+								l_duplicate := l_name_set.has_or_insert (a_input, last_attribute_name_start, last_attribute_name_end)
+								-- The table now owns only integer metadata; the small lists can be released.
+								l_name_starts := Void
+								l_name_ends := Void
+							else
+								l_duplicate := input_ranges_same (a_input, last_attribute_name_start, last_attribute_name_end, l_first_name_start, l_first_name_end)
+								if not l_duplicate and then attached l_name_starts as l_attached_starts and then attached l_name_ends as l_attached_ends then
+									l_duplicate := has_attribute_name_range (a_input, last_attribute_name_start, last_attribute_name_end, l_attached_starts, l_attached_ends)
+								end
 							end
 							if l_duplicate then
 								set_error ("duplicate attribute")
 								i := a_input.count + 1
-							else
+							elseif l_name_set = Void then
 								if not attached l_name_starts then
 									create l_name_starts.make (4)
 									create l_name_ends.make (4)

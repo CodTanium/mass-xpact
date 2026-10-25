@@ -48,6 +48,7 @@ feature {NONE} -- Initialization
 			run_test ("test_document_structure", agent test_document_structure)
 			run_test ("test_token_slice_abstraction", agent test_token_slice_abstraction)
 			run_test ("test_plain_tokenizer_attribute_fast_path", agent test_plain_tokenizer_attribute_fast_path)
+			run_test ("test_many_attribute_duplicates_and_reuse", agent test_many_attribute_duplicates_and_reuse)
 			run_test ("test_plain_tokenizer_character_data_fast_path", agent test_plain_tokenizer_character_data_fast_path)
 			run_test ("test_incremental_parse_session_prototype", agent test_incremental_parse_session_prototype)
 			run_test ("test_expat_port_parse_session_spike", agent test_expat_port_parse_session_spike)
@@ -1222,6 +1223,80 @@ feature {NONE} -- Tests
 			create l_parser.make (l_handler)
 			assert ("plain tokenizer rejects left angle in attribute", not l_parser.parse ("<root a='<bad'/>"))
 			assert ("plain tokenizer left angle attribute error", l_parser.last_error.same_string ("left angle bracket in attribute value"))
+		end
+
+
+	test_many_attribute_duplicates_and_reuse
+			-- Large attribute sets must preserve exact duplicate checks across
+			-- table growth, colliding names, fallback and parser recovery.
+		local
+			l_handler: XP_NULL_EVENT_HANDLER
+			l_parser: XP_PARSER
+			l_prefix, l_valid, l_collision, l_fallback: STRING_8
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			from i := 8 until i > 33 loop
+				if i = 8 or i = 9 or i = 16 or i = 17 or i = 32 or i = 33 then
+					l_prefix := attribute_test_start (i)
+					l_valid := l_prefix + "/>"
+					assert ("unique attributes accepted at " + i.out, l_parser.parse (l_valid))
+					assert ("unique attributes complete at " + i.out, l_parser.last_error.is_empty and then l_parser.current_byte_index = l_valid.count)
+					assert ("first attribute duplicate rejected at " + i.out, not l_parser.parse (l_prefix + " a1='duplicate'/>"))
+					assert ("first attribute duplicate diagnostic at " + i.out, l_parser.last_error.same_string ("duplicate attribute"))
+					assert ("attribute growth recovers at " + i.out, l_parser.parse (l_valid) and then l_parser.last_error.is_empty)
+					assert ("last attribute duplicate rejected at " + i.out, not l_parser.parse (l_prefix + " a" + i.out + "='duplicate'/>"))
+					assert ("last attribute duplicate diagnostic at " + i.out, l_parser.last_error.same_string ("duplicate attribute"))
+				end
+				i := i + 1
+			end
+
+				-- These distinct names have the same full 32-bit FNV-1a hash.
+				-- A hash match alone must never be treated as a duplicate.
+			l_collision := attribute_test_start (16) + " nK0KJY7lQN='one' nSr6UXOAOr='two'"
+			assert ("distinct colliding names accepted", l_parser.parse (l_collision + "/>"))
+			assert ("second colliding name duplicate rejected", not l_parser.parse (l_collision + " nSr6UXOAOr='duplicate'/>"))
+			assert ("second colliding name duplicate diagnostic", l_parser.last_error.same_string ("duplicate attribute"))
+			assert ("colliding name recovery", l_parser.parse (l_collision + "/>") and then l_parser.last_error.is_empty)
+			assert ("first colliding name duplicate rejected", not l_parser.parse (l_collision + " nK0KJY7lQN='duplicate'/>"))
+			assert ("first colliding name duplicate diagnostic", l_parser.last_error.same_string ("duplicate attribute"))
+			l_collision := attribute_test_start (33) + " nK0KJY7lQN='one' nSr6UXOAOr='two'"
+			assert ("distinct colliding names accepted after growth", l_parser.parse (l_collision + "/>"))
+			assert ("colliding duplicate rejected after growth", not l_parser.parse (l_collision + " nSr6UXOAOr='duplicate'/>"))
+			assert ("colliding duplicate after growth diagnostic", l_parser.last_error.same_string ("duplicate attribute"))
+
+			l_prefix := attribute_test_start (33)
+			assert ("malformed attribute after growth rejected", not l_parser.parse (l_prefix + " broken/>"))
+			assert ("malformed attribute after growth diagnostic", l_parser.last_error.same_string ("missing attribute equals"))
+			assert ("simple document recovers after growth failure", l_parser.parse ("<root a='v'/>") and then l_parser.last_error.is_empty)
+			l_fallback := l_prefix + " escaped='&amp;'"
+			assert ("entity fallback after growth accepted", l_parser.parse (l_fallback + "/>"))
+			assert ("duplicate after entity fallback rejected", not l_parser.parse (l_fallback + " a1='duplicate'/>"))
+			assert ("duplicate after entity fallback diagnostic", l_parser.last_error.same_string ("duplicate attribute"))
+			assert ("entity fallback recovers after duplicate", l_parser.parse (l_fallback + "/>") and then l_parser.last_error.is_empty)
+
+			l_prefix := attribute_test_start (9) + " %/195/%/169/='one' %/195/%/168/='two'"
+			assert ("distinct UTF-8 attribute names accepted", l_parser.parse (l_prefix + "/>"))
+			assert ("duplicate UTF-8 attribute name rejected", not l_parser.parse (l_prefix + " %/195/%/169/='duplicate'/>"))
+			assert ("duplicate UTF-8 attribute name diagnostic", l_parser.last_error.same_string ("duplicate attribute"))
+			assert ("simple document recovers after UTF-8 duplicate", l_parser.parse ("<root/>") and then l_parser.last_error.is_empty and then l_parser.current_byte_index = 7)
+		end
+
+	attribute_test_start (a_count: INTEGER): STRING_8
+			-- Unclosed root start tag with `a_count' distinct attributes.
+		require
+			count_non_negative: a_count >= 0
+		local
+			i: INTEGER
+		do
+			create Result.make_from_string ("<root")
+			from i := 1 until i > a_count loop
+				Result.append (" a")
+				Result.append_integer (i)
+				Result.append ("='v'")
+				i := i + 1
+			end
 		end
 
 	test_plain_tokenizer_character_data_fast_path
