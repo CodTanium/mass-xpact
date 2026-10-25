@@ -96,6 +96,8 @@ Start here, then read:
    gap analysis and next optimization priorities.
 16. `docs/drop-in-verification.md` for the Jenkins and public-application
    replacement plan.
+17. [Jenkins email notifications](docs/jenkins-email-notifications.md) for
+   setting recipients for failed and unstable builds.
 
 ## Build And Verify
 
