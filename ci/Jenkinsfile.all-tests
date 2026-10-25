@@ -761,6 +761,25 @@ def publishDualImplementationResults(outputDir, buildId) {
     archiveArtifacts artifacts: "${outputDir}/**/*.json,${outputDir}/**/*.tsv,${outputDir}/**/*.csv,${outputDir}/**/*.html,${outputDir}/**/*.md,${outputDir}/**/*.xml,${outputDir}/**/*.log,${outputDir}/**/stdout.bin,${outputDir}/**/stderr.bin",
                      excludes: "${outputDir}/**/project/**,${outputDir}/**/suite/**",
                      allowEmptyArchive: true
+def notifyBuildResultByEmail() {
+  def result = currentBuild.currentResult
+  if (!(result in ['FAILURE', 'UNSTABLE'])) {
+    return
+  }
+  def recipients = (params.EMAIL_RECIPIENTS ?: '').trim()
+  if (!recipients) {
+    echo 'EMAIL_RECIPIENTS is empty; skipping the build-result email.'
+    return
+  }
+  catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', catchInterruptions: false,
+             message: 'Could not send the build-result email; preserving the original build result.') {
+    mail to: recipients,
+         subject: "${env.JOB_NAME} #${env.BUILD_NUMBER}: ${result}",
+         body: """Result: ${result}
+Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}
+Build page: ${env.BUILD_URL}
+Console: ${env.BUILD_URL}console
+"""
   }
 }
 
@@ -773,6 +792,10 @@ pipeline {
   }
 
   parameters {
+    string(name: 'EMAIL_RECIPIENTS',
+           defaultValue: "${(params.EMAIL_RECIPIENTS ?: '').trim()}",
+           trim: true,
+           description: 'Comma-separated email addresses for failed or unstable builds. Retained as the next build default; leave empty to disable notifications.')
     string(name: 'EXPAT_SOURCE_DIR',
            defaultValue: 'C:\\src\\libexpat-R_2_8_1\\expat',
            description: 'Path to the upstream Expat source tree. libexpat adapter stages are marked unstable when this path does not exist.')
@@ -792,14 +815,14 @@ pipeline {
                  defaultValue: false,
                  description: 'Require cached pinned Xpact-core and W3C archive for the dual lanes; W3C_SUITE_DIRECTORY may supply a local suite.')
     booleanParam(name: 'RUN_WSL_EIFFEL_BENCHMARKS',
-                 defaultValue: false,
+                 defaultValue: true,
                  description: 'Run separate Linux Eiffel/GCC and libexpat benchmarks inside WSL2. Requires Linux EiffelStudio.')
     string(name: 'WSL_DISTRIBUTION',
-           defaultValue: '',
+           defaultValue: 'Ubuntu',
            description: 'Optional WSL2 distribution for Eiffel/GCC benchmarks. Leave empty to use the default distribution.')
     string(name: 'WSL_EIFFEL_ENVIRONMENT',
-           defaultValue: '',
-           description: 'Optional Linux path to the EiffelStudio setup.rc file for WSL benchmarks.')
+           defaultValue: '/mnt/c/Users/ander/Documents/xpact/build/wsl-toolchain/eiffel-env.sh',
+           description: 'Linux path to a Bash environment file for WSL EiffelStudio. Leave empty to use the login environment.')
     string(name: 'W3C_SUITE_DIRECTORY',
            defaultValue: '',
            description: 'Optional prepared W3C XML suite directory for offline benchmarks. Leave empty to download the pinned, checksum-verified suite.')
@@ -1317,6 +1340,14 @@ pipeline {
         always {
           archiveArtifacts artifacts: 'dist/*.zip,dist/*.txt', allowEmptyArchive: true
         }
+      }
+    }
+  }
+
+  post {
+    cleanup {
+      script {
+        notifyBuildResultByEmail()
       }
     }
   }
