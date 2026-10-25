@@ -26,7 +26,7 @@ pipeline {
       steps {
         powershell '''
           $ErrorActionPreference = 'Stop'
-          foreach ($TestFile in @('test_implementation_builds.py', 'test_w3c_conformance.py', 'test_dual_w3c.py')) {
+          foreach ($TestFile in @('test_implementation_builds.py', 'test_w3c_conformance.py', 'test_dual_w3c.py', 'test_jenkins_xpact_summary.py')) {
             python -m unittest discover -s tests/python -p $TestFile -v
             if ($LASTEXITCODE -ne 0) { throw "Runner checks failed: $TestFile" }
           }
@@ -45,15 +45,18 @@ pipeline {
           $PreviousRuns = @(Get-ChildItem -LiteralPath 'build/dual-w3c' -Directory -ErrorAction SilentlyContinue | ForEach-Object Name)
           try {
             & './scripts/run_dual_w3c.ps1' @LaneOptions
-          } finally {
-            $CurrentRuns = @(Get-ChildItem -LiteralPath 'build/dual-w3c' -Directory -ErrorAction SilentlyContinue |
-              Where-Object { $PreviousRuns -notcontains $_.Name })
-            if ($CurrentRuns.Count -eq 1) {
-              $CurrentRunMarker = "build/dual-w3c-current-run-$($env:BUILD_NUMBER).txt"
-              @($env:BUILD_NUMBER, "build/dual-w3c/$($CurrentRuns[0].Name)") |
-                Set-Content -LiteralPath $CurrentRunMarker -Encoding Ascii
-            }
+          } catch {
+            # Reference-parser results remain comparison data, outside the build gate.
+            Write-Host "Comparison retained a nonzero outcome: $($_.Exception.Message)"
           }
+          $CurrentRuns = @(Get-ChildItem -LiteralPath 'build/dual-w3c' -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $PreviousRuns -notcontains $_.Name })
+          if ($CurrentRuns.Count -ne 1) { throw 'Cannot identify one fresh W3C campaign for this build.' }
+          $CurrentRun = "build/dual-w3c/$($CurrentRuns[0].Name)"
+          $CurrentRunMarker = "build/dual-w3c-current-run-$($env:BUILD_NUMBER).txt"
+          @($env:BUILD_NUMBER, $CurrentRun) | Set-Content -LiteralPath $CurrentRunMarker -Encoding Ascii
+          python './scripts/jenkins_xpact_summary.py' --output-dir $CurrentRun --lane w3c --repo-root .
+          if ($LASTEXITCODE -ne 0) { throw 'xpact W3C validation or infrastructure failed; see xpact-summary.json.' }
         '''
       }
     }
@@ -72,9 +75,13 @@ pipeline {
           if (!(run ==~ /build\/dual-w3c\/[0-9]{8}T[0-9]{6}Z-[0-9a-f]{12}/)) {
             error('Invalid dual W3C run directory')
           }
-          junit testResults: "${run}/conformance/junit.xml", allowEmptyResults: true
-          archiveArtifacts artifacts: "${run}/**/*.json,${run}/**/*.tsv,${run}/**/*.md,${run}/**/*.log,${run}/**/stdout.bin,${run}/**/stderr.bin",
-                           allowEmptyArchive: true
+          try {
+            junit testResults: "${run}/xpact-junit.xml", allowEmptyResults: true
+          } finally {
+            archiveArtifacts artifacts: "${run}/**/*.json,${run}/**/*.tsv,${run}/**/*.md,${run}/**/*.xml,${run}/**/*.log,${run}/**/stdout.bin,${run}/**/stderr.bin",
+                             excludes: "${run}/**/project/**,${run}/**/suite/**",
+                             allowEmptyArchive: true
+          }
         }
       }
     }

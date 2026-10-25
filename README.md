@@ -114,6 +114,9 @@ The [dual W3C lane](docs/dual-w3c-lane.md), `scripts/run_dual_w3c.ps1`, runs the
 same applicable conformance cases with both implementations in that configuration
 and reports their acceptance/rejection results side by side.
 
+Both lanes are included in the main [Jenkins execution and plots](docs/dual-implementation-jenkins.md)
+when `RUN_BENCHMARKS` is enabled.
+
 Compile and run the Eiffel regression matrix, both with and without Eiffel
 runtime assertions:
 

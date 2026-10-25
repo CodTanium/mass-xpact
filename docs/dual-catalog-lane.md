@@ -105,6 +105,13 @@ parity. The pinned source checkout remains unmodified.
 
 ## CI and infrastructure verification
 
+Both main Jenkins pipelines now run this lane and the dual W3C lane under
+`RUN_BENCHMARKS`, with both implementations in the plots. See
+[Dual implementations in Jenkins and plots](dual-implementation-jenkins.md)
+for execution, failure handling and metrics.
+The Jenkins Test Result summary and test gate count only our directed controls;
+core remains in the execution, timing plots and comparison artifacts.
+
 The standalone [Jenkins pipeline](../ci/Jenkinsfile.dual-catalog) selects only
 this lane on the existing Windows `built-in` agent and archives its reports and
 logs even on failure. Configure a Pipeline-from-SCM job with that script path
