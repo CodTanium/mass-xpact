@@ -5998,7 +5998,7 @@ feature {NONE} -- Scanning
 						l_needs_copy := True
 						i := i + 1
 					elseif c.code < 128 then
-						if is_xml_character_code (c.code) then
+						if c.code >= 32 or else c = '%T' or else c = '%N' then
 							i := i + 1
 						else
 							set_error ("invalid XML character")
@@ -6048,7 +6048,7 @@ feature {NONE} -- Scanning
 							i := i + 1
 						end
 					elseif c.code < 128 then
-						if is_xml_character_code (c.code) then
+						if c.code >= 32 or else c = '%T' or else c = '%N' then
 							Result.append_character (c)
 							i := i + 1
 						else

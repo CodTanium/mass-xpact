@@ -50,6 +50,7 @@ feature {NONE} -- Initialization
 			run_test ("test_plain_tokenizer_attribute_fast_path", agent test_plain_tokenizer_attribute_fast_path)
 			run_test ("test_many_attribute_duplicates_and_reuse", agent test_many_attribute_duplicates_and_reuse)
 			run_test ("test_plain_tokenizer_character_data_fast_path", agent test_plain_tokenizer_character_data_fast_path)
+			run_test ("test_ascii_xml_character_normalization", agent test_ascii_xml_character_normalization)
 			run_test ("test_incremental_parse_session_prototype", agent test_incremental_parse_session_prototype)
 			run_test ("test_expat_port_parse_session_spike", agent test_expat_port_parse_session_spike)
 			run_test ("test_position_accounting", agent test_position_accounting)
@@ -1325,6 +1326,59 @@ feature {NONE} -- Tests
 			assert ("plain tokenizer accepts reusable input", l_parser.parse (l_input))
 			assert ("plain tokenizer accepts next input", l_parser.parse ("<next/>"))
 			assert ("plain tokenizer does not mutate reusable input", l_input.same_string ("<root>kept</root>"))
+		end
+
+	test_ascii_xml_character_normalization
+			-- XML 1.0 Char permits TAB, LF, CR and ASCII from space through DEL.
+			-- Check literal text bytes through both normalization paths.
+		local
+			l_null_handler: XP_NULL_EVENT_HANDLER
+			l_handler: XP_COLLECTING_HANDLER
+			l_noop_parser, l_observing_parser: XP_PARSER
+			l_input, l_copy_input: STRING_8
+			l_expected: BOOLEAN
+			i: INTEGER
+		do
+			create l_null_handler.make
+			create l_noop_parser.make (l_null_handler)
+			create l_handler.make
+			create l_observing_parser.make (l_handler)
+			from i := 0 until i > 127 loop
+					-- '<' and '&' are XML syntax rather than literal text here.
+				if i /= 60 and i /= 38 then
+					inspect i
+					when 0 .. 8, 11 .. 12, 14 .. 31 then
+						l_expected := False
+					else
+						l_expected := True
+					end
+					create l_input.make_from_string ("<r>x")
+					l_input.append_character (i.to_character_8)
+					l_input.append ("y</r>")
+					l_copy_input := "<r>%R" + l_input.substring (4, l_input.count)
+					assert ("ASCII no-op normalization verdict " + i.out, l_noop_parser.parse (l_input) = l_expected)
+					assert ("ASCII no-op normalization error state " + i.out, l_noop_parser.has_error = (not l_expected))
+					assert ("ASCII CR-copy normalization verdict " + i.out, l_noop_parser.parse (l_copy_input) = l_expected)
+					assert ("ASCII CR-copy normalization error state " + i.out, l_noop_parser.has_error = (not l_expected))
+					l_handler.events.wipe_out
+					assert ("ASCII observing normalization verdict " + i.out, l_observing_parser.parse (l_input) = l_expected)
+					if l_expected then
+						assert ("ASCII observing normalization clears errors " + i.out, l_observing_parser.last_error.is_empty)
+						assert ("ASCII observing normalization callbacks " + i.out, l_handler.events.count = 3 and then l_handler.events.first.same_string ("start:r:0") and then l_handler.events.last.same_string ("end:r"))
+					else
+						assert ("ASCII invalid byte rejected before callbacks " + i.out, l_handler.events.is_empty and then l_observing_parser.last_error.same_string ("invalid XML character"))
+					end
+					l_handler.events.wipe_out
+					assert ("ASCII observing CR-copy verdict " + i.out, l_observing_parser.parse (l_copy_input) = l_expected)
+					if l_expected then
+						assert ("ASCII observing CR-copy clears errors " + i.out, l_observing_parser.last_error.is_empty)
+						assert ("ASCII observing CR-copy callbacks " + i.out, l_handler.events.count = 3 and then l_handler.events.first.same_string ("start:r:0") and then l_handler.events.last.same_string ("end:r"))
+					else
+						assert ("ASCII invalid byte after CR rejected before callbacks " + i.out, l_handler.events.is_empty and then l_observing_parser.last_error.same_string ("invalid XML character"))
+					end
+				end
+				i := i + 1
+			end
 		end
 
 	test_incremental_parse_session_prototype
