@@ -761,6 +761,9 @@ def publishDualImplementationResults(outputDir, buildId) {
     archiveArtifacts artifacts: "${outputDir}/**/*.json,${outputDir}/**/*.tsv,${outputDir}/**/*.csv,${outputDir}/**/*.html,${outputDir}/**/*.md,${outputDir}/**/*.xml,${outputDir}/**/*.log,${outputDir}/**/stdout.bin,${outputDir}/**/stderr.bin",
                      excludes: "${outputDir}/**/project/**,${outputDir}/**/suite/**",
                      allowEmptyArchive: true
+  }
+}
+
 def notifyBuildResultByEmail() {
   def result = currentBuild.currentResult
   if (!(result in ['FAILURE', 'UNSTABLE'])) {
