@@ -4,6 +4,9 @@ This is the first step towards running the same functional tests and benchmarks
 against our parser (`xpact`) and Finnian Reilly's parser (`xpact-core`). It builds
 two independent Eiffel executables and records exactly what each build used.
 
+The next step is the [coverage inventory](implementation-coverage.md), which
+maps existing cases and workloads to their shared or backend-specific coverage.
+
 ## Build both implementations
 
 Requirements: Windows x64, Python 3.11 or newer, Git, EiffelStudio with Base,

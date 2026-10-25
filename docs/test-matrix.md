@@ -1,5 +1,8 @@
 # Test Matrix
 
+For the case-by-case inventory used to prepare dual xpact/Xpact-core execution,
+see [Dual-implementation coverage inventory](implementation-coverage.md).
+
 xpact keeps two Eiffel regression lanes side by side:
 
 | Lane | ECF target | Eiffel assertions | Purpose |
