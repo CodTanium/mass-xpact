@@ -1,5 +1,10 @@
 # Performance Analysis
 
+The [2026-10-26 parser profiling and optimization report](parser-profile-performance.md)
+records the latest measured position, duplicate-attribute and normalization work,
+with fresh before/after measurements and a six-workload comparison to pinned
+Xpact-core. The older measurements below retain their original context.
+
 The [2026-10-25 tag-dispatch comparison](tag-dispatch-performance.md) measures
 the marker-reuse refinement against fresh baseline builds on both MSVC and
 WSL2 GCC, including text-heavy and real XML inputs. The tables below retain
