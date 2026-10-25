@@ -1,0 +1,49 @@
+// Focused Windows lane: qualify both implementations, then time only the catalog.
+pipeline {
+  agent { label 'built-in' }
+  options {
+    timestamps()
+    skipDefaultCheckout(true)
+    disableConcurrentBuilds()
+    timeout(time: 45, unit: 'MINUTES')
+    buildDiscarder(logRotator(numToKeepStr: '30'))
+  }
+  parameters {
+    booleanParam(name: 'OFFLINE_DEPENDENCY', defaultValue: false,
+                 description: 'Require the pinned Xpact-core checkout to be cached already.')
+    string(name: 'CATALOG_ITERATIONS', defaultValue: '1000',
+           description: 'Initial common document count; calibration may increase it.')
+    string(name: 'CATALOG_PAIRS', defaultValue: '6',
+           description: 'Sequential alternating AB/BA measurement pairs.')
+  }
+  stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+    stage('Runner checks') {
+      steps {
+        powershell '''
+          $ErrorActionPreference = 'Stop'
+          python -m unittest discover -s tests/python -p test_dual_catalog.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'Dual catalog runner checks failed.' }
+        '''
+      }
+    }
+    stage('Dual catalog') {
+      steps {
+        powershell '''
+          $ErrorActionPreference = 'Stop'
+          $OfflineDependency = $env:OFFLINE_DEPENDENCY -eq 'true'
+          & './scripts/run_dual_catalog.ps1' -Offline:$OfflineDependency `
+            -Iterations ([int]$env:CATALOG_ITERATIONS) -Pairs ([int]$env:CATALOG_PAIRS)
+        '''
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: 'build/dual-catalog/**/*.json,build/dual-catalog/**/*.tsv,build/dual-catalog/**/*.md,build/dual-catalog/**/*.log',
+                       allowEmptyArchive: true
+    }
+  }
+}

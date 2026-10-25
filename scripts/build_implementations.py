@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build isolated, assertion-enabled parser probes and publish their provenance."""
+"""Build isolated parser probes or catalog executables and record provenance."""
 
 import argparse
 from datetime import datetime, timezone
@@ -20,6 +20,9 @@ from prepare_xpact_core import DependencyError, prepare_dependency, run_git
 
 class BuildError(RuntimeError):
     """No verified build artifact can be published."""
+
+
+GC_POLICIES = {"xpact": "normal", "xpact-core": "core-managed-off-full-collect"}
 
 
 def write_json_atomic(path, value):
@@ -43,13 +46,25 @@ def file_sha256(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def source_fingerprint(repo_root, implementation):
-    """Hash the checked-in probe/build inputs, excluding generated identities."""
+def source_fingerprint(repo_root, implementation, profile="probe"):
+    """Hash selected source/build inputs, excluding generated identities."""
     root = Path(repo_root)
-    probe = root / "tools/implementation_probe" / implementation.replace("-", "_")
-    paths = list(probe.rglob("*.e")) + list(probe.rglob("*.ecf"))
+    if profile == "probe":
+        source = root / "tools/implementation_probe" / implementation.replace("-", "_")
+        directories = [source]
+    elif profile == "catalog":
+        source = root / "benchmarks/dual_catalog"
+        directories = [source / "shared", source / implementation.replace("-", "_")]
+    else:
+        raise BuildError("Unknown build profile: " + str(profile))
+    paths = [path for directory in directories for pattern in ("*.e", "*.ecf")
+             for path in directory.rglob(pattern)]
     paths += [root / "scripts/build_implementations.py", root / "scripts/prepare_xpact_core.py",
               root / "dependencies/xpact-core.json"]
+    if profile == "catalog":
+        paths += [root / relative for relative in ("scripts/run_dual_catalog.py",
+                  "scripts/run_dual_catalog.ps1", "scripts/compare_eiffel_benchmarks.py")
+                  if (root / relative).is_file()]
     if implementation == "xpact":
         paths += list((root / "src").rglob("*.e"))
     digest = hashlib.sha256()
@@ -138,6 +153,15 @@ def validate_probe(output, implementation, revision, configuration):
                          + repr(markers))
 
 
+def validate_catalog_identity(output, implementation, revision, configuration):
+    expected = "\t".join(("XPACT_CATALOG_IDENTITY", implementation, revision,
+                           configuration, GC_POLICIES[implementation]))
+    if output.splitlines() != [expected]:
+        raise BuildError("Catalog executable did not confirm the expected identity/GC policy: "
+                         + repr(output))
+    return GC_POLICIES[implementation]
+
+
 def makefile_settings(code_directory):
     path = code_directory / "Makefile"
     assignments = {}
@@ -151,13 +175,17 @@ def makefile_settings(code_directory):
 
 
 def build_one(repo_root, run_root, implementation, tools, environment, compiler_metadata,
-              *, offline=False):
+              *, offline=False, profile="probe", assertions=True):
+    if implementation not in GC_POLICIES or profile not in ("probe", "catalog"):
+        raise BuildError("Unknown implementation or build profile")
+    if type(assertions) is not bool:
+        raise BuildError("assertions must be a boolean")
     root = Path(repo_root)
     destination = Path(run_root) / implementation
     destination.mkdir()
     manifest = destination / "build.json"
-    configuration = "finalized/assertions-on/msvc-x64"
-    fingerprint = source_fingerprint(root, implementation)
+    configuration = "finalized/assertions-{}/msvc-x64".format("on" if assertions else "off")
+    fingerprint = source_fingerprint(root, implementation, profile)
     source_status = run_git(["status", "--porcelain", "--untracked-files=all"], root)
     if implementation == "xpact-core":
         source = prepare_dependency(root, offline=offline)
@@ -190,25 +218,37 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
                         "object": str(helper_object), "object_sha256": file_sha256(helper_object),
                         "command": helper_command})
         build_environment["XPACT_SHIFT_JIS_OBJECT"] = str(helper_object)
-    name = implementation.replace("-", "_") + "_build_probe"
+    name = implementation.replace("-", "_") + ("_build_probe" if profile == "probe" else "_catalog_benchmark")
     project = destination / "project"
     project.mkdir()
-    ecf = root / "tools/implementation_probe" / implementation.replace("-", "_") / "probe.ecf"
-    command = [tools["ec"], "-batch", "-clean", "-finalize", "-keep", "-config", str(ecf),
-               "-target", "probe", "-project_path", str(project)]
+    if profile == "probe":
+        ecf = root / "tools/implementation_probe" / implementation.replace("-", "_") / "probe.ecf"
+        target = "probe"
+    else:
+        ecf = root / "benchmarks/dual_catalog" / implementation.replace("-", "_") / "catalog.ecf"
+        target = "catalog_assertions" if assertions else "catalog"
+    command = [tools["ec"], "-batch", "-clean", "-finalize"]
+    if assertions:
+        command.append("-keep")
+    command += ["-config", str(ecf), "-target", target, "-project_path", str(project)]
     print("Building {} ({})".format(implementation, configuration), flush=True)
     run_checked(command, cwd=root, env=build_environment, log_path=destination / "eiffel.log")
-    code = project / "EIFGENs/probe/F_code"
+    code = project / "EIFGENs" / target / "F_code"
     run_checked([tools["finish_freezing"]], cwd=code, env=build_environment,
                 log_path=destination / "c.log")
     executable = code / (name + ".exe")
     if not executable.is_file():
         raise BuildError("Expected isolated executable was not created: " + str(executable))
     flags = makefile_settings(code)
-    output = run_checked([executable], cwd=destination, env=build_environment,
-                         log_path=destination / "probe.log", timeout=30)
-    validate_probe(output, implementation, revision, configuration)
-    if source_fingerprint(root, implementation) != fingerprint:
+    verification_command = [executable] + (["--identity"] if profile == "catalog" else [])
+    output = run_checked(verification_command, cwd=destination, env=build_environment,
+                         log_path=destination / ("identity.log" if profile == "catalog" else "probe.log"),
+                         timeout=30)
+    if profile == "catalog":
+        validate_catalog_identity(output, implementation, revision, configuration)
+    else:
+        validate_probe(output, implementation, revision, configuration)
+    if source_fingerprint(root, implementation, profile) != fingerprint:
         raise BuildError("Build inputs changed while compiling " + implementation)
     if implementation == "xpact-core":
         verified = prepare_dependency(root, offline=True)
@@ -218,14 +258,17 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
         raise BuildError("Repository revision changed while compiling")
     metadata = {
         "schema_version": 1, "status": "verified", "implementation": implementation,
+        "profile": profile,
         "source": source, "build_inputs_sha256": fingerprint,
-        "build": {"configuration": configuration, "mode": "finalized", "assertions": True,
+        "build": {"configuration": configuration, "mode": "finalized", "assertions": assertions,
                   "void_safety": "all", "command": command, "makefile": flags,
                   "native_helpers": helpers},
         "toolchain": compiler_metadata,
         "executable": str(executable), "executable_sha256": file_sha256(executable),
         "probe_output": output,
     }
+    if profile == "catalog":
+        metadata["gc_policy"] = GC_POLICIES[implementation]
     write_json_atomic(manifest, metadata)
     print("Verified {}: {}".format(implementation, manifest), flush=True)
     return {"implementation": implementation, "status": "verified", "manifest": str(manifest)}
@@ -235,6 +278,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--implementation", choices=("both", "xpact", "xpact-core"), default="both")
     parser.add_argument("--offline", action="store_true", help="Require an already verified core checkout")
+    parser.add_argument("--profile", choices=("probe", "catalog"), default="probe")
+    parser.add_argument("--assertions", choices=("on", "off"), default="on")
     args = parser.parse_args(argv)
     root = Path(__file__).resolve().parents[1]
     # Unique runs preserve prior evidence and cannot consume another run's executable/report.
@@ -250,7 +295,8 @@ def main(argv=None):
         for implementation in selected:
             try:
                 result = build_one(root, run_root, implementation, tools, environment,
-                                   compiler_metadata, offline=args.offline)
+                                   compiler_metadata, offline=args.offline, profile=args.profile,
+                                   assertions=args.assertions == "on")
             except (BuildError, DependencyError, OSError, ValueError) as error:
                 result = {"implementation": implementation, "status": "failed", "error": str(error)}
                 print(str(error), file=sys.stderr)

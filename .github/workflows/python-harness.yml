@@ -24,3 +24,4 @@ jobs:
       - run: python -m unittest discover -s tests/python -p test_wsl_benchmarks.py -v
       - run: python -m unittest discover -s tests/python -p test_compare_eiffel_benchmarks.py -v
       - run: python -m unittest discover -s tests/python -p test_implementation_builds.py -v
+      - run: python -m unittest discover -s tests/python -p test_dual_catalog.py -v

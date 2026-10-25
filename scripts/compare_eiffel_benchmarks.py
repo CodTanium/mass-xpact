@@ -66,6 +66,8 @@ def parse_args(argv=None):
     parser.add_argument("--pairs", type=positive_int, default=6)
     parser.add_argument("--warmups", type=positive_int, default=2)
     parser.add_argument("--min-sample-seconds", type=nonnegative_float, default=1.0)
+    parser.add_argument("--timeout-seconds", type=positive_int,
+                        help="Optional maximum duration of one benchmark process")
     args = parser.parse_args(argv)
     for name in ("baseline", "candidate", "output_dir"):
         setattr(args, name, getattr(args, name).expanduser().resolve())
@@ -126,7 +128,7 @@ def prepare_workloads(args):
     return workloads
 
 
-def run_sample(executable, iterations, workload, phase, output_dir):
+def run_sample(executable, iterations, workload, phase, output_dir, timeout=None):
     command = [str(executable), "--iterations", str(iterations)]
     if workload.path is not None:
         command += ["--file", str(workload.path)]
@@ -136,14 +138,14 @@ def run_sample(executable, iterations, workload, phase, output_dir):
     try:
         completed = subprocess.run(command, cwd=work, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, universal_newlines=True,
-                                   encoding="utf-8", errors="replace")
+                                   encoding="utf-8", errors="replace", timeout=timeout)
         elapsed = time.perf_counter() - start
         expected = "xpact benchmark harness parsed {} documents.".format(iterations)
         if completed.returncode == 0 and completed.stdout.strip() == expected and elapsed > 0:
             return elapsed
         details = "exit={}\nstdout:\n{}\nstderr:\n{}".format(
             completed.returncode, completed.stdout, completed.stderr)
-    except OSError as error:
+    except (OSError, subprocess.TimeoutExpired) as error:
         details = str(error)
     logs = output_dir / "logs"
     logs.mkdir(parents=True, exist_ok=True)
@@ -218,8 +220,11 @@ def run_comparison(args):
             count = workload.iterations
             print("Comparing {}...".format(workload.name), flush=True)
             def sample(role, phase):
-                return run_sample(executables[role], count, workload,
-                                  workload.name + "-" + phase + "-" + role, output)
+                arguments = (executables[role], count, workload,
+                             workload.name + "-" + phase + "-" + role, output)
+                if args.timeout_seconds is not None:
+                    return run_sample(*arguments, timeout=args.timeout_seconds)
+                return run_sample(*arguments)
             if args.min_sample_seconds > 0:
                 while True:
                     baseline, candidate = sample("A", "calibration"), sample("B", "calibration")

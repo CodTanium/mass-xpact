@@ -6,6 +6,8 @@ two independent Eiffel executables and records exactly what each build used.
 
 The next step is the [coverage inventory](implementation-coverage.md), which
 maps existing cases and workloads to their shared or backend-specific coverage.
+The [focused dual catalog lane](dual-catalog-lane.md) uses the same build
+infrastructure for assertion-enabled audits and assertion-discarded benchmarks.
 
 ## Build both implementations
 
