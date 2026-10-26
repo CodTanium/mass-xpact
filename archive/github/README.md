@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 20:05 UTC with [`export_github.py`](export_github.py): 63 issues and 72 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 20:59 UTC with [`export_github.py`](export_github.py): 64 issues and 74 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -78,10 +78,10 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#70](items/issue-0070.md) | Issue | Task: close the doc gaps found in the 2026-10-22 checklist audit | closed (completed) | documentation, type:task, workflow | 2026-10-22 |
 | [#71](items/pr-0071.md) | PR | Close the doc gaps found in the 2026-10-22 checklist audit | merged | - | 2026-10-22 |
 | [#72](items/pr-0072.md) | PR | Student mass | merged | - | 2026-10-23 |
-| [#73](items/issue-0073.md) | Issue | Finding: Jenkins DLL build cannot find the Eiffel include folder (C:\El2502E fallback replaced in #2/#10) | open | bug, type:finding, group:B-reliable-results, P0, build, regression | 2026-10-23 |
+| [#73](items/issue-0073.md) | Issue | Finding: Jenkins DLL build cannot find the Eiffel include folder (C:\El2502E fallback replaced in #2/#10) | closed (completed) | bug, type:finding, group:B-reliable-results, P0, build, regression | 2026-10-23 |
 | [#74](items/issue-0074.md) | Issue | Finding: native build scripts override the machine's MSVC backend with msc_vc140 | open | type:finding, group:B-reliable-results, P1, build, investigation | 2026-10-23 |
 | [#75](items/pr-0075.md) | PR | Restore the Jenkins Eiffel include fallback next to the student path (#73) | merged | - | 2026-10-23 |
-| [#76](items/pr-0076.md) | PR | Keep the machine's MSVC backend in the native build scripts (#74) | open | - | 2026-10-23 |
+| [#76](items/pr-0076.md) | PR | Keep the machine's MSVC backend in the native build scripts (#74) | merged | - | 2026-10-23 |
 | [#77](items/pr-0077.md) | PR | Write the week 3 report | merged | - | 2026-10-23 |
 | [#78](items/pr-0078.md) | PR | Merge student-Mass into main: Jenkins Eiffel include fallback (#73) | merged | - | 2026-10-23 |
 | [#79](items/issue-0079.md) | Issue | Finding: parser fails 283 W3C cases and the DLL tests (#38, #39, #40, K3); Jenkins FAILURE on main | open (reopened) | bug, type:finding, P0, test | 2026-10-23 |
@@ -141,3 +141,6 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#133](items/pr-0133.md) | PR | Remove the unused old copy of the W3C runner (#132) | merged | - | 2026-10-26 |
 | [#134](items/issue-0134.md) | Issue | Bring the student docs up to date after week 5 (2026-10-26) | closed (completed) | documentation, type:task | 2026-10-26 |
 | [#135](items/pr-0135.md) | PR | Bring the student docs up to date after week 5 (#134) | merged | - | 2026-10-26 |
+| [#136](items/pr-0136.md) | PR | Record the Jenkins verification of the #73 fix | merged | - | 2026-10-26 |
+| [#137](items/issue-0137.md) | Issue | Finish PR #76 and clean up merged branches | closed (completed) | type:task, workflow | 2026-10-26 |
+| [#138](items/pr-0138.md) | PR | Record PR #76 merged and the branch cleanup (#137) | merged | - | 2026-10-26 |

@@ -1,6 +1,6 @@
 # Issue #122: Finding: malformed UTF-8 error is reported at 1:0, not at the bad byte (Expat 2.8.1 comparison)
 
-Archived from <https://github.com/andersoxie/xpact/issues/122> on 2026-10-26 20:05 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/122> on 2026-10-26 20:59 UTC.
 
 | | |
 |---|---|

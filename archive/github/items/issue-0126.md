@@ -1,6 +1,6 @@
 # Issue #126: Finding: default handler receives normalized line ends, not the raw CR (Expat passes raw text)
 
-Archived from <https://github.com/andersoxie/xpact/issues/126> on 2026-10-26 20:05 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/126> on 2026-10-26 20:59 UTC.
 
 | | |
 |---|---|

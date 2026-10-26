@@ -1,13 +1,13 @@
 # Issue #73: Finding: Jenkins DLL build cannot find the Eiffel include folder (C:\El2502E fallback replaced in #2/#10)
 
-Archived from <https://github.com/andersoxie/xpact/issues/73> on 2026-10-26 20:05 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/73> on 2026-10-26 20:59 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-23 07:54 |
-| Closed |  |
+| Closed | 2026-10-26 20:40 |
 | Labels | `bug`, `type:finding`, `group:B-reliable-results`, `P0`, `build`, `regression` |
 | Milestone | Week 3 - Failure reporting |
 
@@ -60,3 +60,21 @@ Both are tested on the student PC (lookup test with fake install folders: the Je
 Two more things from the same log, not caused by these PRs:
 - *SonarQube analysis*: `HTTP 401 Unauthorized` from `sonarqube.bsharp.se` — the Sonar token in Jenkins seems missing or expired; only you can renew it.
 - *Eiffel Tests* turns green but prints no test result (no `xpact Phase 1 tests: ok`). On the student PC the same stage script ran a stale `xpact_tests.exe` that printed nothing and exited 0, because the stage runs no `finish_freezing`. We will file this separately.
+
+### CodTanium, 2026-10-26 20:40: comment
+
+**Verified on Jenkins; closing.**
+
+The fix (`63f67f3`, PR #75) reached `main` with PR #78 (`cf12dee`, 2026-10-23). The Jenkins run on `main` @ `cf12dee` passed the stage that failed before. The log is in [`reports/issue-0079/jenkins-log-cf12dee-before.txt`](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0079/jenkins-log-cf12dee-before.txt):
+
+```
+135   [Pipeline] { (Build Eiffel-Backed DLL)
+204   "C:\El2502E\studio\spec\win64\lib\msc_vc140\finalized.lib" ...
+216   Built ...\build\native-eiffel\xpact.dll (Production)
+218   xpact Eiffel DLL smoke: ok
+292   Built ...\build\native-eiffel\xpact_assertions.dll (Assertions)
+```
+
+The run's final `FAILURE` came later, at the W3C check (#79), which is a separate problem.
+
+Recorded in `reports/issue-0073/report.md` (section 7) and `student/PLAN.md` (Solved), PR #136 (`f9822b6`).
