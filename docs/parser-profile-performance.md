@@ -1,5 +1,9 @@
 # Parser profiling and optimization, 26 October 2026
 
+The [PubMed character-data follow-up](pubmed-character-data-performance.md)
+measures the next optimization and revised core gap. The tables below retain
+this earlier campaign's results.
+
 Profiling found repeated document-prefix position scans and quadratic duplicate
 attribute searches. The changes substantially improve the two real XML process
 latency workloads and the attribute-heavy workload. Catalog throughput remains

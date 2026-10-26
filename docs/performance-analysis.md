@@ -1,5 +1,10 @@
 # Performance Analysis
 
+The [PubMed character-data follow-up](pubmed-character-data-performance.md)
+profiles the remaining gap and removes repeated close-marker construction.
+It records a further 62.3% PubMed throughput improvement and the fresh core
+comparison. Earlier reports below preserve their own measurements.
+
 The [2026-10-26 parser profiling and optimization report](parser-profile-performance.md)
 records the latest measured position, duplicate-attribute and normalization work,
 with fresh before/after measurements and a six-workload comparison to pinned
