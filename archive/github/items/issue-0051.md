@@ -1,6 +1,6 @@
 # Issue #51: Finding: import_msvc_environment.ps1 stops on "'vswhere.exe' is not recognized" in PowerShell 5.1
 
-Archived from <https://github.com/andersoxie/xpact/issues/51> on 2026-10-26 17:14 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/51> on 2026-10-26 18:53 UTC.
 
 | | |
 |---|---|

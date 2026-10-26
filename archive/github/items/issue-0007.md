@@ -1,6 +1,6 @@
 # Issue #7: Finding: build_native_eiffel.ps1 stops with "Expected Eiffel link response file not found" (xpact_native_library.lnk)
 
-Archived from <https://github.com/andersoxie/xpact/issues/7> on 2026-10-26 17:14 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/7> on 2026-10-26 18:53 UTC.
 
 | | |
 |---|---|

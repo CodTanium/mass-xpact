@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 17:14 UTC with [`export_github.py`](export_github.py): 50 issues and 66 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 18:53 UTC with [`export_github.py`](export_github.py): 52 issues and 68 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -122,3 +122,7 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#114](items/pr-0114.md) | PR | Record the student PC environment changes of 2026-10-26 (#113) | merged | - | 2026-10-26 |
 | [#115](items/issue-0115.md) | Issue | Task: bring the student docs up to date (2026-10-26) | closed (completed) | documentation, type:task, workflow | 2026-10-26 |
 | [#116](items/pr-0116.md) | PR | Bring the student docs up to date (2026-10-26) (#115) | merged | - | 2026-10-26 |
+| [#117](items/issue-0117.md) | Issue | Task: xmlconf verdict rules - re-score the 2026-10-14 baseline with the runner's rules (draft 12) | closed (completed) | type:task, D2-guided, P1, test, group:G-verification | 2026-10-26 |
+| [#118](items/issue-0118.md) | Issue | Task: G01 - corpus manifest and 50-100 reviewed W3C cases | closed (completed) | type:task, D2-guided, P0, test, group:G-verification | 2026-10-26 |
+| [#119](items/pr-0119.md) | PR | Re-score the 2026-10-14 xmlconf results with the runner's verdict rules (#117) | merged | - | 2026-10-26 |
+| [#120](items/pr-0120.md) | PR | Add the G01 corpus manifest: 93 reviewed W3C cases (#118) | merged | - | 2026-10-26 |
