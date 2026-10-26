@@ -1,13 +1,13 @@
 # Issue #70: Task: close the doc gaps found in the 2026-10-22 checklist audit
 
-Archived from <https://github.com/andersoxie/xpact/issues/70> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/70> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-22 21:23 |
-| Closed |  |
+| Closed | 2026-10-26 12:14 |
 | Labels | `documentation`, `type:task`, `workflow` |
 | Milestone | Week 3 - Failure reporting |
 
@@ -26,3 +26,9 @@ A check of every closed issue's "Done when" list on 2026-10-22 (at `76ac272`) fo
 - [ ] Report with verification in `reports/issue-NNNN/report.md`
 
 Not in scope: the 6 labels missing on GitHub (#35, needs the supervisor).
+
+## Discussion
+
+### CodTanium, 2026-10-26 12:14: comment
+
+Fixed in `82ad4cb` (PR #71). Verified 2026-10-26 in #104 (https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/report.md): the four pages state their date and commit, `reports/issue-0070/report.md` is on `student-Mass`. Closing.

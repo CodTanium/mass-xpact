@@ -1,6 +1,6 @@
 # Issue #74: Finding: native build scripts override the machine's MSVC backend with msc_vc140
 
-Archived from <https://github.com/andersoxie/xpact/issues/74> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/74> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
@@ -37,3 +37,7 @@ Confirmed from the code (the two assignments). Whether `msc_vc140` would work on
 ### CodTanium, 2026-10-23 12:02: comment
 
 Fix in PR #76. Not seen failing yet; needs the same Jenkins rerun as #73 (see the request there: https://github.com/andersoxie/xpact/issues/73). Stays open until a Jenkins run builds the DLL.
+
+### CodTanium, 2026-10-26 12:14: comment
+
+PR #76 updated on 2026-10-26 after #103 and #105 (only rows in reports/README.md and student/PLAN.md conflicted; scripts unchanged). Retested: both choice tests 0 failures; build_native_eiffel.ps1 -BuildTier Production and run_native_runtime_smoke.ps1 exit 0 on the student PC. Mergeable; still waiting for a Jenkins run.

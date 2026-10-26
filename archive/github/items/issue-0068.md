@@ -1,13 +1,13 @@
 # Issue #68: Task: complete the A01 evidence (tests linked, change-and-predict, notes)
 
-Archived from <https://github.com/andersoxie/xpact/issues/68> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/68> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-22 21:19 |
-| Closed |  |
+| Closed | 2026-10-26 12:14 |
 | Labels | `documentation`, `type:task`, `workflow` |
 | Milestone | Week 1 - Setup |
 
@@ -32,3 +32,9 @@ A01 is ticked as done in `student/PLAN.md` (#18), but three items in its "Done w
 - [ ] Predictions committed before the run
 - [ ] `student/github/issues/01-A01.md` ticked with evidence; `student/PLAN.md` A01 line points to the notes
 - [ ] Report with verification in `reports/issue-NNNN/report.md`
+
+## Discussion
+
+### CodTanium, 2026-10-26 12:14: comment
+
+Fixed in `2fdc61a` (PR #69). Verified 2026-10-26 in #104 (https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/report.md): `student/results/A01-orientation/` (README, predictions, actual output), `reports/issue-0068/report.md` on `student-Mass`; the A01 draft has no unticked items. Closing.

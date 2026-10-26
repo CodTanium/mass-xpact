@@ -1,7 +1,7 @@
 SUPERVISOR'S CHANGES ON MAIN - 2026-10-24 AND 2026-10-25
-Checked on main @ d686496, 2026-10-25; updated to main @ 64d027f, 2026-10-26
+Checked on main @ d686496, 2026-10-25; updated to main @ de01371, 2026-10-26
 
-16 pull requests merged into main by andersoxie (#82 - #100).
+17 pull requests merged into main by andersoxie (#82 - #101).
 
 
 1. LIBEXPAT TEST LANES IN JENKINS (24 Oct)
@@ -63,11 +63,28 @@ Xpact-core, the other parser implementation, on the same tests as xpact.
        for Windows).
 
 
+6. PARSER SPEED (25-26 Oct, found on 2026-10-26)
+------------------------------------------------
+  #101 Made the parser faster, measured on large PubMed XML files
+       (11 commits). It now checks plain ASCII text faster, stores
+       attribute names without building strings (new class
+       src/xp_attribute_name_range_set.e), no longer rescans the start of
+       the document when positions move back, avoids work per byte in CDATA,
+       counts text positions in batches, and parses the DOCTYPE more cheaply.
+       533 new test lines in tests/xp_test_root.e. Evidence in
+       docs/*performance*.md and benchmarks/results/.
+       Brought into student-Mass on 2026-10-26: issue #110, PR #111 (merge
+       commit e8c5cb3, no conflicts).
+
+
 WHAT THIS MEANS FOR ME
 ----------------------
   [x] Our Jenkins path fix (#75) is in main. He didn't change our build
       scripts.
   [ ] #76 (the compiler-setting fix) is still open on student-Mass.
+  [x] #101 brought into student-Mass on 2026-10-26 (#110, PR #111):
+      student-Mass is 0 commits behind main. Tests on the merged code:
+      see issue #110.
   [x] main brought into student-Mass on 2026-10-26: issue #102, PR #103
       (merge commit 41731c8, no conflicts; main itself not changed, still
       64d027f). This folder synced to 41731c8 with sync-latest.ps1, so all

@@ -22,6 +22,17 @@
   "archived_by": null
  },
  {
+  "id": 12843319611,
+  "node_id": "LA_kwDOSlFAns8AAAAC_YWBOw",
+  "url": "https://api.github.com/repos/andersoxie/xpact/labels/D1-beginner",
+  "name": "D1-beginner",
+  "color": "c2e0c6",
+  "default": false,
+  "description": "Read, run prepared examples, document and report",
+  "archived_at": null,
+  "archived_by": null
+ },
+ {
   "id": 12761989780,
   "node_id": "LA_kwDOSlFAns8AAAAC-KyClA",
   "url": "https://api.github.com/repos/andersoxie/xpact/labels/D2-guided",
@@ -40,6 +51,17 @@
   "color": "f9d0c4",
   "default": false,
   "description": "Experienced developer guides closely",
+  "archived_at": null,
+  "archived_by": null
+ },
+ {
+  "id": 12843319750,
+  "node_id": "LA_kwDOSlFAns8AAAAC_YWBxg",
+  "url": "https://api.github.com/repos/andersoxie/xpact/labels/D4-expert",
+  "name": "D4-expert",
+  "color": "e99695",
+  "default": false,
+  "description": "Experienced developer owns the implementation",
   "archived_at": null,
   "archived_by": null
  },
@@ -88,6 +110,17 @@
   "archived_by": null
  },
  {
+  "id": 12843319134,
+  "node_id": "LA_kwDOSlFAns8AAAAC_YV_Xg",
+  "url": "https://api.github.com/repos/andersoxie/xpact/labels/group:A-orientation",
+  "name": "group:A-orientation",
+  "color": "1d76db",
+  "default": false,
+  "description": "A - Orientation and assertion policy",
+  "archived_at": null,
+  "archived_by": null
+ },
+ {
   "id": 12761989639,
   "node_id": "LA_kwDOSlFAns8AAAAC-KyCBw",
   "url": "https://api.github.com/repos/andersoxie/xpact/labels/group:B-reliable-results",
@@ -106,6 +139,28 @@
   "color": "d93f0b",
   "default": false,
   "description": "C - Parser correctness and memory safety",
+  "archived_at": null,
+  "archived_by": null
+ },
+ {
+  "id": 12843319261,
+  "node_id": "LA_kwDOSlFAns8AAAAC_YV_3Q",
+  "url": "https://api.github.com/repos/andersoxie/xpact/labels/group:F-core",
+  "name": "group:F-core",
+  "color": "5319e7",
+  "default": false,
+  "description": "F - Xpact core investigation and adapters",
+  "archived_at": null,
+  "archived_by": null
+ },
+ {
+  "id": 12843319433,
+  "node_id": "LA_kwDOSlFAns8AAAAC_YWAiQ",
+  "url": "https://api.github.com/repos/andersoxie/xpact/labels/group:G-verification",
+  "name": "group:G-verification",
+  "color": "fbca04",
+  "default": false,
+  "description": "G - Shared verification and measurement",
   "archived_at": null,
   "archived_by": null
  },
@@ -194,6 +249,17 @@
   "color": "1d76db",
   "default": false,
   "description": "Tests, test runs and test tools",
+  "archived_at": null,
+  "archived_by": null
+ },
+ {
+  "id": 12843319902,
+  "node_id": "LA_kwDOSlFAns8AAAAC_YWCXg",
+  "url": "https://api.github.com/repos/andersoxie/xpact/labels/type:blocker",
+  "name": "type:blocker",
+  "color": "000000",
+  "default": false,
+  "description": "Stops other work until resolved",
   "archived_at": null,
   "archived_by": null
  },

@@ -17,7 +17,7 @@ unchanged so the record is complete. They are snapshots: the reports in
 | [`jenkins.odt`](jenkins.odt) | 2026-10-23, updated 2026-10-25 | Jenkins notes |
 | [`reportweek.txt`](reportweek.txt) | 2026-10-23 | Weekly report, week 3 (19-23 October) |
 | [`w3cerror.txt`](w3cerror.txt) | 2026-10-24 | Analysis of the Jenkins W3C skips: where 1,716 skipped and 3,497 passed come from, and which skips can be fixed |
-| [`newChanges.txt`](newChanges.txt) | 2026-10-25, updated 2026-10-26 | The supervisor's changes on `main` (#82-#100) in plain words, what they mean for the student work, and the sync of `main` into `student-Mass` (#102, #103) |
+| [`newChanges.txt`](newChanges.txt) | 2026-10-25, updated 2026-10-26 | The supervisor's changes on `main` (#82-#101) in plain words, what they mean for the student work, and the sync of `main` into `student-Mass` (#102, #103) |
 
 The Jenkins log of `main` at `cf12dee` (`jenkinReport.txt`) is already in the
 repository as [`reports/issue-0079/jenkins-log-cf12dee-before.txt`](../../reports/issue-0079/jenkins-log-cf12dee-before.txt).

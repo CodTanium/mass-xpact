@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 11:49 UTC with [`export_github.py`](export_github.py): 44 issues and 59 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 16:48 UTC with [`export_github.py`](export_github.py): 48 issues and 64 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -8,7 +8,7 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 |---|---|---|---|---|---|
 | [#1](items/pr-0001.md) | PR | Add W3C XML conformance suite to benchmarks and Jenkins | merged | - | 2026-10-06 |
 | [#2](items/issue-0002.md) | Issue | Finding: build_native_eiffel.ps1 cannot find the Eiffel runtime include directory | closed (completed) | bug, type:finding, group:B-reliable-results, D2-guided, P0, build | 2026-10-19 |
-| [#3](items/issue-0003.md) | Issue | Finding: postcondition final_finished_or_suspended fails in test_garbage_collection_suspension (B03) | open | bug, type:finding, group:C-correctness, D3-advanced, P0, investigation | 2026-10-19 |
+| [#3](items/issue-0003.md) | Issue | Finding: postcondition final_finished_or_suspended fails in test_garbage_collection_suspension (B03) | closed (completed) | bug, type:finding, group:C-correctness, D3-advanced, P0, investigation | 2026-10-19 |
 | [#4](items/issue-0004.md) | Issue | Finding: importing the MSVC environment fails with "The input line is too long" | closed (completed) | bug, type:finding, group:B-reliable-results, D2-guided, P0, build | 2026-10-19 |
 | [#5](items/issue-0005.md) | Issue | Task: versioning workflow for fixes on student-Mass | closed (completed) | documentation, type:task, workflow | 2026-10-19 |
 | [#6](items/pr-0006.md) | PR | Add versioning workflow for fixes | merged | - | 2026-10-19 |
@@ -44,8 +44,8 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#36](items/pr-0036.md) | PR | Repair the repository state left on 2026-10-21 | merged | documentation, type:task, workflow | 2026-10-21 |
 | [#37](items/issue-0037.md) | Issue | Task: C# test program for the xpact DLL (C02, C03, C10 part) | closed (completed) | type:task, group:C-correctness, D2-guided, P0, test | 2026-10-21 |
 | [#38](items/issue-0038.md) | Issue | Finding: with a start handler, the rest of the document is not parsed: <root> is accepted and end events are lost (C01) | closed (completed) | bug, type:finding, group:C-correctness, D3-advanced, P0, test | 2026-10-21 |
-| [#39](items/issue-0039.md) | Issue | Finding: invalid UTF-8 is accepted in text, attributes, names, comments, PIs and CDATA | open | bug, type:finding, group:C-correctness, D3-advanced, P0, test | 2026-10-21 |
-| [#40](items/issue-0040.md) | Issue | Finding: a non-final chunk that ends with '<' crashes xpact_assertions.dll (find_markup_declaration_end index_in_bounds) | open | bug, type:finding, group:C-correctness, D3-advanced, P0, test, investigation | 2026-10-21 |
+| [#39](items/issue-0039.md) | Issue | Finding: invalid UTF-8 is accepted in text, attributes, names, comments, PIs and CDATA | closed (completed) | bug, type:finding, group:C-correctness, D3-advanced, P0, test | 2026-10-21 |
+| [#40](items/issue-0040.md) | Issue | Finding: a non-final chunk that ends with '<' crashes xpact_assertions.dll (find_markup_declaration_end index_in_bounds) | closed (completed) | bug, type:finding, group:C-correctness, D3-advanced, P0, test, investigation | 2026-10-21 |
 | [#41](items/pr-0041.md) | PR | Add a C# test program for the xpact DLL (C02, C03, C10 part) | merged | type:task, group:C-correctness, D2-guided, P0, test | 2026-10-21 |
 | [#42](items/pr-0042.md) | PR | Record the GitHub labels and week milestones from CLAUDE.md | merged | documentation, type:task, workflow | 2026-10-22 |
 | [#43](items/issue-0043.md) | Issue | Task: bring the student docs up to date (2026-10-22) in the CLAUDE.md layout | closed (completed) | documentation, type:task, workflow | 2026-10-22 |
@@ -73,9 +73,9 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#65](items/pr-0065.md) | PR | Drop the Jenkins check of B02, mark week 3 complete | merged | - | 2026-10-22 |
 | [#66](items/issue-0066.md) | Issue | Task: record the items put on hold on 2026-10-22 in student/PLAN.md | closed (completed) | documentation, type:task | 2026-10-22 |
 | [#67](items/pr-0067.md) | PR | Record the items put on hold on 2026-10-22 | merged | - | 2026-10-22 |
-| [#68](items/issue-0068.md) | Issue | Task: complete the A01 evidence (tests linked, change-and-predict, notes) | open | documentation, type:task, workflow | 2026-10-22 |
+| [#68](items/issue-0068.md) | Issue | Task: complete the A01 evidence (tests linked, change-and-predict, notes) | closed (completed) | documentation, type:task, workflow | 2026-10-22 |
 | [#69](items/pr-0069.md) | PR | Complete the A01 evidence (tests linked, change-and-predict, notes) | merged | - | 2026-10-22 |
-| [#70](items/issue-0070.md) | Issue | Task: close the doc gaps found in the 2026-10-22 checklist audit | open | documentation, type:task, workflow | 2026-10-22 |
+| [#70](items/issue-0070.md) | Issue | Task: close the doc gaps found in the 2026-10-22 checklist audit | closed (completed) | documentation, type:task, workflow | 2026-10-22 |
 | [#71](items/pr-0071.md) | PR | Close the doc gaps found in the 2026-10-22 checklist audit | merged | - | 2026-10-22 |
 | [#72](items/pr-0072.md) | PR | Student mass | merged | - | 2026-10-23 |
 | [#73](items/issue-0073.md) | Issue | Finding: Jenkins DLL build cannot find the Eiffel include folder (C:\El2502E fallback replaced in #2/#10) | open | bug, type:finding, group:B-reliable-results, P0, build, regression | 2026-10-23 |
@@ -106,6 +106,15 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#98](items/pr-0098.md) | PR | Added both lanes to **both main Jenkins pipelines**, enabled by `RUN_… | merged | - | 2026-10-25 |
 | [#99](items/pr-0099.md) | PR | Yes—the merge commit `5989c33` dropped two closing braces before `not… | merged | - | 2026-10-25 |
 | [#100](items/pr-0100.md) | PR | Found and fixed a **Windows Git path-length problem**. | merged | - | 2026-10-25 |
-| [#101](items/pr-0101.md) | PR | Codex/profile parser bottlenecks | open | - | 2026-10-26 |
+| [#101](items/pr-0101.md) | PR | Codex/profile parser bottlenecks | merged | - | 2026-10-26 |
 | [#102](items/issue-0102.md) | Issue | Task: sync student-Mass with main after #82-#100 | closed (completed) | type:task, workflow | 2026-10-26 |
 | [#103](items/pr-0103.md) | PR | Sync student-Mass with main after #82-#100 | merged | - | 2026-10-26 |
+| [#104](items/issue-0104.md) | Issue | Task: full check of student-Mass @ 41731c8 and PLAN.md update (2026-10-26) | closed (completed) | documentation, type:task, workflow, test | 2026-10-26 |
+| [#105](items/pr-0105.md) | PR | Record the full check of student-Mass @ 41731c8 and update PLAN.md (#104) | merged | - | 2026-10-26 |
+| [#106](items/issue-0106.md) | Issue | Task: finish the open week 2 and week 3 items in PLAN.md | closed (completed) | documentation, type:task, workflow | 2026-10-26 |
+| [#107](items/pr-0107.md) | PR | Finish the open week 2 and week 3 items in PLAN.md (#106) | merged | - | 2026-10-26 |
+| [#108](items/issue-0108.md) | Issue | Task: create the 6 missing labels (#35) and bring the project board up to date | closed (completed) | documentation, type:task, workflow | 2026-10-26 |
+| [#109](items/pr-0109.md) | PR | Record the 6 new labels (#35) and the updated project board (#108) | merged | - | 2026-10-26 |
+| [#110](items/issue-0110.md) | Issue | Task: sync student-Mass with main after #101 | closed (completed) | type:task, workflow | 2026-10-26 |
+| [#111](items/pr-0111.md) | PR | Sync student-Mass with main after #101 | merged | - | 2026-10-26 |
+| [#112](items/pr-0112.md) | PR | Record the sync with main after #101 and the tests on the merged code (#110) | merged | - | 2026-10-26 |

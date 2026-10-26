@@ -1,13 +1,13 @@
 # Issue #39: Finding: invalid UTF-8 is accepted in text, attributes, names, comments, PIs and CDATA
 
-Archived from <https://github.com/andersoxie/xpact/issues/39> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/39> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-21 23:57 |
-| Closed |  |
+| Closed | 2026-10-26 12:13 |
 | Labels | `bug`, `type:finding`, `group:C-correctness`, `D3-advanced`, `P0`, `test` |
 | Milestone | Week 5 - Regressions |
 
@@ -45,3 +45,17 @@ Program from #37. The inputs are exact bytes in the program (`Catalog.cs`), for 
 **10. Verification:** a fix is verified when every bad-sequence case in the `utf8` group is REJECT and every `valid-e9` case still passes. A rerun gave the same result for every case.
 
 **Logs:** [results README, finding 2](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/README.md#findings) · [production/results.tsv](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/production/results.tsv)
+
+## Discussion
+
+### CodTanium, 2026-10-26 12:13: comment
+
+**Verified fixed, 2026-10-26** (#104, report: https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/report.md).
+
+- Fix: PR #80 (strict UTF-8), on `student-Mass` @ `41731c8`.
+- Command: `XpactDllTests.exe` (C# DLL test program, #37) on `xpact_assertions.dll` and `xpact.dll`, both built 2026-10-26 with `build_native_eiffel.ps1`.
+- Expected (written first): 0 failures.
+- Actual: the `utf8` group — whole 180, split 2,298, byte by byte 180 = **2,658 cases — all pass on both DLLs**; total 3,360/3,360, 0 crash ([assertions DLL](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/logs/10-dll-tests-assertions.txt), [production DLL](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/logs/11-dll-tests-production.txt)). Before: 2,106 of 2,148 malformed inputs accepted.
+- W3C, both finalized builds: 1,727 passed, 0 failed ([log](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/logs/12-benchmarks-w3c.txt)).
+
+Closing.

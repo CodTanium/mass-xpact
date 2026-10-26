@@ -1,6 +1,6 @@
 # Issue #35: Task: GitHub labels and week milestones from CLAUDE.md
 
-Archived from <https://github.com/andersoxie/xpact/issues/35> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/35> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
@@ -21,8 +21,8 @@ Archived from <https://github.com/andersoxie/xpact/issues/35> on 2026-10-26 11:4
 - [x] Every issue #2-#33 has a milestone and the matching new labels
 
 **To do in the repository:**
-- [ ] `student/github/labels.json` and `milestones.json` match what is on GitHub ⚠️ **not yet:** 6 labels in `labels.json` are not on GitHub (`D1-beginner`, `D4-expert`, `group:A-orientation`, `group:F-core`, `group:G-verification`, `type:blocker`); creating them needs the supervisor. Milestones match exactly.
-- [ ] `student/github/README.md` describes the labels, milestones and which issue has which ⚠️ **not yet:** the issue table stops at #46; #48-#68 are missing
+- [x] `student/github/labels.json` and `milestones.json` match what is on GitHub _(verified 2026-10-26 after #108: 21/21 labels, 10/10 milestones)_
+- [x] `student/github/README.md` describes the labels, milestones and which issue has which _(verified 2026-10-26: issue tables in #70, labels and board in #108)_
 
 **Not done:** the project board (Todo → In progress → In review → Done). `gh` is logged in without the `project` scope; `gh auth refresh -s project` needs the browser, so the student has to run it once.
 

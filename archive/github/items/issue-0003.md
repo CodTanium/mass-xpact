@@ -1,13 +1,13 @@
 # Issue #3: Finding: postcondition final_finished_or_suspended fails in test_garbage_collection_suspension (B03)
 
-Archived from <https://github.com/andersoxie/xpact/issues/3> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/3> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-19 21:25 |
-| Closed |  |
+| Closed | 2026-10-26 12:13 |
 | Labels | `bug`, `type:finding`, `group:C-correctness`, `D3-advanced`, `P0`, `investigation` |
 | Milestone | Week 2 - Baseline |
 
@@ -294,3 +294,15 @@ Fix report with the analysis, proof of the new variant and all logs: [reports/fi
 How it was done: separate worktree `C:\xpact\xpact-b03-check` at `42d6b40`, `git show d9f662f -- src | git apply`, `scripts\build_native_eiffel.ps1 -BuildTier Assertions -OutputDir build\native-eiffel-b03`; nothing committed. Details: [results README, finding 4](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/README.md#findings) · [diff](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/assertions-b03fix/b03-fix.diff) · [build log](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/assertions-b03fix/build.log) · [crash example](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/assertions/crash-examples/b03-no-trace-c02-valid_none_whole.txt)
 
 This supports reviewing draft PR #12. Still open: the PR waits for the parser developer's review.
+
+### CodTanium, 2026-10-26 12:13: comment
+
+**Verified fixed, 2026-10-26** (#104, report: https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/report.md).
+
+- Fix: PR #12, merged by the supervisor; on `student-Mass` @ `41731c8`.
+- Command: `.\scripts\run_eiffel_test_matrix.ps1 -AssertionMode All -BuildMode All` on the student PC (EiffelStudio 25.12, assertions on and off, finalized with `-keep`).
+- Expected (written first): 4 × `xpact Phase 1 tests: ok`, exit 0.
+- Actual: 4 × `xpact Phase 1 tests: ok`, exit 0. The assertions-on / Workbench lane runs `test_garbage_collection_suspension` without the `final_finished_or_suspended` violation ([log](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/logs/matrix-all.txt)).
+- Through the DLL (the 2026-10-22 evidence above: crash on every `/>` input): `XpactDllTests` on `xpact_assertions.dll` 3,360/3,360, 0 crashes ([log](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/logs/10-dll-tests-assertions.txt)).
+
+Closing. #13 (the GC wrapper that hid this error) stays open.

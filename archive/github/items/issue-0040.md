@@ -1,13 +1,13 @@
 # Issue #40: Finding: a non-final chunk that ends with '<' crashes xpact_assertions.dll (find_markup_declaration_end index_in_bounds)
 
-Archived from <https://github.com/andersoxie/xpact/issues/40> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/40> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-21 23:57 |
-| Closed |  |
+| Closed | 2026-10-26 12:13 |
 | Labels | `bug`, `type:finding`, `group:C-correctness`, `D3-advanced`, `P0`, `test`, `investigation` |
 | Milestone | Week 5 - Regressions |
 
@@ -49,3 +49,16 @@ XP_NATIVE_PARSER    parse @7  ->  XP_NATIVE_BRIDGE_EXPORT parse @3  ->  XP_NATIV
 **10. Verification:** a fix is verified when no `split` or `bytes` case crashes in `find_markup_declaration_end` on `xpact_assertions.dll`.
 
 **Logs:** [results README, finding 3](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/README.md#findings) · [assertions-b03fix/results.tsv](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/assertions-b03fix/results.tsv) · [summary](https://github.com/andersoxie/xpact/blob/fix/37-dll-test-program/student/results/dll-tests-2026-10-22/assertions-b03fix/summary.txt)
+
+## Discussion
+
+### CodTanium, 2026-10-26 12:13: comment
+
+**Verified fixed, 2026-10-26** (#104, report: https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/report.md).
+
+- Fix: PR #80, on `student-Mass` @ `41731c8`.
+- Command: `XpactDllTests.exe` on `xpact_assertions.dll` (built 2026-10-26, assertions on, SHA-256 `ed7b2c86…`), every split point and byte by byte.
+- Expected (written first): 0 crashes.
+- Actual: 3,360/3,360 pass, **0 crashes** (before: 644 crashes in `find_markup_declaration_end`) ([log](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0104/logs/10-dll-tests-assertions.txt)).
+
+Closing.

@@ -1,6 +1,6 @@
 # Issue #4: Finding: importing the MSVC environment fails with "The input line is too long"
 
-Archived from <https://github.com/andersoxie/xpact/issues/4> on 2026-10-26 11:49 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/4> on 2026-10-26 16:48 UTC.
 
 | | |
 |---|---|
