@@ -1,5 +1,9 @@
 # PubMed character-data profiling, 26 October 2026
 
+The [text-position follow-up](pubmed-position-performance.md) records the next
+profile, allocation-free position batching and the latest direct core
+comparison. The tables below retain this earlier campaign's results.
+
 This follows the [first profiling pass](parser-profile-performance.md), where
 pinned Xpact-core was 17.7197x faster on sustained PubMed parsing. The next
 measured bottleneck was repeated construction of a fixed three-byte marker in

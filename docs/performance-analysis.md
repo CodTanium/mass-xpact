@@ -1,5 +1,9 @@
 # Performance Analysis
 
+The [PubMed text-position follow-up](pubmed-position-performance.md) records
+the next profile, allocation-free position batching and the latest direct
+core comparison. Older reports below retain their original provenance.
+
 The [PubMed character-data follow-up](pubmed-character-data-performance.md)
 profiles the remaining gap and removes repeated close-marker construction.
 It records a further 62.3% PubMed throughput improvement and the fresh core
