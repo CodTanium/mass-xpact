@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 18:53 UTC with [`export_github.py`](export_github.py): 52 issues and 68 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 20:05 UTC with [`export_github.py`](export_github.py): 63 issues and 72 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -126,3 +126,18 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#118](items/issue-0118.md) | Issue | Task: G01 - corpus manifest and 50-100 reviewed W3C cases | closed (completed) | type:task, D2-guided, P0, test, group:G-verification | 2026-10-26 |
 | [#119](items/pr-0119.md) | PR | Re-score the 2026-10-14 xmlconf results with the runner's verdict rules (#117) | merged | - | 2026-10-26 |
 | [#120](items/pr-0120.md) | PR | Add the G01 corpus manifest: 93 reviewed W3C cases (#118) | merged | - | 2026-10-26 |
+| [#121](items/issue-0121.md) | Issue | C03/C10: compare chunk and malformed-UTF-8 results with Expat 2.8.1 | closed (completed) | type:task, group:C-correctness, D2-guided, P0, test | 2026-10-26 |
+| [#122](items/issue-0122.md) | Issue | Finding: malformed UTF-8 error is reported at 1:0, not at the bad byte (Expat 2.8.1 comparison) | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#123](items/issue-0123.md) | Issue | Finding: no events before a malformed-UTF-8 error (Expat delivers them) | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#124](items/issue-0124.md) | Issue | Finding: <root/>junk gives error 4, not 9 (junk after document element); position depends on callbacks and chunks | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#125](items/issue-0125.md) | Issue | Finding: default handler receives the mismatched end tag before the error | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#126](items/issue-0126.md) | Issue | Finding: default handler receives normalized line ends, not the raw CR (Expat passes raw text) | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#127](items/pr-0127.md) | PR | C03/C10: compare DLL test results with Expat 2.8.1 (#121) | merged | - | 2026-10-26 |
+| [#128](items/issue-0128.md) | Issue | C02: turn the #38, #39, #40 reproductions into permanent regression tests | closed (completed) | type:task, group:C-correctness, D2-guided, P0, test, regression | 2026-10-26 |
+| [#129](items/pr-0129.md) | PR | C02: regression tests for #38, #39, #40 (#128) | merged | - | 2026-10-26 |
+| [#130](items/issue-0130.md) | Issue | Finding: Jenkins "Eiffel Tests" stage turns green without printing a test result | open | type:finding, group:B-reliable-results, build, investigation | 2026-10-26 |
+| [#131](items/issue-0131.md) | Issue | Finding: SonarQube analysis on Jenkins fails with HTTP 401 Unauthorized | open | type:finding, group:B-reliable-results, build | 2026-10-26 |
+| [#132](items/issue-0132.md) | Issue | Remove the unused old copy tests/python/run_w3c_conformance.py | closed (completed) | type:task, group:B-reliable-results, test | 2026-10-26 |
+| [#133](items/pr-0133.md) | PR | Remove the unused old copy of the W3C runner (#132) | merged | - | 2026-10-26 |
+| [#134](items/issue-0134.md) | Issue | Bring the student docs up to date after week 5 (2026-10-26) | closed (completed) | documentation, type:task | 2026-10-26 |
+| [#135](items/pr-0135.md) | PR | Bring the student docs up to date after week 5 (#134) | merged | - | 2026-10-26 |
