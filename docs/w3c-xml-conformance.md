@@ -1,5 +1,10 @@
 # W3C XML conformance benchmarks
 
+For the same cases against both our implementation and pinned Finnian Xpact-core,
+use the [focused dual W3C lane](dual-w3c-lane.md). It runs the full applicable
+catalog with finalized assertions discarded and retains unsuppressed outcomes
+for both engines.
+
 `scripts/run_benchmarks.ps1` runs the W3C XML binary conformance tests by
 default, once for each selected Eiffel build. The default builds are
 `Finalized` and `FinalizedAssertions`; `Workbench` is also supported. The

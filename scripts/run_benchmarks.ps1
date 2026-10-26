@@ -532,6 +532,8 @@ $Markdown = New-Object System.Collections.Generic.List[string]
 $SelectedEiffelBuildNames = ($SelectedEiffelBuilds | ForEach-Object { $_.Name }) -join ", "
 $Markdown.Add("# Benchmarks")
 $Markdown.Add("")
+$Markdown.Add("For the additional Linux Eiffel/GCC comparison with libexpat inside WSL2, see [WSL2 benchmarks](wsl-benchmarks.md). Its results are kept in a separate report series.")
+$Markdown.Add("")
 $Markdown.Add("Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz')")
 $Markdown.Add("")
 $Markdown.Add("Machine: $Machine")
