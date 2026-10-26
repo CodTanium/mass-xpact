@@ -1,6 +1,6 @@
 # Issue #60: Finding: the test runner stops at the first failure, so later tests do not run
 
-Archived from <https://github.com/andersoxie/xpact/issues/60> on 2026-10-24 20:26 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/60> on 2026-10-26 11:49 UTC.
 
 | | |
 |---|---|

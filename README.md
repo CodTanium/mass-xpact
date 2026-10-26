@@ -33,7 +33,8 @@ failures, and verify fixes with assertions enabled.
 | [`archive/personal-notes/`](archive/personal-notes/README.md) | My working notes from outside git |
 
 Branches: `portfolio` (this page, default) = `student-Mass` + this README and the archive.
-`student-Mass` and `main` are unchanged copies of the original repository's branches.
+`student-Mass` and `main` are unchanged copies of the original repository's branches
+(last refreshed 2026-10-26: `student-Mass` @ `41731c8`, `main` @ `64d027f`).
 
 ---
 

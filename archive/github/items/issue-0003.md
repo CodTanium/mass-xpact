@@ -1,6 +1,6 @@
 # Issue #3: Finding: postcondition final_finished_or_suspended fails in test_garbage_collection_suspension (B03)
 
-Archived from <https://github.com/andersoxie/xpact/issues/3> on 2026-10-24 20:26 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/3> on 2026-10-26 11:49 UTC.
 
 | | |
 |---|---|

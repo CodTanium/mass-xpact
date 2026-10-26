@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-24 20:26 UTC with [`export_github.py`](export_github.py): 40 issues and 46 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 11:49 UTC with [`export_github.py`](export_github.py): 44 issues and 59 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -92,3 +92,20 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#84](items/pr-0084.md) | PR | Isolate Windows libexpat tests to contain callback assertion failures | merged | - | 2026-10-24 |
 | [#85](items/pr-0085.md) | PR | Fix libexpat native failures and parsing timeouts | merged | - | 2026-10-24 |
 | [#86](items/pr-0086.md) | PR | Add WSL2 GCC benchmarks and xpact compiler comparison | merged | - | 2026-10-24 |
+| [#87](items/pr-0087.md) | PR | Improve tag dispatch with cached markup markers | merged | - | 2026-10-24 |
+| [#88](items/issue-0088.md) | Issue | Enable verified WSL Eiffel GCC benchmark settings by default | open | - | 2026-10-25 |
+| [#89](items/pr-0089.md) | PR | Enable WSL Eiffel GCC benchmarks by default | merged | - | 2026-10-25 |
+| [#90](items/issue-0090.md) | Issue | Add email notifications for failed and unstable xpact builds | open | - | 2026-10-25 |
+| [#91](items/pr-0091.md) | PR | Notify failed and unstable xpact builds by email | merged | - | 2026-10-25 |
+| [#92](items/pr-0092.md) | PR | Fix Declarative email parameter defaults | merged | - | 2026-10-25 |
+| [#93](items/issue-0093.md) | Issue | Pin Xpact-core and add isolated implementation build probes | open | - | 2026-10-25 |
+| [#94](items/pr-0094.md) | PR | Pin Xpact-core and add isolated implementation builds | merged | - | 2026-10-25 |
+| [#95](items/pr-0095.md) | PR | Inventory tests and benchmarks for dual implementations | merged | - | 2026-10-25 |
+| [#96](items/pr-0096.md) | PR | Run the finalized catalog lane with both implementations | merged | - | 2026-10-25 |
+| [#97](items/pr-0097.md) | PR | Implemented and ran the W3C cases with both implementations, using **… | merged | - | 2026-10-25 |
+| [#98](items/pr-0098.md) | PR | Added both lanes to **both main Jenkins pipelines**, enabled by `RUN_… | merged | - | 2026-10-25 |
+| [#99](items/pr-0099.md) | PR | Yes—the merge commit `5989c33` dropped two closing braces before `not… | merged | - | 2026-10-25 |
+| [#100](items/pr-0100.md) | PR | Found and fixed a **Windows Git path-length problem**. | merged | - | 2026-10-25 |
+| [#101](items/pr-0101.md) | PR | Codex/profile parser bottlenecks | open | - | 2026-10-26 |
+| [#102](items/issue-0102.md) | Issue | Task: sync student-Mass with main after #82-#100 | closed (completed) | type:task, workflow | 2026-10-26 |
+| [#103](items/pr-0103.md) | PR | Sync student-Mass with main after #82-#100 | merged | - | 2026-10-26 |

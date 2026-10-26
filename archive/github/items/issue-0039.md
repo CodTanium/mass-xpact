@@ -1,6 +1,6 @@
 # Issue #39: Finding: invalid UTF-8 is accepted in text, attributes, names, comments, PIs and CDATA
 
-Archived from <https://github.com/andersoxie/xpact/issues/39> on 2026-10-24 20:26 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/39> on 2026-10-26 11:49 UTC.
 
 | | |
 |---|---|

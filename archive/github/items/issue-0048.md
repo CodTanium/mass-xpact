@@ -1,6 +1,6 @@
 # Issue #48: Finding: assertions-on Finalized test lane does not check assertions (missing -keep)
 
-Archived from <https://github.com/andersoxie/xpact/issues/48> on 2026-10-24 20:26 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/48> on 2026-10-26 11:49 UTC.
 
 | | |
 |---|---|

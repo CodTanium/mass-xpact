@@ -1,0 +1,87 @@
+SUPERVISOR'S CHANGES ON MAIN - 2026-10-24 AND 2026-10-25
+Checked on main @ d686496, 2026-10-25; updated to main @ 64d027f, 2026-10-26
+
+16 pull requests merged into main by andersoxie (#82 - #100).
+
+
+1. LIBEXPAT TEST LANES IN JENKINS (24 Oct)
+------------------------------------------
+libexpat is the reference XML parser that xpact copies. These make its tests
+run, and report honestly, in Jenkins.
+
+  #82  Fixed a wrong output folder path for the libexpat adapter on Jenkins
+       (small fix).
+  #83  Jenkins now checks libexpat test failures properly before it accepts
+       the result, and returns the right exit code.
+  #84  Runs the Windows libexpat tests in isolation, so one crashing test
+       can't take down the rest.
+  #85  THE BIGGEST CHANGE, AND IT TOUCHES THE PARSER ITSELF (src/, native/,
+       about 3,300 lines). Fixes incremental (chunked) parsing, DTD replay
+       and timeouts. Also keeps parser handles alive until they are
+       explicitly released, and keeps buffers, reset and errors working
+       correctly between calls.
+
+
+2. SPEED AND BENCHMARKS (24-25 Oct)
+-----------------------------------
+  #86  Added a benchmark lane that builds xpact with GCC under WSL2 (Linux on
+       Windows) and compares compilers.
+  #87  PARSER SPEED-UP: start and end tags are recognised faster by reusing
+       markers it already found. Includes benchmark results.
+  #89  Turned the WSL GCC benchmarks on by default in Jenkins
+       (issue #88, still open).
+
+
+3. JENKINS EMAIL ALERTS (25 Oct)
+--------------------------------
+  #91  Jenkins now sends an email when a build fails or is unstable. Also
+       fixes a SonarQube step (issue #90, still open).
+  #92  Fixed the default settings for those emails.
+
+
+4. XPACT-CORE NEXT TO XPACT (25 Oct)
+------------------------------------
+This is the "optional extension" from the student guide (F01/F02): running
+Xpact-core, the other parser implementation, on the same tests as xpact.
+
+  #94  Pinned Xpact-core to a fixed version and added separate trial builds
+       for both implementations (issue #93, still open).
+  #95  Listed which tests and benchmarks exist for each implementation
+       (docs/implementation-coverage/).
+  #96  Runs the test catalog with both implementations in a finalized build.
+  #97  Ran the W3C cases with both implementations, in a finalized build
+       WITH ASSERTIONS SWITCHED OFF.
+  #98  Added both implementation lanes to BOTH main Jenkins pipelines,
+       switched on by the RUN_BENCHMARKS setting.
+
+
+5. JENKINS REPAIRS AFTER #98 (25 Oct, found on 2026-10-26)
+----------------------------------------------------------
+  #99  A merge in #98 lost two closing braces before
+       notifyBuildResultByEmail() in the Jenkinsfile; put them back.
+  #100 Found and fixed a Windows Git path-length problem (paths too long
+       for Windows).
+
+
+WHAT THIS MEANS FOR ME
+----------------------
+  [x] Our Jenkins path fix (#75) is in main. He didn't change our build
+      scripts.
+  [ ] #76 (the compiler-setting fix) is still open on student-Mass.
+  [x] main brought into student-Mass on 2026-10-26: issue #102, PR #103
+      (merge commit 41731c8, no conflicts; main itself not changed, still
+      64d027f). This folder synced to 41731c8 with sync-latest.ps1, so all
+      of the changes above are now here to look at.
+  [ ] #97 ran W3C with assertions off. The student guide says assertions on
+      is the main target. Worth asking him about, or checking ourselves.
+  [ ] Three of his issues are still open: #88, #90, #93.
+
+
+HOW THIS WAS CHECKED
+--------------------
+  In the clone C:\Users\masou\Desktop\Lia\xpact\xpactGit:
+    git fetch origin
+    git log origin/student-Mass..origin/main
+    gh pr list -R andersoxie/xpact --state all --base main --author andersoxie
+    git diff --shortstat <merge>^1 <merge>    (for each merged PR)
+    git merge-base --is-ancestor 63f67f3 origin/main    (#75 is in main)

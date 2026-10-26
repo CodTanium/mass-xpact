@@ -1,6 +1,6 @@
 # Issue #32: Finding: Python harness test fails on Python 3.10 (csv cannot write NUL)
 
-Archived from <https://github.com/andersoxie/xpact/issues/32> on 2026-10-24 20:26 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/32> on 2026-10-26 11:49 UTC.
 
 | | |
 |---|---|
