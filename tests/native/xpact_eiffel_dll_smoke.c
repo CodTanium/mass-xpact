@@ -1752,6 +1752,46 @@ check_unfinished_root_space_lifecycle(void) {
 }
 
 static int
+check_split_character_data_close_marker(void) {
+	XML_Parser parser = XML_ParserCreate(NULL);
+	int valid;
+	if (!check(parser != NULL, "split character-data close marker parser created")) return 0;
+	g_general_entity_len = 0;
+	g_general_entity_text[0] = '\0';
+	g_general_entity_failed = 0;
+	XML_SetCharacterDataHandler(parser, general_entity_text_handler);
+	valid = check(smoke_parse_string(parser, "<r>text]", XML_FALSE) == XML_STATUS_OK,
+		"first close-marker bracket accepted as non-final text")
+		&& check(smoke_parse_string(parser, "]", XML_FALSE) == XML_STATUS_OK,
+			"second close-marker bracket accepted as non-final text")
+		&& check(smoke_parse_string(parser, ">tail</r>", XML_TRUE) == XML_STATUS_ERROR
+			&& XML_GetErrorCode(parser) == XML_ERROR_INVALID_TOKEN,
+			"literal close marker split across three chunks rejected")
+		&& check(XML_ParserReset(parser, NULL), "split close-marker failure resets");
+	if (valid) {
+		g_general_entity_len = 0;
+		g_general_entity_text[0] = '\0';
+		g_general_entity_failed = 0;
+		XML_SetCharacterDataHandler(parser, general_entity_text_handler);
+		valid = check(smoke_parse_string(parser, "<r>text]]", XML_FALSE) == XML_STATUS_OK
+			&& smoke_parse_string(parser, "&gt;</r>", XML_TRUE) == XML_STATUS_OK,
+			"reset parser accepts escaped greater-than after trailing brackets")
+			&& check(!g_general_entity_failed && strcmp(g_general_entity_text, "text]]>") == 0,
+				"escaped split text delivered once without loss")
+			&& check(XML_ParserReset(parser, NULL), "escaped split completion resets");
+	}
+	if (valid) {
+		valid = check(smoke_parse_string(parser, "<r>text]", XML_FALSE) == XML_STATUS_OK
+			&& smoke_parse_string(parser, "]", XML_FALSE) == XML_STATUS_OK
+			&& smoke_parse_string(parser, ">tail</r>", XML_TRUE) == XML_STATUS_ERROR
+			&& XML_GetErrorCode(parser) == XML_ERROR_INVALID_TOKEN,
+			"split marker is rejected again after failure and successful recovery");
+	}
+	XML_ParserFree(parser);
+	return valid;
+}
+
+static int
 check_one_byte_declaration_and_dtd(void) {
 	const char *input = "<?xml version=\"1.0\"?>\n<!DOCTYPE doc [\n<!ENTITY en \"x\">\n]>\n<doc/>";
 	XML_Parser parser = XML_ParserCreate(NULL);
@@ -3898,6 +3938,7 @@ main(void) {
 	if (!check_null_context_parameter_child()) return 1;
 	if (!check_reset_encoding_lifecycle()) return 1;
 	if (!check_unfinished_root_space_lifecycle()) return 1;
+	if (!check_split_character_data_close_marker()) return 1;
 	if (!check_one_byte_declaration_and_dtd()) return 1;
 	if (!check_one_byte_start_positions()) return 1;
 	if (!check_parameter_child_survives_parent_replay()) return 1;
