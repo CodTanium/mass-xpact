@@ -5236,7 +5236,14 @@ feature {NONE} -- Event dispatch
 				and then not handler.wants_automatic_character_data_default
 				and then not handler.wants_default_events
 				and then not use_foreign_dtd
-				and then doctype_name.is_empty
+				-- A DOCTYPE alone needs no materialization for a pure no-op sink.
+				-- Keep callbacks, raw replacement buffers and larger attribute limits
+				-- on their existing path, including ownership and diagnostic behavior.
+				and then (doctype_name.is_empty or else
+					(handler.generating_type.type_id = ({detachable XP_NULL_EVENT_HANDLER}).type_id
+					and then external_entity_resolver = Void
+					and then entity_stack.is_empty
+					and then max_attribute_count <= Default_max_attribute_count))
 				and then attribute_decl_table.count = 0
 				and then element_slice_stack.count = element_stack.count
 		end

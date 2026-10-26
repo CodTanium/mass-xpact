@@ -54,6 +54,10 @@ feature {NONE} -- Initialization
 			run_test ("test_character_data_entity_bracket_boundaries", agent test_character_data_entity_bracket_boundaries)
 			run_test ("test_text_span_resolver_and_replacement_positions", agent test_text_span_resolver_and_replacement_positions)
 			run_test ("test_text_span_partial_utf8_and_reference_positions", agent test_text_span_partial_utf8_and_reference_positions)
+			run_test ("test_doctype_replacement_attribute_boundaries", agent test_doctype_replacement_attribute_boundaries)
+			run_test ("test_doctype_mixed_names_and_entity_reuse", agent test_doctype_mixed_names_and_entity_reuse)
+			run_test ("test_doctype_defaults_and_cached_name_reuse", agent test_doctype_defaults_and_cached_name_reuse)
+			run_test ("test_doctype_callback_input_mutation", agent test_doctype_callback_input_mutation)
 			run_test ("test_ascii_xml_character_normalization", agent test_ascii_xml_character_normalization)
 			run_test ("test_incremental_parse_session_prototype", agent test_incremental_parse_session_prototype)
 			run_test ("test_expat_port_parse_session_spike", agent test_expat_port_parse_session_spike)
@@ -1509,6 +1513,156 @@ feature {NONE} -- Tests
 			assert ("reference-only prefix final position", l_parser.current_line_number = 1 and then l_parser.current_column_number = 8 and then l_parser.current_byte_index = 8 and then l_parser.current_byte_count = 0)
 			assert ("reference-only complete document accepted", l_parser.parse ("<r>&amp;</r>"))
 			assert ("reference-only complete final position", l_parser.current_line_number = 1 and then l_parser.current_column_number = 12 and then l_parser.current_byte_index = 12 and then l_parser.current_byte_count = 0)
+		end
+
+	test_doctype_replacement_attribute_boundaries
+			-- Replacement buffers may contain CR introduced after document normalization.
+		local
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_handler: XP_COLLECTING_HANDLER
+			l_parser, l_observing_parser: XP_PARSER
+			l_resolver, l_observing_resolver: XP_POSITION_OBSERVING_RESOLVER
+			l_input, l_replacement, l_internal: STRING_8
+			i: INTEGER
+		do
+			create l_sink.make
+			create l_parser.make (l_sink)
+			create l_handler.make
+			create l_observing_parser.make (l_handler)
+			create l_resolver.make (l_parser, "")
+			create l_observing_resolver.make (l_observing_parser, "")
+			l_parser.set_external_entity_resolver (l_resolver)
+			l_observing_parser.set_external_entity_resolver (l_observing_resolver)
+			l_parser.set_external_entity_policy ({XP_EXTERNAL_ENTITY_POLICY}.External_general_entities)
+			l_observing_parser.set_external_entity_policy ({XP_EXTERNAL_ENTITY_POLICY}.External_general_entities)
+			l_input := "<!DOCTYPE r [<!ENTITY ext SYSTEM 'mem://positioned'>]><r>&ext;</r>"
+			l_internal := "<!DOCTYPE r [<!ENTITY child %"<n a='x&#13;y'/>%">]><r>&child;</r>"
+			from i := 1 until i > 2 loop
+				l_replacement := "<n a='x%Ry%Tz%Nw'/>"
+				l_resolver.set_replacement (l_replacement)
+				l_observing_resolver.set_replacement (l_replacement)
+				assert ("no-op external replacement accepts literal XML whitespace in attribute", l_parser.parse (l_input))
+				assert ("observing external replacement accepts literal XML whitespace", l_observing_parser.parse (l_input))
+				assert ("external replacement attribute whitespace normalized", l_handler.last_attribute_value.same_string ("x y z w"))
+				assert ("no-op internal replacement accepts character-reference CR", l_parser.parse (l_internal))
+				assert ("observing internal replacement accepts character-reference CR", l_observing_parser.parse (l_internal))
+				assert ("CR generated in entity value normalizes in attribute", l_handler.last_attribute_value.same_string ("x y"))
+				l_resolver.set_replacement ("<n a='%/226/%/130/")
+				assert ("partial UTF-8 in raw replacement attribute rejected", not l_parser.parse (l_input))
+				assert ("raw replacement attribute preserves partial-character diagnostic", l_parser.last_error.same_string ("partial character"))
+				l_resolver.set_replacement ("<n %/181/='v'/>")
+				assert ("malformed name byte in raw replacement rejected", not l_parser.parse (l_input))
+				assert ("raw replacement name preserves diagnostic", l_parser.last_error.same_string ("invalid name character"))
+				i := i + 1
+			end
+			assert ("unrelated document recovers after replacement failures", l_parser.parse ("<fresh/>") and then l_parser.last_error.is_empty)
+		end
+
+	test_doctype_mixed_names_and_entity_reuse
+			-- Attribute references force a materialized subtree between simple siblings;
+			-- nested entities add names from other buffers and must respect their floor.
+		local
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_parser: XP_PARSER
+			l_prefix, l_valid, l_mismatch, l_close, l_open: STRING_8
+			i, l_error_index: INTEGER
+		do
+			create l_sink.make
+			create l_parser.make (l_sink)
+			l_prefix := "<!DOCTYPE r [<!ENTITY leaf '<leaf></leaf>'><!ENTITY wrapped %"<box a='x&amp;y'>&leaf;</box>%"><!ENTITY close '</r>'><!ENTITY open '<open>'>]>"
+			l_valid := l_prefix + "<r><before/><mid a='p' b='&amp;'><below/></mid>&wrapped;<after><last/></after></r>"
+			l_mismatch := l_prefix + "<r><mid a='&amp;'><below/></mid><after></wrong></r>"
+			l_close := l_prefix + "<r><mid a='&amp;'><below/></mid>&close;</r>"
+			l_open := l_prefix + "<r>&open;</r>"
+			from i := 1 until i > 2 loop
+				assert ("mismatch after reference-valued subtree rejected", not l_parser.parse (l_mismatch))
+				l_error_index := l_mismatch.substring_index ("</wrong>", 1) + 1
+				assert ("mixed-name mismatch diagnostic and position", l_parser.last_error.same_string ("mismatched end tag") and then l_parser.current_byte_index = l_error_index and then l_parser.current_line_number = 1 and then l_parser.current_column_number = l_error_index)
+				assert ("mixed name representations and nested replacement buffers recover", l_parser.parse (l_valid) and then l_parser.current_byte_index = l_valid.count and then l_parser.current_byte_count = 0)
+				assert ("entity cannot close outer simple name after fallback subtree", not l_parser.parse (l_close))
+				assert ("closing entity retains outer reference position", l_parser.last_error.same_string ("asynchronous entity") and then l_parser.current_byte_index = l_close.substring_index ("&close;", 1) - 1)
+				assert ("valid document restores entity floor after closing failure", l_parser.parse (l_valid))
+				assert ("entity cannot leave an unclosed replacement name", not l_parser.parse (l_open))
+				assert ("opening entity retains outer reference position", l_parser.last_error.same_string ("asynchronous entity") and then l_parser.current_byte_index = l_open.substring_index ("&open;", 1) - 1)
+				assert ("valid document restores both name stacks after opening failure", l_parser.parse (l_valid))
+				i := i + 1
+			end
+			assert ("fallback rechecks preceding attributes for duplicates", not l_parser.parse (l_prefix + "<r><mid a='one' b='&amp;' a='two'/></r>"))
+			assert ("fallback duplicate diagnostic preserved", l_parser.last_error.same_string ("duplicate attribute"))
+			assert ("ordinary parse recovers after mixed-stack duplicate", l_parser.parse ("<fresh><leaf/></fresh>"))
+		end
+
+	test_doctype_defaults_and_cached_name_reuse
+			-- A declaration table still requires default processing with no callbacks;
+			-- cached DTD replay and standalone rules survive representation changes.
+		local
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_handler: XP_COLLECTING_HANDLER
+			l_parser, l_observing_parser: XP_PARSER
+			l_prefix, l_non_standalone, l_standalone: STRING_8
+		do
+			create l_sink.make
+			create l_parser.make_with_limits (l_sink, 4096, 16, 1, 4096)
+			l_prefix := "<!DOCTYPE r [<!ENTITY e '<leaf/>'>]>"
+			assert ("DTD without attribute declarations cached", l_parser.parse_with_cached_doctype (l_prefix, False))
+			assert ("cached mixed-name content prefix accepted", l_parser.parse_with_cached_doctype (l_prefix + "<r><mid a='&amp;'></mid><after/>&e;", False))
+			assert ("cached replay rebuilds mixed names and replacement buffers", l_parser.parse_with_cached_doctype (l_prefix + "<r><mid a='&amp;'></mid><after/>&e;</r>", True))
+			assert ("successful cached replay releases cached source", l_parser.cached_doctype_byte_count = 0)
+			l_prefix := "<!DOCTYPE r [<!ATTLIST r a CDATA 'one' b CDATA 'two'>]>"
+			assert ("new DTD with default declarations cached", l_parser.parse_with_cached_doctype (l_prefix, False))
+			assert ("default attributes enforce no-op parser attribute ceiling", not l_parser.parse_with_cached_doctype (l_prefix + "<r/>", True))
+			assert ("default attribute limit diagnostic and cache cleanup", l_parser.last_error.same_string ("attribute count exceeds limit") and then l_parser.cached_doctype_byte_count = 0)
+			l_non_standalone := "<?xml version='1.0' standalone='no'?><!DOCTYPE r SYSTEM 'unloaded.dtd' [<!ATTLIST r a CDATA 'default'>]><r>&missing;</r>"
+			l_standalone := "<?xml version='1.0' standalone='yes'?><!DOCTYPE r SYSTEM 'unloaded.dtd' [<!ATTLIST r a CDATA 'default'>]><r>&missing;</r>"
+			assert ("non-standalone document may skip external undeclared entity", l_parser.parse (l_non_standalone))
+			assert ("standalone document still rejects missing entity with defaults", not l_parser.parse (l_standalone))
+			assert ("standalone missing entity diagnostic retained", l_parser.last_error.same_string ("undefined entity"))
+			assert ("no-declaration document recovers after default and standalone failures", l_parser.parse ("<!DOCTYPE other><r><leaf/></r>"))
+			create l_handler.make
+			create l_observing_parser.make (l_handler)
+			assert ("observing non-standalone document retains defaults", l_observing_parser.parse (l_non_standalone))
+			assert ("default attribute value still delivered", l_handler.last_attribute_value.same_string ("default"))
+		end
+
+	test_doctype_callback_input_mutation
+			-- A callback may edit a consumed name in aliased input; the open name
+			-- still has the spelling that was parsed before the callback ran.
+		local
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_comment_handler: XP_INPUT_MUTATING_NULL_HANDLER
+			l_parser, l_comment_parser: XP_PARSER
+			l_resolver: XP_INPUT_MUTATING_RESOLVER
+			l_input: STRING_8
+			i: INTEGER
+		do
+			create l_sink.make
+			create l_parser.make (l_sink)
+			l_parser.set_external_entity_policy ({XP_EXTERNAL_ENTITY_POLICY}.External_general_entities)
+			create l_comment_handler.make
+			create l_comment_parser.make (l_comment_handler)
+			from i := 1 until i > 2 loop
+				l_input := "<!DOCTYPE r [<!ENTITY ext SYSTEM 'mem://mutate'>]><r>&ext;</r>"
+				create l_resolver.make (l_input)
+				l_parser.set_external_entity_resolver (l_resolver)
+				assert ("resolver editing consumed source preserves original open name", l_parser.parse (l_input))
+				assert ("resolver actually edits aliased opening tag", l_resolver.call_count = 1 and then l_input.has_substring ("<s>"))
+				l_input := "<!DOCTYPE r [<!ENTITY ext SYSTEM 'mem://mutate'>]><r>&ext;</wrong>"
+				create l_resolver.make (l_input)
+				l_parser.set_external_entity_resolver (l_resolver)
+				assert ("mismatch still rejected after mutating resolver reuse", not l_parser.parse (l_input) and then l_parser.last_error.same_string ("mismatched end tag"))
+				l_input := "<!DOCTYPE r><r><!--edit--></r>"
+				l_comment_handler.set_input (l_input)
+				assert ("null-handler descendant editing consumed source preserves open name", l_comment_parser.parse (l_input))
+				assert ("comment callback actually edits aliased opening tag", l_input.has_substring ("<s>"))
+				l_input := "<!DOCTYPE r><r><!--edit--></wrong>"
+				l_comment_handler.set_input (l_input)
+				assert ("mismatch still rejected after mutating comment callback reuse", not l_comment_parser.parse (l_input) and then l_comment_parser.last_error.same_string ("mismatched end tag"))
+				i := i + 1
+			end
+			l_parser.set_external_entity_resolver (Void)
+			l_comment_handler.set_input (Void)
+			assert ("parser recovers after mutating resolver removed", l_parser.parse ("<!DOCTYPE r><r/>"))
+			assert ("parser recovers after mutating handler detached from input", l_comment_parser.parse ("<!DOCTYPE r><r/>"))
 		end
 
 	test_ascii_xml_character_normalization
