@@ -2138,6 +2138,7 @@ feature {NONE} -- Character data and references
 			l_literal_default: BOOLEAN
 			l_default_start, l_default_end, l_reference_end: INTEGER
 			l_all_space: BOOLEAN
+			l_pending_literal_position: INTEGER
 		do
 			l_materialize_text := handler.wants_character_data_events or else handler.wants_default_events or else handler.wants_automatic_character_data_default
 			l_literal_default := handler.wants_automatic_character_data_default and then handler.wants_literal_character_data_default
@@ -2159,13 +2160,18 @@ feature {NONE} -- Character data and references
 				until
 					i > a_input.count or has_error or is_suspended or else a_input.item (i) = '<'
 				loop
-					note_position (i)
 					c := a_input.item (i)
+					if c = ']' then
+						note_position (i)
+						l_pending_literal_position := 0
+					end
 					-- The fixed marker is read-only; ordinary bytes need no prefix check.
 					if c = ']' and then has_at (a_input, i, once "]]>") then
 						set_error ("CDATA close marker in character data")
 						i := a_input.count + 1
 					elseif c = '&' then
+						note_position (i)
+						l_pending_literal_position := 0
 						if element_stack.count = 0 and then not parsing_external_entity then
 							set_error ("entity reference outside document element")
 							i := a_input.count + 1
@@ -2190,10 +2196,14 @@ feature {NONE} -- Character data and references
 								l_default_end := i - 1
 							end
 						end
-					elseif is_incomplete_utf8_sequence_at (a_input, i) then
+					elseif c.code >= 128 and then is_incomplete_utf8_sequence_at (a_input, i) then
+						note_position (i)
+						l_pending_literal_position := 0
 						set_error ("partial character")
 						i := a_input.count + 1
 					elseif not is_xml_character_code (c.code) then
+						note_position (i)
+						l_pending_literal_position := 0
 						set_error ("invalid XML character")
 						i := a_input.count + 1
 					else
@@ -2201,13 +2211,22 @@ feature {NONE} -- Character data and references
 							l_all_space := is_xml_space (c)
 						end
 						if attached l_text as l_attached_text then
+							-- Appending may allocate; preserve its exception-time position.
+							note_position (i)
+							l_pending_literal_position := 0
 							l_attached_text.append_character (c)
+						else
+							l_pending_literal_position := i
 						end
 						i := i + 1
 						l_default_end := i - 1
 					end
 				variant
 					a_input.count - i + 1
+				end
+				if l_pending_literal_position > 0 then
+					-- Included entity text has no surrounding position commit.
+					note_position (l_pending_literal_position)
 				end
 				if not has_error and not is_suspended then
 					if element_stack.count = 0 and then not parsing_external_entity then
@@ -2306,7 +2325,7 @@ feature {NONE} -- Character data and references
 					note_position (i)
 					set_error ("invalid XML character")
 					i := a_input.count + 1
-				elseif is_incomplete_utf8_sequence_at (a_input, i) then
+				elseif c.code >= 128 and then is_incomplete_utf8_sequence_at (a_input, i) then
 					note_position (i)
 					set_error ("partial character")
 					i := a_input.count + 1
@@ -2357,6 +2376,7 @@ feature {NONE} -- Character data and references
 			l_literal_default: BOOLEAN
 			l_default_start, l_default_end, l_reference_end: INTEGER
 			l_all_space: BOOLEAN
+			l_pending_literal_position: INTEGER
 			l_done: BOOLEAN
 		do
 			l_materialize_text := handler.wants_character_data_events or else handler.wants_default_events or else handler.wants_automatic_character_data_default
@@ -2374,12 +2394,17 @@ feature {NONE} -- Character data and references
 			until
 				i > a_input.count or l_done or has_error or is_suspended or else a_input.item (i) = '<'
 			loop
-				note_position (i)
 				c := a_input.item (i)
+				if c = ']' then
+					note_position (i)
+					l_pending_literal_position := 0
+				end
 				if c = ']' and then has_at (a_input, i, once "]]>") then
 					set_error ("CDATA close marker in character data")
 					i := a_input.count + 1
 				elseif c = '&' then
+					note_position (i)
+					l_pending_literal_position := 0
 					if find_character (a_input, ';', i + 1) = 0 then
 						l_done := True
 						i := a_input.count + 1
@@ -2404,10 +2429,14 @@ feature {NONE} -- Character data and references
 							l_default_end := i - 1
 						end
 					end
-				elseif is_incomplete_utf8_sequence_at (a_input, i) then
+				elseif c.code >= 128 and then is_incomplete_utf8_sequence_at (a_input, i) then
+					note_position (i)
+					l_pending_literal_position := 0
 					l_done := True
 					i := a_input.count + 1
 				elseif not is_xml_character_code (c.code) then
+					note_position (i)
+					l_pending_literal_position := 0
 					set_error ("invalid XML character")
 					i := a_input.count + 1
 				else
@@ -2415,13 +2444,22 @@ feature {NONE} -- Character data and references
 						l_all_space := is_xml_space (c)
 					end
 					if attached l_text as l_attached_text then
+						-- Appending may allocate; preserve its exception-time position.
+						note_position (i)
+						l_pending_literal_position := 0
 						l_attached_text.append_character (c)
+					else
+						l_pending_literal_position := i
 					end
 					i := i + 1
 					l_default_end := i - 1
 				end
 			variant
 				a_input.count - i + 1
+			end
+			if l_pending_literal_position > 0 then
+				-- Included entity text has no surrounding position commit.
+				note_position (l_pending_literal_position)
 			end
 			if not has_error and not is_suspended then
 				if element_stack.count = 0 and then not parsing_external_entity then

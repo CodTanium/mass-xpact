@@ -52,6 +52,8 @@ feature {NONE} -- Initialization
 			run_test ("test_plain_tokenizer_character_data_fast_path", agent test_plain_tokenizer_character_data_fast_path)
 			run_test ("test_character_data_bracket_dispatch", agent test_character_data_bracket_dispatch)
 			run_test ("test_character_data_entity_bracket_boundaries", agent test_character_data_entity_bracket_boundaries)
+			run_test ("test_text_span_resolver_and_replacement_positions", agent test_text_span_resolver_and_replacement_positions)
+			run_test ("test_text_span_partial_utf8_and_reference_positions", agent test_text_span_partial_utf8_and_reference_positions)
 			run_test ("test_ascii_xml_character_normalization", agent test_ascii_xml_character_normalization)
 			run_test ("test_incremental_parse_session_prototype", agent test_incremental_parse_session_prototype)
 			run_test ("test_expat_port_parse_session_spike", agent test_expat_port_parse_session_spike)
@@ -1429,6 +1431,84 @@ feature {NONE} -- Tests
 					Result.append_substring (l_event.item, 6, l_event.item.count)
 				end
 			end
+		end
+
+	test_text_span_resolver_and_replacement_positions
+			-- A resolver observes the reference after a multiline ordinary span;
+			-- replacement parsing also has no document-loop position update.
+		local
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_parser: XP_PARSER
+			l_resolver: XP_POSITION_OBSERVING_RESOLVER
+			l_input: STRING_8
+			i: INTEGER
+		do
+			create l_sink.make
+			create l_parser.make (l_sink)
+			create l_resolver.make (l_parser, "abc<")
+			l_parser.set_external_entity_resolver (l_resolver)
+			l_parser.set_external_entity_policy ({XP_EXTERNAL_ENTITY_POLICY}.External_general_entities)
+			l_input := "<!DOCTYPE r [<!ENTITY ext SYSTEM 'mem://positioned'>]>%N<r>alpha%Nbeta&ext;tail</r>"
+			from i := 1 until i > 2 loop
+				l_resolver.set_replacement ("abc<")
+				assert ("ordinary replacement text followed by incomplete markup rejected", not l_parser.parse (l_input))
+				assert ("incomplete replacement markup diagnostic: " + l_parser.last_error, l_parser.last_error.same_string ("unterminated declaration"))
+				assert ("resolver sees multiline reference boundary", l_resolver.line_number = 3 and then l_resolver.column_number = 4 and then l_resolver.byte_index = l_input.substring_index ("&ext;", 1) - 1 and then l_resolver.byte_count = 0)
+				assert ("replacement text preserves prior error checkpoint", l_parser.current_line_number = 1 and then l_parser.current_column_number = 2 and then l_parser.current_byte_index = 2 and then l_parser.current_byte_count = 0)
+				l_resolver.set_replacement ("ok")
+				assert ("resolver succeeds after replacement error", l_parser.parse (l_input) and then l_parser.last_error.is_empty)
+				assert ("resolver position remains exact after recovery", l_resolver.line_number = 3 and then l_resolver.column_number = 4 and then l_resolver.byte_index = l_input.substring_index ("&ext;", 1) - 1 and then l_resolver.byte_count = 0)
+				assert ("resolved document final position", l_parser.current_line_number = 3 and then l_parser.current_column_number = 17 and then l_parser.current_byte_index = l_input.count and then l_parser.current_byte_count = 0)
+				i := i + 1
+			end
+			assert ("resolver called exactly once per parse", l_resolver.call_count = 4)
+			l_parser.set_external_entity_resolver (Void)
+			assert ("unrelated parse recovers after resolver reuse", l_parser.parse ("<r/>") and then l_parser.current_byte_index = 4 and then l_parser.current_byte_count = 0)
+		end
+
+	test_text_span_partial_utf8_and_reference_positions
+			-- Final errors and non-final prefixes distinguish the partial UTF-8
+			-- boundary from the consumed plain-text span and the outer EOF position.
+		local
+			l_handler: XP_POSITION_COLLECTING_HANDLER
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_parser, l_noop_parser: XP_PARSER
+			l_partial, l_complete: STRING_8
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			l_handler.set_parser (l_parser)
+			create l_sink.make
+			create l_noop_parser.make (l_sink)
+			l_partial := "<r>&amp;alpha%N%/226/%/130/"
+			l_complete := "<r>&amp;alpha%N%/226/%/130/%/172/</r>"
+			assert ("partial UTF-8 after ordinary text accepted as prefix", l_parser.parse_prefix (l_partial))
+			assert ("partial prefix emits completed text at its original position", l_handler.events.count = 2 and then l_handler.events.last.same_string ("text:&alpha%N:1:3:3:7"))
+			assert ("partial prefix outer position remains end of available bytes", l_parser.current_line_number = 2 and then l_parser.current_column_number = 2 and then l_parser.current_byte_index = 16 and then l_parser.current_byte_count = 0)
+			assert ("no-op partial UTF-8 prefix accepted", l_noop_parser.parse_prefix (l_partial))
+			assert ("no-op partial prefix position", l_noop_parser.current_line_number = 2 and then l_noop_parser.current_column_number = 2 and then l_noop_parser.current_byte_index = 16 and then l_noop_parser.current_byte_count = 0)
+			from i := 1 until i > 2 loop
+				l_handler.events.wipe_out
+				assert ("partial UTF-8 after ordinary text rejected when final", not l_parser.parse (l_partial))
+				assert ("partial UTF-8 final diagnostic", l_parser.last_error.same_string ("partial character"))
+				assert ("partial UTF-8 final error position", l_parser.current_line_number = 2 and then l_parser.current_column_number = 0 and then l_parser.current_byte_index = 14 and then l_parser.current_byte_count = 0)
+				assert ("failed final text emits no partial text callback", l_handler.events.count = 1 and then l_handler.events.first.same_string ("start:r:1:0:0:0"))
+				assert ("no-op partial UTF-8 final rejected", not l_noop_parser.parse (l_partial))
+				assert ("no-op partial UTF-8 final error position", l_noop_parser.last_error.same_string ("partial character") and then l_noop_parser.current_line_number = 2 and then l_noop_parser.current_column_number = 0 and then l_noop_parser.current_byte_index = 14 and then l_noop_parser.current_byte_count = 0)
+				l_handler.events.wipe_out
+				assert ("completed UTF-8 document recovers after partial error", l_parser.parse (l_complete) and then l_parser.last_error.is_empty)
+				assert ("completed UTF-8 callback preserves byte count", l_handler.events.count = 3 and then l_handler.events.i_th (2).same_string ("text:&alpha%N%/226/%/130/%/172/:1:3:3:10"))
+				assert ("completed UTF-8 final position", l_parser.current_line_number = 2 and then l_parser.current_column_number = 7 and then l_parser.current_byte_index = 21 and then l_parser.current_byte_count = 0)
+				assert ("no-op completed UTF-8 recovers", l_noop_parser.parse (l_complete) and then l_noop_parser.current_byte_index = 21 and then l_noop_parser.current_byte_count = 0)
+				i := i + 1
+			end
+			l_handler.events.wipe_out
+			assert ("reference-only prefix accepted after text reuse", l_parser.parse_prefix ("<r>&amp;"))
+			assert ("reference-only prefix callback byte count", l_handler.events.count = 2 and then l_handler.events.last.same_string ("text:&:1:3:3:1"))
+			assert ("reference-only prefix final position", l_parser.current_line_number = 1 and then l_parser.current_column_number = 8 and then l_parser.current_byte_index = 8 and then l_parser.current_byte_count = 0)
+			assert ("reference-only complete document accepted", l_parser.parse ("<r>&amp;</r>"))
+			assert ("reference-only complete final position", l_parser.current_line_number = 1 and then l_parser.current_column_number = 12 and then l_parser.current_byte_index = 12 and then l_parser.current_byte_count = 0)
 		end
 
 	test_ascii_xml_character_normalization
