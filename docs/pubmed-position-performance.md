@@ -1,5 +1,9 @@
 # PubMed text-position profiling, 26 October 2026
 
+The [DOCTYPE follow-up](pubmed-doctype-performance.md) records the next
+core comparison and bounded no-op element-name/attribute path change.
+The measurements below retain this earlier campaign's provenance.
+
 This follows the [character-data marker study](pubmed-character-data-performance.md),
 which left a measured 11.02x PubMed gap to pinned Xpact-core. The next profile
 showed repeated position bookkeeping in discarded ordinary text. Batching that

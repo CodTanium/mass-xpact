@@ -1,5 +1,9 @@
 # Performance Analysis
 
+The [PubMed DOCTYPE follow-up](pubmed-doctype-performance.md) compares the
+remaining core architecture differences and measures the bounded no-op
+slice-path change. Earlier reports retain their original measurements.
+
 The [PubMed text-position follow-up](pubmed-position-performance.md) records
 the next profile, allocation-free position batching and the latest direct
 core comparison. Older reports below retain their original provenance.
