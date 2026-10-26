@@ -34,7 +34,7 @@ failures, and verify fixes with assertions enabled.
 
 Branches: `portfolio` (this page, default) = `student-Mass` + this README and the archive.
 `student-Mass` and `main` are unchanged copies of the original repository's branches
-(last refreshed 2026-10-26: `student-Mass` @ `72b2f5c`, `main` @ `de01371`).
+(last refreshed 2026-10-26: `student-Mass` @ `76f539e`, `main` @ `de01371`).
 
 ---
 

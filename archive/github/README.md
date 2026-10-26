@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 16:48 UTC with [`export_github.py`](export_github.py): 48 issues and 64 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 17:14 UTC with [`export_github.py`](export_github.py): 50 issues and 66 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -118,3 +118,7 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#110](items/issue-0110.md) | Issue | Task: sync student-Mass with main after #101 | closed (completed) | type:task, workflow | 2026-10-26 |
 | [#111](items/pr-0111.md) | PR | Sync student-Mass with main after #101 | merged | - | 2026-10-26 |
 | [#112](items/pr-0112.md) | PR | Record the sync with main after #101 and the tests on the merged code (#110) | merged | - | 2026-10-26 |
+| [#113](items/issue-0113.md) | Issue | Task: record the student PC environment changes of 2026-10-26 (MSVC backend, Python 3.14, long paths) | closed (completed) | documentation, type:task, workflow, build | 2026-10-26 |
+| [#114](items/pr-0114.md) | PR | Record the student PC environment changes of 2026-10-26 (#113) | merged | - | 2026-10-26 |
+| [#115](items/issue-0115.md) | Issue | Task: bring the student docs up to date (2026-10-26) | closed (completed) | documentation, type:task, workflow | 2026-10-26 |
+| [#116](items/pr-0116.md) | PR | Bring the student docs up to date (2026-10-26) (#115) | merged | - | 2026-10-26 |
