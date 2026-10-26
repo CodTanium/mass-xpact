@@ -50,6 +50,8 @@ feature {NONE} -- Initialization
 			run_test ("test_plain_tokenizer_attribute_fast_path", agent test_plain_tokenizer_attribute_fast_path)
 			run_test ("test_many_attribute_duplicates_and_reuse", agent test_many_attribute_duplicates_and_reuse)
 			run_test ("test_plain_tokenizer_character_data_fast_path", agent test_plain_tokenizer_character_data_fast_path)
+			run_test ("test_character_data_bracket_dispatch", agent test_character_data_bracket_dispatch)
+			run_test ("test_character_data_entity_bracket_boundaries", agent test_character_data_entity_bracket_boundaries)
 			run_test ("test_ascii_xml_character_normalization", agent test_ascii_xml_character_normalization)
 			run_test ("test_incremental_parse_session_prototype", agent test_incremental_parse_session_prototype)
 			run_test ("test_expat_port_parse_session_spike", agent test_expat_port_parse_session_spike)
@@ -1326,6 +1328,107 @@ feature {NONE} -- Tests
 			assert ("plain tokenizer accepts reusable input", l_parser.parse (l_input))
 			assert ("plain tokenizer accepts next input", l_parser.parse ("<next/>"))
 			assert ("plain tokenizer does not mutate reusable input", l_input.same_string ("<root>kept</root>"))
+		end
+
+	test_character_data_bracket_dispatch
+			-- Literal close markers remain invalid after text/reference fallback;
+			-- near matches and UTF-8 retain their text, positions and reuse behavior.
+		local
+			l_handler: XP_COLLECTING_HANDLER
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_parser, l_noop_parser: XP_PARSER
+			l_valid, l_invalid: STRING_8
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			create l_sink.make
+			create l_noop_parser.make (l_sink)
+			l_valid := "<r>&amp;] ]] ]x %/195/%/169/ %/230/%/188/%/162/ &gt;</r>"
+			l_invalid := "<r>&amp;%R%N%/195/%/169/]]>tail</r>"
+			from i := 1 until i > 2 loop
+				l_handler.events.wipe_out
+				assert ("bracket near matches and UTF-8 parse", l_parser.parse (l_valid))
+				assert ("bracket near matches preserve observed text", collected_character_data (l_handler).same_string ("&] ]] ]x %/195/%/169/ %/230/%/188/%/162/ >"))
+				assert ("bracket near matches finish positions", l_parser.current_byte_index = l_valid.count and then l_parser.current_line_number = 1 and then l_parser.current_column_number = l_valid.count)
+				assert ("no-op bracket near matches parse after reference", l_noop_parser.parse (l_valid) and then l_noop_parser.last_error.is_empty)
+				assert ("no-op bracket near matches finish positions", l_noop_parser.current_byte_index = l_valid.count and then l_noop_parser.current_column_number = l_valid.count)
+				l_handler.events.wipe_out
+				assert ("literal close marker after reference rejected", not l_parser.parse (l_invalid))
+				assert ("literal close marker diagnostic", l_parser.last_error.same_string ("CDATA close marker in character data"))
+				assert ("literal close marker preserves preceding callbacks", l_handler.events.count = 1 and then l_handler.events.first.same_string ("start:r:0"))
+				assert ("literal close marker normalized error position", l_parser.current_byte_index = 11 and then l_parser.current_line_number = 2 and then l_parser.current_column_number = 2 and then l_parser.current_byte_count = 0)
+				assert ("no-op literal close marker after reference rejected", not l_noop_parser.parse (l_invalid))
+				assert ("no-op literal close marker diagnostic", l_noop_parser.last_error.same_string ("CDATA close marker in character data"))
+				assert ("no-op literal close marker normalized error position", l_noop_parser.current_byte_index = 11 and then l_noop_parser.current_line_number = 2 and then l_noop_parser.current_column_number = 2 and then l_noop_parser.current_byte_count = 0)
+				i := i + 1
+			end
+			l_handler.events.wipe_out
+			assert ("one trailing bracket external fragment parses after failure", l_parser.parse_external_entity ("x]"))
+			assert ("one trailing bracket external fragment text", collected_character_data (l_handler).same_string ("x]"))
+			assert ("one trailing bracket external fragment position", l_parser.current_byte_index = 2 and then l_parser.current_column_number = 2)
+			l_handler.events.wipe_out
+			assert ("two trailing brackets external fragment parse", l_parser.parse_external_entity ("x]]"))
+			assert ("two trailing brackets external fragment text", collected_character_data (l_handler).same_string ("x]]"))
+			assert ("two trailing brackets external fragment position", l_parser.current_byte_index = 3 and then l_parser.current_column_number = 3)
+			assert ("no-op short document recovers after marker failures", l_noop_parser.parse ("<r/>") and then l_noop_parser.last_error.is_empty and then l_noop_parser.current_byte_index = 4)
+		end
+
+	test_character_data_entity_bracket_boundaries
+			-- Entity boundaries may assemble the three characters in delivered text;
+			-- a literal close marker inside one parsed replacement remains forbidden.
+		local
+			l_handler: XP_COLLECTING_HANDLER
+			l_sink: XP_NULL_EVENT_HANDLER
+			l_parser, l_noop_parser: XP_PARSER
+			l_documents: ARRAY [STRING_8]
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			create l_sink.make
+			create l_noop_parser.make (l_sink)
+			l_documents := <<
+				"<r>]]&gt;</r>",
+				"<r>]&#93;&gt;</r>",
+				"<!DOCTYPE r [<!ENTITY end '>'>]><r>]]&end;</r>",
+				"<!DOCTYPE r [<!ENTITY a ']]'><!ENTITY b '>'>]><r>&a;&b;</r>"
+			>>
+			from i := l_documents.lower until i > l_documents.upper loop
+				l_handler.events.wipe_out
+				assert ("entity-assembled close characters accepted " + i.out, l_parser.parse (l_documents [i]))
+				assert ("entity-assembled close characters delivered " + i.out, collected_character_data (l_handler).same_string ("]]>"))
+				assert ("entity-assembled text reaches document end " + i.out, l_parser.current_byte_index = l_documents [i].count and then l_parser.last_error.is_empty)
+				assert ("no-op entity-assembled close characters accepted " + i.out, l_noop_parser.parse (l_documents [i]) and then l_noop_parser.last_error.is_empty)
+				i := i + 1
+			end
+			l_documents := <<
+				"<!DOCTYPE r [<!ENTITY bad ']]>'>]><r>&bad;</r>",
+				"<!DOCTYPE r [<!ENTITY bad '&#93;&#93;&#62;'>]><r>&bad;</r>"
+			>>
+			from i := l_documents.lower until i > l_documents.upper loop
+				l_handler.events.wipe_out
+				assert ("literal close marker in entity rejected " + i.out, not l_parser.parse (l_documents [i]))
+				assert ("literal close marker in entity diagnostic " + i.out, l_parser.last_error.same_string ("CDATA close marker in character data"))
+				assert ("no-op literal close marker in entity rejected " + i.out, not l_noop_parser.parse (l_documents [i]))
+				assert ("no-op literal close marker in entity diagnostic " + i.out, l_noop_parser.last_error.same_string ("CDATA close marker in character data"))
+				l_handler.events.wipe_out
+				assert ("observing parser recovers after bad entity " + i.out, l_parser.parse ("<r>]]&gt;</r>") and then l_parser.last_error.is_empty)
+				assert ("recovered entity-assembled text preserved " + i.out, collected_character_data (l_handler).same_string ("]]>"))
+				assert ("no-op parser recovers after bad entity " + i.out, l_noop_parser.parse ("<r>]]&gt;</r>") and then l_noop_parser.last_error.is_empty)
+				i := i + 1
+			end
+		end
+
+	collected_character_data (a_handler: XP_COLLECTING_HANDLER): STRING_8
+			-- Delivered text with adjacent callbacks coalesced for comparison.
+		do
+			create Result.make_empty
+			across a_handler.events as l_event loop
+				if l_event.item.starts_with ("text:") then
+					Result.append_substring (l_event.item, 6, l_event.item.count)
+				end
+			end
 		end
 
 	test_ascii_xml_character_normalization

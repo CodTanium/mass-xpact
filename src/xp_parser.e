@@ -2161,7 +2161,8 @@ feature {NONE} -- Character data and references
 				loop
 					note_position (i)
 					c := a_input.item (i)
-					if has_at (a_input, i, "]]>") then
+					-- The fixed marker is read-only; ordinary bytes need no prefix check.
+					if c = ']' and then has_at (a_input, i, once "]]>") then
 						set_error ("CDATA close marker in character data")
 						i := a_input.count + 1
 					elseif c = '&' then
@@ -2284,7 +2285,7 @@ feature {NONE} -- Character data and references
 				if c = '&' then
 					l_fallback := True
 					i := a_input.count + 1
-				elseif c = ']' and then has_at (a_input, i, "]]>") then
+				elseif c = ']' and then has_at (a_input, i, once "]]>") then
 					note_position (i)
 					set_error ("CDATA close marker in character data")
 					i := a_input.count + 1
@@ -2375,7 +2376,7 @@ feature {NONE} -- Character data and references
 			loop
 				note_position (i)
 				c := a_input.item (i)
-				if has_at (a_input, i, "]]>") then
+				if c = ']' and then has_at (a_input, i, once "]]>") then
 					set_error ("CDATA close marker in character data")
 					i := a_input.count + 1
 				elseif c = '&' then
