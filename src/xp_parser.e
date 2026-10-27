@@ -309,11 +309,36 @@ feature -- Configuration
 			clear_cached_doctype
 			dtd_declarations_disabled := dtd_declarations_disabled or else a_child.dtd_declarations_disabled
 			dtd_has_parameter_entity_references := dtd_has_parameter_entity_references or else a_child.dtd_declarations_disabled
+			mark_new_general_entities_external (a_child.general_entity_context_table.current_keys)
+			mark_new_general_entities_external (a_child.external_general_entity_context_table.current_keys)
 			copy_string_table_into (a_child.general_entity_context_table, entity_table)
 			copy_string_table_into (a_child.parameter_entity_context_table, parameter_entity_table)
 			copy_integer_table_into (a_child.parameter_entity_accounting_context_table, parameter_entity_accounting_table)
 			copy_external_entity_table_into (a_child.external_general_entity_context_table, external_entity_table)
 			copy_external_entity_table_into (a_child.external_parameter_entity_context_table, external_parameter_entity_table)
+		end
+
+	mark_new_general_entities_external (a_names: ARRAY [STRING_8])
+			-- Mark each of `a_names' that is not yet bound here as declared outside the internal subset.
+		require
+			names_attached: a_names /= Void
+		local
+			i: INTEGER
+		do
+			from
+				i := a_names.lower
+			invariant
+				index_in_bounds: i >= a_names.lower and i <= a_names.upper + 1
+			until
+				i > a_names.upper
+			loop
+				if not entity_table.has (a_names.item (i)) and then not external_entity_table.has (a_names.item (i)) then
+					mark_externally_declared_general_entity (a_names.item (i))
+				end
+				i := i + 1
+			variant
+				a_names.upper - i + 1
+			end
 		end
 
 	set_parameter_entities_unless_standalone (a_enabled: BOOLEAN)
@@ -2671,6 +2696,11 @@ feature {NONE} -- Character data and references
 		do
 			l_name := resolved_general_entity_name (a_name)
 			if has_error then
+			elseif xml_standalone = 1 and then not parsing_external_entity and then external_dtd_depth = 0
+				and then parameter_subset_expansion_depth = 0 and then is_externally_declared_general_entity (l_name)
+			then
+					-- WFC "Entity Declared": a standalone document may only use internally declared entities.
+				set_error ("entity declared in parameter entity")
 			elseif is_entity_active (l_name) then
 				set_error ("recursive entity reference")
 			elseif entity_stack.count >= Default_max_entity_depth then
@@ -2713,6 +2743,11 @@ feature {NONE} -- Character data and references
 		do
 			l_name := resolved_general_entity_name (a_name)
 			if has_error then
+			elseif xml_standalone = 1 and then not parsing_external_entity and then external_dtd_depth = 0
+				and then parameter_subset_expansion_depth = 0 and then is_externally_declared_general_entity (l_name)
+			then
+					-- WFC "Entity Declared": a standalone document may only use internally declared entities.
+				set_error ("entity declared in parameter entity")
 			elseif is_entity_active (l_name) then
 				set_error ("recursive entity reference")
 			elseif entity_stack.count >= Default_max_entity_depth then
@@ -7594,6 +7629,7 @@ feature {NONE} -- Entity tables
 			if not entity_table.has (l_name) then
 				create l_value.make_from_string (a_value)
 				entity_table.put (l_value, l_name)
+				note_general_entity_declaration_place (l_name)
 			end
 		end
 
@@ -7636,8 +7672,46 @@ feature {NONE} -- Entity tables
 			elseif not entity_table.has (l_name) and then not external_entity_table.has (l_name) then
 				create l_entity.make (a_name, a_public_id, a_system_id, a_notation_name, False, a_is_unparsed)
 				external_entity_table.put (l_entity, l_name)
+				note_general_entity_declaration_place (l_name)
 			end
 		end
+
+	note_general_entity_declaration_place (a_name: STRING_8)
+			-- Remember `a_name' if it is declared in the external subset or a parameter entity.
+		require
+			name_attached: a_name /= Void
+		do
+			if parsing_external_entity or else external_dtd_depth > 0 or else parameter_subset_expansion_depth > 0 then
+				mark_externally_declared_general_entity (a_name)
+			end
+		end
+
+	mark_externally_declared_general_entity (a_name: STRING_8)
+			-- Record that general entity `a_name' was not declared in the internal subset proper.
+		require
+			name_attached: a_name /= Void
+		local
+			l_names: HASH_TABLE [BOOLEAN, STRING_8]
+		do
+			if attached externally_declared_general_entities as l_existing then
+				l_names := l_existing
+			else
+				create l_names.make (8)
+				externally_declared_general_entities := l_names
+			end
+			l_names.force (True, a_name.twin)
+		end
+
+	is_externally_declared_general_entity (a_name: READABLE_STRING_8): BOOLEAN
+			-- Was general entity `a_name' declared in the external subset or a parameter entity?
+		require
+			name_attached: a_name /= Void
+		do
+			Result := attached externally_declared_general_entities as l_names and then l_names.has (a_name.to_string_8)
+		end
+
+	externally_declared_general_entities: detachable HASH_TABLE [BOOLEAN, STRING_8]
+			-- General entities declared in the external subset or a parameter entity (WFC: Entity Declared).
 
 	is_parameter_entity_declared (a_name: READABLE_STRING_8): BOOLEAN
 			-- Is a parameter entity with `a_name' already bound?
@@ -7922,6 +7996,7 @@ feature {NONE} -- State
 			entity_reference_start_stack.wipe_out
 			entity_reference_count_stack.wipe_out
 			entity_table.wipe_out
+			externally_declared_general_entities := Void
 			parameter_entity_table.wipe_out
 			parameter_entity_accounting_table.wipe_out
 			external_entity_table.wipe_out
