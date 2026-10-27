@@ -17,7 +17,8 @@ Issue: [#146](https://github.com/andersoxie/xpact/issues/146)   Branch: `fix/146
 - ✅ The new lanes exposed 7 parser problems in the external-entity path, never tested before. All 7 are fixed (F1–F7), one commit each.
 - ✅ No regression: the smoke tests, the Eiffel matrix, Python, the native stage, and the C# comparison with Expat (4,308 inputs) all pass.
 - ⬜ Jenkins has not run this branch yet; #146 stays open until it has.
-- ⚠️ With 10 s per case (the Jenkins default), the assertions build times out on the 3 `pr-xml-*` documents. They take about 16 s each, are accepted at 30 s, and are slow, not wrong.
+- ⚠️ With 10 s per case (the Jenkins default), the assertions build times out on the 3 `pr-xml-*` documents. They take about 16 s each, are accepted at 30 s, and are slow, not wrong. **Fixed separately in [#148](https://github.com/andersoxie/xpact/issues/148)** (PR #149): 0.2 s.
+- ✅ **Added 2026-10-27:** Jenkins runs all cases (`run_benchmarks.ps1 -W3cAllCases`), and either-verdict cases are reported apart as "no crash only". See [Jenkins and honest counts](#added-jenkins-runs-all-cases-and-honest-counts).
 
 ## Lanes (`scripts/run_w3c_conformance.py --all-cases`)
 
@@ -81,6 +82,30 @@ The committed source was rebuilt fix by fix from `ec1705d`, and its SHA-256 matc
 - **The 290 errors** are files missing from that copy. 143 of them are Edinburgh files that exist in another folder, because that old catalog has no `xml:base`.
 - **The 302 failures** are exactly the old name-rule tests. That catalog has no `EDITION` marks, so they are judged with the 5th-edition rules; with the 4th-edition rules, all pass.
 - **Recommendation:** use the 2013 suite.
+
+## Added: Jenkins runs all cases, and honest counts
+
+Two commits on this branch, after the first review of option A:
+
+| Commit | Change |
+|---|---|
+| Report either-verdict W3C cases apart from checked verdicts | `optional-error` and `xml-1.1` passes are counted as `no_crash_only`, not `passed`; they get their own JUnit suite, `w3c-xml-<engine>-no-crash-only`; 5 new runner tests (33 OK) |
+| Run all W3C cases in the Jenkins Benchmarks stage | `run_benchmarks.ps1 -W3cAllCases` builds the matching DLL, compiles the checker, and passes `--all-cases`; both Jenkinsfiles switch it on |
+
+**Verification:** the Jenkins Benchmarks stage script was run locally on this branch **plus the #148 fix**, with the default 10 s ([log](runs/jenkins-stage/jenkins-benchmarks-stage.txt), [summary](runs/jenkins-stage/summary.md)). Exit 0.
+
+| JUnit suite | Tests | Failures | Errors | Skipped |
+|---|---:|---:|---:|---:|
+| `w3c-xml-Finalized` | 2,283 | 0 | 0 | 0 |
+| `w3c-xml-Finalized-no-crash-only` | 302 | 0 | 0 | 0 |
+| `w3c-xml-FinalizedAssertions` | 2,283 | 0 | 0 | 0 |
+| `w3c-xml-FinalizedAssertions-no-crash-only` | 302 | 0 | 0 | 0 |
+
+Same code (option A + #148): Eiffel matrix 4/4 ([log](runs/jenkins-stage/eiffel-matrix-combined.txt)), Python 183 OK ([log](runs/jenkins-stage/python-combined.txt)).
+
+**Without #148**, the assertions build still times out on the 3 `pr-xml-*` documents at 10 s, so merge #149 before, or together with, this PR.
+
+**Problem met (environment, kept separate):** the first local run stopped at the WSL benchmark probe, because WSL is not installed on the student PC ([log](runs/jenkins-stage/jenkins-benchmarks-stage-ATTEMPT1-no-wsl.txt)). The rerun used `-SkipWslC` as its only deviation from Jenkins ([script](runs/jenkins-stage/jenkins-benchmarks-stage-nowsl.ps1)). That run's generated `docs/benchmarks.md` was restored and is not committed.
 
 ## Limitations
 
