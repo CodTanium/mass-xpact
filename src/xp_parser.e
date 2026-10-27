@@ -2662,7 +2662,9 @@ feature {NONE} -- Character data and references
 					l_previous_floor := entity_element_floor
 					entity_element_floor := l_element_depth
 					push_entity (l_name)
+					internal_entity_expansion_depth := internal_entity_expansion_depth + 1
 					parse_entity_content (l_value)
+					internal_entity_expansion_depth := internal_entity_expansion_depth - 1
 					pop_entity
 					entity_element_floor := l_previous_floor
 					if not has_error and then element_stack.count /= l_element_depth then
@@ -7582,6 +7584,7 @@ feature {NONE} -- State
 			last_attribute_name_end := 0
 			external_dtd_depth := 0
 			entity_element_floor := 0
+			internal_entity_expansion_depth := 0
 			element_stack.wipe_out
 			element_slice_stack.wipe_out
 			entity_stack.wipe_out
@@ -7617,6 +7620,7 @@ feature {NONE} -- State
 			last_attribute_name_end := 0
 			external_dtd_depth := 0
 			entity_element_floor := 0
+			internal_entity_expansion_depth := 0
 			dtd_has_parameter_entity_references := False
 			dtd_declarations_disabled := False
 			entity_literal_ended_by_undefined_parameter := False
@@ -7673,11 +7677,17 @@ feature {NONE} -- State
 
 	note_position (a_index: INTEGER)
 			-- Record the current parser position as a 1-based input index.
+			-- While internal entity replacement text is parsed, `a_index' indexes that text,
+			-- not the document: the position of the entity reference is kept instead.
 		local
 			l_index: INTEGER
 		do
 			if not position_input.is_empty or else a_index > 0 then
-				l_index := bounded_position_index (a_index)
+				if internal_entity_expansion_depth > 0 and then entity_reference_start_stack.count > 0 then
+					l_index := bounded_position_index (entity_reference_start_stack.i_th (entity_reference_start_stack.count))
+				else
+					l_index := bounded_position_index (a_index)
+				end
 				if lazy_position_accounting then
 					current_position_index := l_index
 				else
@@ -8079,6 +8089,9 @@ feature {NONE} -- State
 	entity_element_floor: INTEGER
 			-- Element depth at the start of the general entity whose content is being parsed;
 			-- end tags may not close elements at or below it.
+
+	internal_entity_expansion_depth: INTEGER
+			-- Number of internal general entities whose replacement text is being parsed as content.
 
 	dtd_has_parameter_entity_references: BOOLEAN
 			-- Has the DTD referenced a parameter entity? Undeclared general entities
