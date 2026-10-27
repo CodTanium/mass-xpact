@@ -56,6 +56,59 @@ class TemporarySuite(unittest.TestCase):
 
 
 class CatalogTests(TemporarySuite):
+    FORWARD_VERSION_DOCUMENT = (b'<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n'
+                                b'<!ENTITY e SYSTEM "E38.ent">\n]>\n<foo>&e;</foo>\n')
+    FORWARD_VERSION_ENTITY = b'<?xml version="1.1" encoding="utf-8"?>\n<foo/>\n'
+
+    def test_reviewed_forward_version_case_uses_fifth_edition_and_retains_catalog_verdict(self):
+        document = self.write("eduni/errata-2e/E38.xml", self.FORWARD_VERSION_DOCUMENT)
+        entity = self.write("eduni/errata-2e/E38.ent", self.FORWARD_VERSION_ENTITY)
+        self.catalog('<TEST ID="rmt-e2e-38" TYPE="not-wf" RECOMMENDATION="XML1.0-errata2e" '
+                     'ENTITIES="general" URI="eduni/errata-2e/E38.xml"/>')
+
+        case, = runner.load_catalog(self.suite)
+
+        self.assertEqual((case.expected, case.catalog_expected, case.skip_reason), ("ACCEPT", "REJECT", ""))
+        self.assertIn("erratum E10", case.expectation_adjustment)
+        self.assertEqual(document.read_bytes(), self.FORWARD_VERSION_DOCUMENT)
+        self.assertEqual(entity.read_bytes(), self.FORWARD_VERSION_ENTITY)
+
+    def test_forward_version_correction_requires_reviewed_metadata_and_both_input_hashes(self):
+        for changes in ({"ID": "other-case"}, {"URI": "other/E38.xml"}, {"TYPE": "valid"},
+                        {"RECOMMENDATION": "XML1.0"}, {"ENTITIES": "both"}, {"NAMESPACE": "no"},
+                        {"VERSION": "1.1"}, {"EDITION": "1 2 3 4"},
+                        {"document": self.FORWARD_VERSION_DOCUMENT + b"\n"},
+                        {"entity": self.FORWARD_VERSION_ENTITY + b"\n"}, {"entity": None}):
+            with self.subTest(changes=changes):
+                attributes = {"ID": "rmt-e2e-38", "TYPE": "not-wf", "RECOMMENDATION": "XML1.0-errata2e",
+                              "ENTITIES": "general", "URI": "eduni/errata-2e/E38.xml", **changes}
+                document = attributes.pop("document", self.FORWARD_VERSION_DOCUMENT)
+                entity = attributes.pop("entity", self.FORWARD_VERSION_ENTITY)
+                self.write(attributes["URI"], document)
+                entity_path = self.suite / "eduni/errata-2e/E38.ent"
+                if entity is None:
+                    entity_path.unlink(missing_ok=True)
+                else:
+                    self.write("eduni/errata-2e/E38.ent", entity)
+                self.catalog("<TEST " + " ".join(f'{key}="{value}"' for key, value in attributes.items()) + "/>")
+
+                case, = runner.load_catalog(self.suite)
+
+                expected = "ACCEPT" if attributes["TYPE"] == "valid" else "REJECT"
+                self.assertEqual((case.expected, case.catalog_expected), (expected, expected))
+                self.assertEqual(case.expectation_adjustment, "")
+
+    def test_malformed_entity_inputs_are_selected_without_case_id_or_byte_exceptions(self):
+        original = b"<!DOCTYPE r SYSTEM 'malformed.dtd'><r/>"
+        path = self.write("input.xml", original)
+        self.catalog('<TEST ID="not-wf-not-sa-002" TYPE="not-wf" ENTITIES="both" URI="input.xml"/>'
+                     '<TEST ID="other-malformed" TYPE="not-wf" ENTITIES="parameter" URI="input.xml"/>')
+
+        cases = runner.load_catalog(self.suite)
+
+        self.assertEqual([(case.expected, case.skip_reason) for case in cases], [("REJECT", "")] * 2)
+        self.assertEqual(path.read_bytes(), original)
+
     def test_entities_dtd_defaults_nested_bases_and_original_bytes(self):
         self.write("testcases.dtd", '<!ATTLIST TEST ENTITIES CDATA "none" '
                    'RECOMMENDATION CDATA "XML1.0" NAMESPACE CDATA "yes">')
@@ -128,13 +181,27 @@ class ExpectationTests(unittest.TestCase):
         for attributes in (
             {"VERSION": "1.1"}, {"EDITION": "1 2 3 4"},
             {"RECOMMENDATION": "XML1.1"}, {"RECOMMENDATION": "NS1.1"},
-            {"ENTITIES": "general"}, {"ENTITIES": "parameter"}, {"ENTITIES": "both"},
             {"TYPE": "error"},
         ):
             with self.subTest(attributes=attributes):
                 _, reason = runner.expectation({"TYPE": "not-wf", **attributes})
                 self.assertTrue(reason)
         self.assertEqual(runner.expectation({"TYPE": "error"})[0], "unspecified")
+
+    def test_entity_metadata_preserves_all_binary_expectations(self):
+        for kind, expected in (("valid", "ACCEPT"), ("invalid", "ACCEPT"), ("not-wf", "REJECT")):
+            for entities in ("none", "general", "parameter", "both"):
+                with self.subTest(kind=kind, entities=entities):
+                    self.assertEqual(runner.expectation({"TYPE": kind, "ENTITIES": entities}),
+                                     (expected, ""))
+
+    def test_entity_acceptance_does_not_override_version_edition_or_optional_exclusions(self):
+        for attributes in ({"VERSION": "1.1"}, {"EDITION": "1 2 3 4"},
+                           {"RECOMMENDATION": "XML1.1"}, {"RECOMMENDATION": "NS1.1"},
+                           {"TYPE": "error"}):
+            with self.subTest(attributes=attributes):
+                _, reason = runner.expectation({"TYPE": "valid", "ENTITIES": "both", **attributes})
+                self.assertTrue(reason)
 
     def test_lists_containing_supported_version_and_edition_remain_applicable(self):
         self.assertEqual(runner.expectation({"TYPE": "valid", "VERSION": "1.0 1.1", "EDITION": "4 5"}),
@@ -185,6 +252,48 @@ class ExecutionTests(TemporarySuite):
         result, process = self.invoke(self.case(expected="REJECT", namespaces=False), completed)
         self.assertEqual((result.status, result.actual), ("passed", "REJECT"))
         self.assertNotIn("--namespaces", process.call_args.args[0])
+
+    def test_suite_root_is_canonical_and_keeps_original_input_bytes(self):
+        case = self.case()
+        original = case.path.read_bytes()
+        completed = subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b"")
+        with mock.patch.object(runner.subprocess, "run", return_value=completed) as process:
+            result = runner.run_case(case, "xpact", Path("parser.exe"), 0.25, self.root,
+                                     suite_root=self.suite / "subdir" / "..")
+        self.assertEqual(result.status, "passed")
+        self.assertEqual(process.call_args.args[0], ["parser.exe", "--conformance-file", str(case.path),
+                         "--suite-root", str(self.suite.resolve()), "--namespaces"])
+        self.assertEqual(case.path.read_bytes(), original)
+
+    def test_invalid_suite_root_does_not_launch_parser_or_count_as_rejection(self):
+        case = self.case(expected="REJECT")
+        outside = self.root / "other suite"
+        outside.mkdir()
+        for suite_root in (outside, self.root / "missing suite"):
+            with self.subTest(suite_root=suite_root), mock.patch.object(runner.subprocess, "run") as process:
+                result = runner.run_case(case, "xpact", Path("parser.exe"), 0.25, self.root,
+                                         suite_root=suite_root)
+            process.assert_not_called()
+            self.assertEqual((result.status, result.actual), ("error", "not-run"))
+
+    def test_profile_adjustment_is_visible_even_when_the_case_passes(self):
+        case = replace(self.case(), kind="not-wf", catalog_expected="REJECT",
+                       expectation_adjustment="XML edition correction: required ACCEPT")
+        result, _ = self.invoke(case, subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b""))
+        self.assertEqual((result.status, result.expected, result.catalog_expected), ("passed", "ACCEPT", "REJECT"))
+
+        report = runner.write_reports([result], self.output, {})
+
+        self.assertEqual(report["expectation_adjustments"], [{"case_id": case.id, "catalog_expected": "REJECT",
+                         "expected": "ACCEPT", "reason": case.expectation_adjustment}])
+        properties = ET.parse(self.output / "junit.xml").getroot().findall("testsuite/testcase/properties/property")
+        self.assertEqual({p.get("name"): p.get("value") for p in properties},
+                         {"catalog_expected": "REJECT", "profile_expected": "ACCEPT",
+                          "expectation_adjustment": case.expectation_adjustment})
+        with (self.output / "results.tsv").open(encoding="utf-8", newline="") as source:
+            row, = csv.DictReader(source, delimiter="\t")
+        self.assertEqual((row["expected"], row["catalog_expected"], row["expectation_adjustment"]),
+                         ("ACCEPT", "REJECT", case.expectation_adjustment))
 
     def test_incorrect_binary_verdict_is_a_conformance_failure(self):
         completed = subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b"")
@@ -330,6 +439,8 @@ class ReportAndCliTests(TemporarySuite):
         with mock.patch.object(runner.subprocess, "run", side_effect=verdicts) as process, contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(runner.main(arguments), 1)
         self.assertEqual(process.call_count, 2)
+        for call in process.call_args_list:
+            self.assertEqual(call.args[0][3:5], ["--suite-root", str(self.suite.resolve())])
         report = json.loads((self.output / "summary.json").read_text())
         self.assertEqual([row["failed"] for row in report["engines"]], [0, 1])
         self.assertEqual(report["source_mode"], "local-directory")

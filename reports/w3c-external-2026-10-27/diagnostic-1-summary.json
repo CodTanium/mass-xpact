@@ -1,0 +1,119 @@
+{
+  "suite_version": "20130923",
+  "source": "https://www.w3.org/XML/Test/xmlts20130923.zip",
+  "archive_sha256": "f9510b3532926e1b4c2e54855b021e4b8a66ec98a5337dcf4ff07e8a41968deb",
+  "source_mode": "verified-archive",
+  "suite_directory": "C:\\Users\\ander\\Documents\\xpact\\build\\validation-corpora\\w3c-xml-20130923\\xmlconf",
+  "executables": {
+    "DiagnosticAssertions": "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T052205Z-8accaf854856\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe"
+  },
+  "catalog_cases": 2585,
+  "profile": "XML 1.0 fifth edition; namespaces unless NAMESPACE=no; nonvalidating; external-resource cases included; local suite root supplied to each engine; binary verdicts only",
+  "engines": [
+    {
+      "engine": "DiagnosticAssertions",
+      "total": 2585,
+      "passed": 1974,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 611,
+      "accepted": 958,
+      "rejected": 1016,
+      "known": 0,
+      "unexpected": 0,
+      "elapsed_ms": 69816.166
+    }
+  ],
+  "expectation_adjustments": [
+    {
+      "case_id": "rmt-e2e-38",
+      "catalog_expected": "REJECT",
+      "expected": "ACCEPT",
+      "reason": "XML 1.0 fifth edition permits this 1.1 text declaration without non-1.0 features; fourth-edition erratum E10 reverses second-edition E38: https://www.w3.org/XML/xml-V10-4e-errata#E10"
+    }
+  ],
+  "status": "diagnostic-passed",
+  "date": "2026-10-27",
+  "build": {
+    "schema_version": 1,
+    "status": "verified",
+    "implementation": "xpact",
+    "profile": "w3c",
+    "source": {
+      "repository": "https://github.com/andersoxie/xpact.git",
+      "revision": "687f6cfdb7137abd302f2b2f534bce2f59dcc0da",
+      "source_dir": "C:\\Users\\ander\\Documents\\xpact",
+      "source_sha256": "6819e55a30a30a300083dff399d1ceea219d7056394e45d7a3d1f4126c316f2b",
+      "worktree_dirty": true
+    },
+    "build_inputs_sha256": "6819e55a30a30a300083dff399d1ceea219d7056394e45d7a3d1f4126c316f2b",
+    "build": {
+      "configuration": "finalized/assertions-on/msvc-x64",
+      "mode": "finalized",
+      "assertions": true,
+      "void_safety": "all",
+      "command": [
+        "C:\\El2502E\\studio\\spec\\win64\\bin\\ec.EXE",
+        "-batch",
+        "-clean",
+        "-finalize",
+        "-keep",
+        "-config",
+        "C:\\Users\\ander\\Documents\\xpact\\benchmarks\\dual_w3c\\xpact\\conformance.ecf",
+        "-target",
+        "conformance_assertions",
+        "-project_path",
+        "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T052205Z-8accaf854856\\xpact\\project"
+      ],
+      "makefile": {
+        "CC": "cl",
+        "CPP": "cl",
+        "CFLAGS": "-Ox -MT -w -nologo -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_CRT_SECURE_NO_DEPRECATE -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -I\"C:\\El2502E\\studio\\spec\\win64\\include\" -I. $(INCLUDE_PATH)",
+        "CPPFLAGS": "-Ox -MT -w -nologo -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_CRT_SECURE_NO_DEPRECATE -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -I\"C:\\El2502E\\studio\\spec\\win64\\include\" -I. $(INCLUDE_PATH)",
+        "LDFLAGS": "-STACK:5000000 -NODEFAULTLIB:libc",
+        "CCLDFLAGS": "-STACK:5000000 -NODEFAULTLIB:libc  -SUBSYSTEM:CONSOLE",
+        "EIFLIB": "\"C:\\El2502E\\studio\\spec\\win64\\lib\\msc_vc140\\finalized.lib\""
+      },
+      "native_helpers": []
+    },
+    "toolchain": {
+      "platform": "Windows-11-10.0.26300-SP0",
+      "architecture": "x64",
+      "eiffel_compiler": "C:\\El2502E\\studio\\spec\\win64\\bin\\ec.EXE",
+      "eiffel_version": "ISE EiffelStudio version 25.02.9.8723 Enterprise Edition - win64",
+      "c_compiler": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.EXE",
+      "c_compiler_version": "Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35229 for x64\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\nusage: cl [ option... ] filename... [ /link linkoption... ]",
+      "ise_eiffel": "C:\\El2502E",
+      "ise_library": "C:\\El2502E",
+      "ise_c_compiler": "msc_vc140",
+      "dependencies": [
+        {
+          "path": "C:\\El2502E\\library\\base\\base.ecf",
+          "sha256": "aebd21bdfa85f5dd943a43166ca5fe52e2818415aa29998237ee93774c8270f5"
+        },
+        {
+          "path": "C:\\El2502E\\library\\base_extension\\base_extension.ecf",
+          "sha256": "3b0bf259b6abefc36baac706c49263da06cbb94b3e58a257b7eca4a331943289"
+        },
+        {
+          "path": "C:\\El2502E\\library\\time\\time.ecf",
+          "sha256": "e2a97232eb1f5d351083733b23c6e97beef34ee7a4ef4cf6655f8dd2177530ae"
+        },
+        {
+          "path": "C:\\El2502E\\C_library\\zlib\\clibs_zlib.ecf",
+          "sha256": "3e8b23b5db824bdbd3eb39f233f46c18e273925fcbae5a81285f46588406bb41"
+        },
+        {
+          "path": "C:\\El2502E\\C_library\\zlib\\spec\\msc_vc140\\win64\\lib\\zlib.lib",
+          "sha256": "716d7073fd30f9814113b54c1caa76e0ea820476f9936b7cc4f9956cd760f6ee"
+        }
+      ]
+    },
+    "executable": "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T052205Z-8accaf854856\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+    "executable_sha256": "55a3f3c699821093e6dc7acf08fde5bf511373655b8a83f2ea36eaf317984e2a",
+    "probe_output": "XPACT_W3C_IDENTITY\txpact\t687f6cfdb7137abd302f2b2f534bce2f59dcc0da\tfinalized/assertions-on/msvc-x64\tnormal",
+    "gc_policy": "normal"
+  },
+  "limitation": "Early assertion-enabled snapshot only; final matched-source assertion-enabled/disabled campaign still pending after further source refinements.",
+  "raw_evidence_directory": "build/w3c-external-2026-10-27/diagnostic-1"
+}

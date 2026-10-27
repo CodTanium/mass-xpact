@@ -1,0 +1,28 @@
+Eiffel Compilation Manager
+Version 25.02.9.8723 Enterprise Edition - win64
+
+Degree 6: Examining System
+Degree 5: Parsing Classes
+Degree 4: Analyzing Inheritance
+Degree 3: Checking Types
+Degree 2: Generating Byte Code
+-------------------------------------------------------------------------------
+
+Warning code: Obsolete Class
+
+Warning: type relies on obsolete class.
+What to do: update to new class at your earliest convenience. The
+  class is still available but may be removed in the future.
+
+Class: EXTERNAL_PROBE
+Class: EXTERNAL_PROBE
+Feature: make
+Obsolete class: ARGUMENTS
+Obsolete message: Use `ARGUMENTS_32' to manipulate Unicode arguments.
+
+-------------------------------------------------------------------------------
+Degree -2: Constructing Polymorphic Table
+Degree -3: Generating Optimized Code
+System Recompiled.
+You must now run "finish_freezing" in:
+	$REPO\build\w3c-skip-investigation\portable-external-probe\project\EIFGENs\probe\F_code

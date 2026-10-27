@@ -31,7 +31,19 @@ SUITE_VERSION = "20130923"
 SUITE_URL = "https://www.w3.org/XML/Test/xmlts20130923.zip"
 SUITE_SHA256 = "f9510b3532926e1b4c2e54855b021e4b8a66ec98a5337dcf4ff07e8a41968deb"
 ROOT_CATALOG_SHA256 = "a10d3fc409fc0de5ea1758d2e4fe6efcbc51df6d1942c80f299dbbe085b2fd52"
-PROFILE = "XML 1.0 fifth edition; namespaces unless NAMESPACE=no; nonvalidating; no external entities; binary verdicts only"
+PROFILE = ("XML 1.0 fifth edition; namespaces unless NAMESPACE=no; nonvalidating; "
+           "external-resource cases included; local suite root supplied to each engine; binary verdicts only")
+# Fourth-edition erratum E10, incorporated in the fifth edition, reversed
+# second-edition E38. Keep the upstream catalog verdict visible while applying
+# the current profile only to the exact reviewed document and entity bytes.
+FORWARD_VERSION_CASE_ID = "rmt-e2e-38"
+FORWARD_VERSION_DOCUMENT = "eduni/errata-2e/E38.xml"
+FORWARD_VERSION_DOCUMENT_SHA256 = "b6be7039a5dfeaad8eaad16eb3976c754888985bdd598b518a81a0f9547e3cf6"
+FORWARD_VERSION_ENTITY = "eduni/errata-2e/E38.ent"
+FORWARD_VERSION_ENTITY_SHA256 = "028229ed9dda8481d7996ef03a1e17300255abef2bf082011312f09b28623eef"
+FORWARD_VERSION_REASON = ("XML 1.0 fifth edition permits this 1.1 text declaration without non-1.0 features; "
+                         "fourth-edition erratum E10 reverses second-edition E38: "
+                         "https://www.w3.org/XML/xml-V10-4e-errata#E10")
 REPORT_FILES = ("junit.xml", "results.tsv", "summary.json", "summary.md")
 KNOWN_FAILURE_FIELDS = ("engine", "case_id", "status", "category")
 # With --all-cases, cases outside the profile run in these lanes instead of being skipped.
@@ -57,6 +69,8 @@ class Case:
     lane: str = "core"
     lane_expected: str = ""
     entities: bool = False
+    catalog_expected: str = ""
+    expectation_adjustment: str = ""
 
 
 @dataclass
@@ -73,6 +87,8 @@ class Result:
     known: str = ""
     exit_code: int | None = None
     lane: str = "core"
+    catalog_expected: str = ""
+    expectation_adjustment: str = ""
 
 
 def contained_path(root: Path, candidate: Path) -> Path:
@@ -145,8 +161,6 @@ def expectation(attributes: dict[str, str]) -> tuple[str, str]:
     entities = attributes.get("ENTITIES", "none")
     if entities not in {"none", "general", "parameter", "both"}:
         raise ValueError(f"Unknown ENTITIES: {entities}")
-    if entities != "none":
-        return expected, f"Requires external {entities} entities; resolver is disabled"
     return expected, ""
 
 
@@ -229,10 +243,22 @@ def load_catalog(suite_dir: Path) -> list[Case]:
             if namespace not in {"yes", "no"}:
                 raise ValueError(f"Unknown NAMESPACE for {identifier}: {namespace}")
             path = local_uri(root, current_base, attributes["URI"])
+            catalog_expected, adjustment = expected, ""
+            entity_path = root / FORWARD_VERSION_ENTITY
+            if (not skip_reason and identifier == FORWARD_VERSION_CASE_ID
+                    and attributes["TYPE"] == "not-wf"
+                    and attributes.get("RECOMMENDATION", "XML1.0") == "XML1.0-errata2e"
+                    and attributes.get("ENTITIES", "none") == "general"
+                    and namespace == "yes"
+                    and path.relative_to(root).as_posix() == FORWARD_VERSION_DOCUMENT
+                    and path.is_file() and entity_path.resolve().is_relative_to(root) and entity_path.is_file()
+                    and hashlib.sha256(path.read_bytes()).hexdigest() == FORWARD_VERSION_DOCUMENT_SHA256
+                    and hashlib.sha256(entity_path.read_bytes()).hexdigest() == FORWARD_VERSION_ENTITY_SHA256):
+                expected, adjustment = "ACCEPT", FORWARD_VERSION_REASON
             cases.append(Case(identifier, path, attributes["TYPE"], namespace == "yes",
                               expected, skip_reason, " ".join(element.itertext()).strip(),
                               attributes.get("RECOMMENDATION", "XML1.0"), lane, lane_expected,
-                              attributes.get("ENTITIES", "none") != "none"))
+                              attributes.get("ENTITIES", "none") != "none", catalog_expected, adjustment))
         for child in element:
             visit(child, current_base)
 
@@ -243,8 +269,11 @@ def load_catalog(suite_dir: Path) -> list[Case]:
 
 
 def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir: Path,
-             *, diagnostic_dir: Path | None = None, extra_arguments: tuple[str, ...] = ()) -> Result:
+             *, diagnostic_dir: Path | None = None, suite_root: Path | None = None,
+             extra_arguments: tuple[str, ...] = ()) -> Result:
     result = Result(engine, case.id, str(case.path), case.kind, case.expected, "not-run", "skipped", lane=case.lane)
+    result.catalog_expected = case.catalog_expected or case.expected
+    result.expectation_adjustment = case.expectation_adjustment
     if case.skip_reason:
         result.message = case.skip_reason
         return result
@@ -253,6 +282,13 @@ def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir
         result.message = "Catalog input file is missing"
         return result
     command = [str(executable), "--conformance-file", str(case.path)]
+    if suite_root is not None:
+        suite_root = suite_root.resolve()
+        if not suite_root.is_dir() or not case.path.resolve().is_relative_to(suite_root):
+            result.status = "error"
+            result.message = "Catalog input is outside an existing local suite root"
+            return result
+        command += ["--suite-root", str(suite_root)]
     if case.namespaces:
         command.append("--namespaces")
     command += extra_arguments
@@ -388,6 +424,12 @@ def add_junit_suite(suites: ET.Element, name: str, rows: list[Result], profile: 
         classname = f"w3c.xml.{row.engine}" if row.lane == "core" else f"w3c.xml.{row.engine}.{row.lane}"
         test = ET.SubElement(suite, "testcase", classname=classname,
                              name=row.case_id, time=f"{row.elapsed_ms / 1000:.6f}", file=row.path)
+        if row.expectation_adjustment:
+            case_properties = ET.SubElement(test, "properties")
+            for name, value in (("catalog_expected", row.catalog_expected),
+                                ("profile_expected", row.expected),
+                                ("expectation_adjustment", row.expectation_adjustment)):
+                ET.SubElement(case_properties, "property", name=name, value=xml_text(value))
         if row.status in {"failed", "error", "skipped"}:
             tag = {"failed": "failure", "error": "error", "skipped": "skipped"}[row.status]
             text = f"[known: {row.known}] {row.message}" if row.known else row.message
@@ -425,7 +467,11 @@ def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> di
         writer = csv.DictWriter(target, fieldnames=list(Result.__dataclass_fields__), delimiter="\t")
         writer.writeheader()
         writer.writerows(tsv_row(row) for row in results)
-    report = {**metadata, "profile": PROFILE, "engines": summaries}
+    adjustments = {row.case_id: {"case_id": row.case_id, "catalog_expected": row.catalog_expected,
+                   "expected": row.expected, "reason": row.expectation_adjustment}
+                   for row in results if row.expectation_adjustment}
+    report = {**metadata, "profile": PROFILE, "engines": summaries,
+              "expectation_adjustments": list(adjustments.values())}
     (output_dir / "summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     lines = ["# W3C XML conformance", "", f"Source: {SUITE_URL}", "", f"Profile: {PROFILE}", ""]
     if any(row["no_crash_only"] for row in summaries):
@@ -452,6 +498,10 @@ def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> di
                              f"{counts['error']} | {counts['skipped']} | {sum(r.actual == 'ACCEPT' for r in rows)} | "
                              f"{sum(r.actual == 'REJECT' for r in rows)} |")
         lines += [""] + [f"- `{lane}`: {LANES[lane]}" for lane in lanes]
+    if adjustments:
+        lines += ["", "Catalog expectations adjusted to the selected XML edition:"]
+        lines += [f"- {row['case_id']}: catalog {row['catalog_expected']}; profile {row['expected']}. {row['reason']}"
+                  for row in adjustments.values()]
     lines += ["", "Known counts failures and errors listed in the known-failures file; they are still parser gaps.",
               "Unexpected counts every other failure or error; any unexpected result fails the run.",
               "Elapsed time includes a fresh process and file read per executed case; it is not parser-only throughput.",
@@ -534,9 +584,9 @@ def main(argv: list[str] | None = None) -> int:
                         else:
                             extra = ("--legacy-names",) if case.lane == "legacy-names" else ()
                             results.append(run_case(lane_case, engine, executable, args.timeout, Path(work),
-                                                    extra_arguments=extra))
+                                                    suite_root=suite_dir, extra_arguments=extra))
                     else:
-                        results.append(run_case(case, engine, executable, args.timeout, Path(work)))
+                        results.append(run_case(case, engine, executable, args.timeout, Path(work), suite_root=suite_dir))
                     if index % 250 == 0:
                         print(f"  {engine}: {index}/{len(cases)}", flush=True)
     except (OSError, ValueError, KeyError, expat.ExpatError, zipfile.BadZipFile) as error:
