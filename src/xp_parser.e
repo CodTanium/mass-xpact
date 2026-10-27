@@ -1923,6 +1923,9 @@ feature {NONE} -- Markup parsing
 				elseif parsing_external_entity and then l_encoding.is_empty then
 						-- A text declaration requires EncodingDecl (XML 1.0, production [77]).
 					set_error ("invalid text declaration")
+				elseif parsing_external_entity and then not l_version.is_empty and then not l_version.same_string ("1.0") then
+						-- An XML 1.0 document must not include an entity of a later version (erratum E38).
+					set_error ("invalid text declaration")
 				else
 					xml_standalone := l_standalone
 					handler.on_xml_declaration (l_version, l_encoding, l_standalone)
@@ -3099,9 +3102,16 @@ feature {NONE} -- DTD entity declarations
 						i := l_end + 3
 					end
 				elseif has_at (a_subset, i, "<?") then
-					if starts_xml_declaration_at (a_subset, i) then
+						-- A text declaration may only begin an external entity; elsewhere "<?xml" is a
+						-- processing instruction with a reserved target.
+					if starts_xml_declaration_at (a_subset, i) and then i = 1 and then not l_seen_xml_declaration
+						and then (parsing_external_entity or else external_dtd_depth > 0) and then parameter_subset_expansion_depth = 0
+					then
 						i := parse_processing_instruction (a_subset, i)
 						l_seen_xml_declaration := not has_error
+					elseif starts_xml_declaration_at (a_subset, i) then
+						set_error ("misplaced xml declaration")
+						i := a_subset.count + 1
 					else
 						l_end := find_sequence (a_subset, "?>", i + 2)
 						if l_end = 0 then
