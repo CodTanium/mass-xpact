@@ -70,6 +70,7 @@ test scripts that back it up. The rules are in
 | [#140](https://github.com/andersoxie/xpact/issues/140) | `student/tools/collect-supervisor-info.ps1`: one read-only command for the supervisor that collects tools, Jenkins builds, dual-lane runs, WSL and large-XML information into one .txt | (the pull request) | see `git log --grep "Refs #140"` | [issue-0140](issue-0140/report.md) |
 | [#142](https://github.com/andersoxie/xpact/issues/142) | `-SkipSmoke` removed from the assertions DLL build in both Jenkinsfiles and the release script, and from the libexpat stage; all smokes ok locally, Jenkins run pending | (the pull request) | see `git log --grep "Refs #142"` | [issue-0142](issue-0142/report.md) |
 | [#143](https://github.com/andersoxie/xpact/issues/143) | The native libexpat Python tests also find the CMake bundled with Visual Studio (via `vswhere`); Python suite 178 run, 0 skipped (before: 7 skipped) | (the pull request) | see `git log --grep "Refs #143"` | [issue-0143](issue-0143/report.md) |
+| [#146](https://github.com/andersoxie/xpact/issues/146) | **Option A**: W3C runner `--all-cases` (0 skipped, 4 lanes), DLL checker, and parser fixes F1-F7 found by it; 2,585/2,585 in both builds (30 s), Jenkins pending | (the pull request) | see `git log --grep "Refs #146"` | [issue-0146](issue-0146/report.md) |
 
 #36, #41, #42 and #44 were stacked pull requests, merged in that order on 2026-10-22.
 
