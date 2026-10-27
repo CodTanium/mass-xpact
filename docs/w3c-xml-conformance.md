@@ -127,9 +127,22 @@ python scripts\run_w3c_conformance.py --all-cases `
 `results.tsv` gains a `lane` column, `summary.md` a table per lane, and JUnit
 class names end in the lane (`w3c.xml.<engine>.<lane>`; core cases keep
 `w3c.xml.<engine>`). Without `--all-cases` nothing changes. With assertions
-on, the three `pr-xml-*` documents (the XML specification, about 200-300 KB
-with its DTD) take about 16 s each on the student PC, so they need
-`--timeout 30` there.
+on, the three `pr-xml-*` documents (the XML specification with its DTD) take
+about 16 s each until the entity-position fix of
+[#148](https://github.com/andersoxie/xpact/issues/148) is in (0.2 s with it),
+so without it they need `--timeout 30`.
+
+Cases whose lane accepts either verdict (`optional-error`, `xml-1.1`) only
+show that the parser gave a verdict without crashing. They are reported
+apart from checked verdicts: `summary.json` counts them as `no_crash_only`
+(not in `passed`), `summary.md` shows a "No crash only" column, and JUnit puts
+them in their own suite, `w3c-xml-<engine>-no-crash-only`.
+
+`scripts/run_benchmarks.ps1 -W3cAllCases` does all of this for the selected
+Eiffel builds: it builds the DLL tier matching each build (Finalized →
+`xpact.dll`, the others → `xpact_assertions.dll`), compiles the checker into
+`build\benchmarks\w3c-dll\<build>\`, and passes `--all-cases` and
+`--entity-engine`. The Jenkins Benchmarks stage uses it.
 
 ### Known failures
 
