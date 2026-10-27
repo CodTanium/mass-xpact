@@ -1978,9 +1978,6 @@ feature {NONE} -- Markup parsing
 				elseif parsing_external_entity and then l_encoding.is_empty then
 						-- A text declaration requires EncodingDecl (XML 1.0, production [77]).
 					set_error ("invalid text declaration")
-				elseif parsing_external_entity and then not l_version.is_empty and then not l_version.same_string ("1.0") then
-						-- An XML 1.0 document must not include an entity of a later version (erratum E38).
-					set_error ("invalid text declaration")
 				else
 					xml_standalone := l_standalone
 					handler.on_xml_declaration (l_version, l_encoding, l_standalone)
