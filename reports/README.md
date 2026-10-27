@@ -70,6 +70,7 @@ test scripts that back it up. The rules are in
 | [#140](https://github.com/andersoxie/xpact/issues/140) | `student/tools/collect-supervisor-info.ps1`: one read-only command for the supervisor that collects tools, Jenkins builds, dual-lane runs, WSL and large-XML information into one .txt | (the pull request) | see `git log --grep "Refs #140"` | [issue-0140](issue-0140/report.md) |
 | [#142](https://github.com/andersoxie/xpact/issues/142) | `-SkipSmoke` removed from the assertions DLL build in both Jenkinsfiles and the release script, and from the libexpat stage; all smokes ok locally, Jenkins run pending | (the pull request) | see `git log --grep "Refs #142"` | [issue-0142](issue-0142/report.md) |
 | [#143](https://github.com/andersoxie/xpact/issues/143) | The native libexpat Python tests also find the CMake bundled with Visual Studio (via `vswhere`); Python suite 178 run, 0 skipped (before: 7 skipped) | (the pull request) | see `git log --grep "Refs #143"` | [issue-0143](issue-0143/report.md) |
+| [#148](https://github.com/andersoxie/xpact/issues/148) | Internal entity references no longer cost time proportional to the document: the XML spec 1,100 -> 79 ms (16 s -> 0.2 s with assertions); errors inside entities now at the reference, as in Expat | (the pull request) | see `git log --grep "Refs #148"` | [issue-0148](issue-0148/report.md) |
 
 #36, #41, #42 and #44 were stacked pull requests, merged in that order on 2026-10-22.
 
