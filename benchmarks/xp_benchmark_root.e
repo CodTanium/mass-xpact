@@ -14,7 +14,7 @@ feature {NONE} -- Initialization
 
 	make
 		do
-			if has_argument ("--conformance-file") or has_argument ("--namespaces") then
+			if has_argument ("--conformance-file") or has_argument ("--namespaces") or has_argument ("--legacy-names") then
 				run_conformance
 			else
 				run_benchmark
@@ -26,7 +26,7 @@ feature {NONE} -- Initialization
 		local
 			l_arguments: ARGUMENTS
 			l_path: detachable STRING_8
-			l_namespaces, l_invalid: BOOLEAN
+			l_namespaces, l_legacy_names, l_invalid: BOOLEAN
 			l_handler: XP_NULL_EVENT_HANDLER
 			l_parser: XP_PARSER
 			i: INTEGER
@@ -49,6 +49,10 @@ feature {NONE} -- Initialization
 				elseif l_arguments.argument (i).same_string ("--namespaces") and then not l_namespaces then
 					l_namespaces := True
 					i := i + 1
+				elseif l_arguments.argument (i).same_string ("--legacy-names") and then not l_legacy_names then
+						-- Fourth-edition name tables, as the native Expat-compatible parser uses.
+					l_legacy_names := True
+					i := i + 1
 				else
 					l_invalid := True
 				end
@@ -56,7 +60,7 @@ feature {NONE} -- Initialization
 				l_arguments.argument_count - i + 2 - l_invalid.to_integer
 			end
 			if l_invalid or l_path = Void then
-				io.error.put_string ("usage: --conformance-file PATH [--namespaces]%N")
+				io.error.put_string ("usage: --conformance-file PATH [--namespaces] [--legacy-names]%N")
 				exit_with_code (2)
 			elseif attached l_path as l_file_path then
 				if attached raw_file_bytes (l_file_path) as l_input then
@@ -64,6 +68,9 @@ feature {NONE} -- Initialization
 					create l_parser.make (l_handler)
 					if l_namespaces then
 						l_parser.set_namespace_mode ('|')
+					end
+					if l_legacy_names then
+						l_parser.set_legacy_name_character_ranges (True)
 					end
 					if l_parser.parse (l_input) then
 						io.put_string ("XPACT_CONFORMANCE%TACCEPT%N")

@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import csv
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 from pathlib import Path
@@ -34,6 +34,14 @@ ROOT_CATALOG_SHA256 = "a10d3fc409fc0de5ea1758d2e4fe6efcbc51df6d1942c80f299dbbe08
 PROFILE = "XML 1.0 fifth edition; namespaces unless NAMESPACE=no; nonvalidating; no external entities; binary verdicts only"
 REPORT_FILES = ("junit.xml", "results.tsv", "summary.json", "summary.md")
 KNOWN_FAILURE_FIELDS = ("engine", "case_id", "status", "category")
+# With --all-cases, cases outside the profile run in these lanes instead of being skipped.
+LANES = {
+    "core": "the profile above",
+    "legacy-names": "XML 1.0 editions 1-4: fourth-edition name tables (--legacy-names, as the native DLL parser uses); W3C verdict",
+    "external-entities": "external entities loaded through the Expat-compatible DLL (child parsers, files below the suite root); W3C verdict, nonvalidating",
+    "optional-error": "TYPE=error: the specification allows either verdict; only a crash, timeout or missing verdict fails",
+    "xml-1.1": "XML 1.1 / Namespaces 1.1: no XML 1.0 verdict exists; only a crash, timeout or missing verdict fails",
+}
 
 
 @dataclass(frozen=True)
@@ -46,6 +54,9 @@ class Case:
     skip_reason: str = ""
     description: str = ""
     recommendation: str = "XML1.0"
+    lane: str = "core"
+    lane_expected: str = ""
+    entities: bool = False
 
 
 @dataclass
@@ -61,6 +72,7 @@ class Result:
     message: str = ""
     known: str = ""
     exit_code: int | None = None
+    lane: str = "core"
 
 
 def contained_path(root: Path, candidate: Path) -> Path:
@@ -138,6 +150,21 @@ def expectation(attributes: dict[str, str]) -> tuple[str, str]:
     return expected, ""
 
 
+def out_of_profile_lane(attributes: dict[str, str]) -> tuple[str, str]:
+    """Return the --all-cases lane and expected verdict ("ANY" = either) for an out-of-profile case."""
+    kind = attributes["TYPE"]
+    recommendation = attributes.get("RECOMMENDATION", "XML1.0")
+    if recommendation.startswith(("XML1.1", "NS1.1")) or (
+            "VERSION" in attributes and "1.0" not in attributes["VERSION"].split()):
+        return "xml-1.1", "ANY"
+    if kind == "error":
+        return "optional-error", "ANY"
+    expected = "REJECT" if kind == "not-wf" else "ACCEPT"
+    if "EDITION" in attributes and "5" not in attributes["EDITION"].split():
+        return "legacy-names", expected
+    return "external-entities", expected
+
+
 def load_catalog(suite_dir: Path) -> list[Case]:
     """Expand only local catalog entities, then apply inherited xml:base.
 
@@ -197,13 +224,15 @@ def load_catalog(suite_dir: Path) -> list[Case]:
                 raise ValueError(f"Duplicate test ID: {identifier}")
             identifiers.add(identifier)
             expected, skip_reason = expectation(attributes)
+            lane, lane_expected = out_of_profile_lane(attributes) if skip_reason else ("core", expected)
             namespace = attributes.get("NAMESPACE", "yes")
             if namespace not in {"yes", "no"}:
                 raise ValueError(f"Unknown NAMESPACE for {identifier}: {namespace}")
             path = local_uri(root, current_base, attributes["URI"])
             cases.append(Case(identifier, path, attributes["TYPE"], namespace == "yes",
                               expected, skip_reason, " ".join(element.itertext()).strip(),
-                              attributes.get("RECOMMENDATION", "XML1.0")))
+                              attributes.get("RECOMMENDATION", "XML1.0"), lane, lane_expected,
+                              attributes.get("ENTITIES", "none") != "none"))
         for child in element:
             visit(child, current_base)
 
@@ -214,8 +243,8 @@ def load_catalog(suite_dir: Path) -> list[Case]:
 
 
 def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir: Path,
-             *, diagnostic_dir: Path | None = None) -> Result:
-    result = Result(engine, case.id, str(case.path), case.kind, case.expected, "not-run", "skipped")
+             *, diagnostic_dir: Path | None = None, extra_arguments: tuple[str, ...] = ()) -> Result:
+    result = Result(engine, case.id, str(case.path), case.kind, case.expected, "not-run", "skipped", lane=case.lane)
     if case.skip_reason:
         result.message = case.skip_reason
         return result
@@ -226,6 +255,7 @@ def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir
     command = [str(executable), "--conformance-file", str(case.path)]
     if case.namespaces:
         command.append("--namespaces")
+    command += extra_arguments
     started = time.perf_counter()
     stdout_bytes, stderr_bytes = b"", b""
     try:
@@ -245,7 +275,7 @@ def run_case(case: Case, engine: str, executable: Path, timeout: float, work_dir
             result.actual = "process-error"
             result.message = f"Exit code {completed.returncode}; missing or inconsistent verdict.\n{result.message}"
             return result
-        result.status = "passed" if result.actual == case.expected else "failed"
+        result.status = "passed" if case.expected in (result.actual, "ANY") else "failed"
         if result.status == "failed":
             result.message = f"Expected {case.expected}, got {result.actual}. {case.description}\n{result.message}"
     except subprocess.TimeoutExpired as error:
@@ -362,7 +392,8 @@ def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> di
         properties = ET.SubElement(suite, "properties")
         ET.SubElement(properties, "property", name="profile", value=PROFILE)
         for row in rows:
-            test = ET.SubElement(suite, "testcase", classname=f"w3c.xml.{engine}",
+            classname = f"w3c.xml.{engine}" if row.lane == "core" else f"w3c.xml.{engine}.{row.lane}"
+            test = ET.SubElement(suite, "testcase", classname=classname,
                                  name=row.case_id, time=f"{row.elapsed_ms / 1000:.6f}", file=row.path)
             if row.status in {"failed", "error", "skipped"}:
                 tag = {"failed": "failure", "error": "error", "skipped": "skipped"}[row.status]
@@ -382,6 +413,19 @@ def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> di
              "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for row in summaries:
         lines.append(f"| {row['engine']} | {row['total']} | {row['passed']} | {row['failed']} | {row['errors']} | {row['skipped']} | {row['known']} | {row['unexpected']} | {row['elapsed_ms']} |")
+    lanes = list(dict.fromkeys(row.lane for row in results if row.engine != "harness"))
+    if any(row.lane != "core" and row.status != "skipped" for row in results):
+        lines += ["", "## Lanes (--all-cases)", "",
+                  "| Engine | Lane | Cases | Passed | Failed | Errors | Skipped | Accepted | Rejected |",
+                  "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
+        for engine in dict.fromkeys(row.engine for row in results if row.engine != "harness"):
+            for lane in lanes:
+                rows = [row for row in results if row.engine == engine and row.lane == lane]
+                counts = Counter(row.status for row in rows)
+                lines.append(f"| {engine} | {lane} | {len(rows)} | {counts['passed']} | {counts['failed']} | "
+                             f"{counts['error']} | {counts['skipped']} | {sum(r.actual == 'ACCEPT' for r in rows)} | "
+                             f"{sum(r.actual == 'REJECT' for r in rows)} |")
+        lines += [""] + [f"- `{lane}`: {LANES[lane]}" for lane in lanes]
     lines += ["", "Known counts failures and errors listed in the known-failures file; they are still parser gaps.",
               "Unexpected counts every other failure or error; any unexpected result fails the run.",
               "Elapsed time includes a fresh process and file read per executed case; it is not parser-only throughput.",
@@ -400,6 +444,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--timeout", type=float, default=10.0, help="Maximum seconds per case (default: 10)")
     parser.add_argument("--known-failures", type=Path,
                         help="TSV of recorded parser gaps (engine, case_id, status, category); listed results do not fail the run")
+    parser.add_argument("--all-cases", action="store_true",
+                        help="Run the out-of-profile cases in their lanes instead of skipping them (see LANES)")
+    parser.add_argument("--entity-engine", action="append", default=[], metavar="NAME=EXE",
+                        help="With --all-cases: Expat-compatible DLL checker for engine NAME, used for cases with external entities")
     parser.add_argument("--write-known-failures", type=Path, metavar="PATH",
                         help="Write this run's failures and errors as a known-failures TSV for review")
     args = parser.parse_args(argv)
@@ -427,9 +475,22 @@ def main(argv: list[str] | None = None) -> int:
             engines[name] = Path(executable).resolve()
             if not engines[name].is_file():
                 raise ValueError(f"Engine executable does not exist: {engines[name]}")
+        entity_engines: dict[str, Path] = {}
+        for value in args.entity_engine:
+            name, separator, executable = value.partition("=")
+            if not separator or name not in engines or name in entity_engines:
+                raise ValueError(f"Invalid, unknown or duplicate --entity-engine NAME=EXE: {value}")
+            entity_engines[name] = Path(executable).resolve()
+            if not entity_engines[name].is_file():
+                raise ValueError(f"Entity engine executable does not exist: {entity_engines[name]}")
+        if args.all_cases and set(entity_engines) != set(engines):
+            raise ValueError("--all-cases needs one --entity-engine for every --engine")
         suite_dir = args.suite_dir.resolve() if args.suite_dir else prepare_suite(args.cache_dir.resolve())
         metadata["suite_directory"] = str(suite_dir)
         metadata["executables"] = {name: str(path) for name, path in engines.items()}
+        if args.all_cases:
+            metadata["entity_executables"] = {name: str(path) for name, path in entity_engines.items()}
+            metadata["lanes"] = LANES
         cases = load_catalog(suite_dir)
         metadata["catalog_cases"] = len(cases)
         if not any(not case.skip_reason for case in cases):
@@ -439,7 +500,17 @@ def main(argv: list[str] | None = None) -> int:
             for engine, executable in engines.items():
                 print(f"W3C XML: {engine}: {len(cases)} catalog cases", flush=True)
                 for index, case in enumerate(cases, 1):
-                    results.append(run_case(case, engine, executable, args.timeout, Path(work)))
+                    if args.all_cases and case.skip_reason:
+                        lane_case = replace(case, expected=case.lane_expected, skip_reason="")
+                        if case.entities:
+                            results.append(run_case(lane_case, engine, entity_engines[engine], args.timeout, Path(work),
+                                                    extra_arguments=("--entity-root", str(suite_dir))))
+                        else:
+                            extra = ("--legacy-names",) if case.lane == "legacy-names" else ()
+                            results.append(run_case(lane_case, engine, executable, args.timeout, Path(work),
+                                                    extra_arguments=extra))
+                    else:
+                        results.append(run_case(case, engine, executable, args.timeout, Path(work)))
                     if index % 250 == 0:
                         print(f"  {engine}: {index}/{len(cases)}", flush=True)
     except (OSError, ValueError, KeyError, expat.ExpatError, zipfile.BadZipFile) as error:

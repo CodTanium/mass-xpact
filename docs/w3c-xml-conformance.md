@@ -99,6 +99,38 @@ missing file, or inconsistent verdict is an error, never a successful
 rejection. Unexpected acceptance/rejection and harness errors return a
 nonzero status after reports have been written.
 
+### All cases (`--all-cases`)
+
+With `--all-cases` the runner also runs the 858 cases outside the profile, in
+four lanes, instead of skipping them. Every `--engine` then needs an
+`--entity-engine` with the same name: the DLL checker built from
+`tests/native/xpact_w3c_case.c` against that build's DLL.
+
+| Lane | Cases | Program | Required result |
+|---|---:|---|---|
+| `legacy-names` | 309 | the engine with `--legacy-names` (fourth-edition name tables, as `XP_NATIVE_PARSER` uses) | the catalog verdict |
+| `external-entities` | 247 | the DLL checker: external entities and the external DTD loaded with `XML_ExternalEntityParserCreate`, only files below the suite directory | the catalog verdict, nonvalidating |
+| `optional-error` | 28 | the engine, or the DLL checker when the case has external entities | either verdict; a crash, timeout or missing verdict fails |
+| `xml-1.1` | 274 | the engine, or the DLL checker when the case has external entities | either verdict; a crash, timeout or missing verdict fails |
+
+```powershell
+cl /nologo /Iinclude tests\native\xpact_w3c_case.c build\native-eiffel\xpact.lib /Fe:build\w3c-dll\xpact_w3c_case.exe
+cl /nologo /Iinclude tests\native\xpact_w3c_case.c build\native-eiffel\xpact_assertions.lib /Fe:build\w3c-dll\xpact_w3c_case_assertions.exe
+copy build\native-eiffel\xpact.dll, build\native-eiffel\xpact_assertions.dll build\w3c-dll\
+python scripts\run_w3c_conformance.py --all-cases `
+  --engine Finalized=EIFGENs\xpact_benchmarks\F_code\xpact_benchmarks.exe `
+  --engine FinalizedAssertions=EIFGENs\xpact_benchmarks_assertions\F_code\xpact_benchmarks.exe `
+  --entity-engine Finalized=build\w3c-dll\xpact_w3c_case.exe `
+  --entity-engine FinalizedAssertions=build\w3c-dll\xpact_w3c_case_assertions.exe
+```
+
+`results.tsv` gains a `lane` column, `summary.md` a table per lane, and JUnit
+class names end in the lane (`w3c.xml.<engine>.<lane>`; core cases keep
+`w3c.xml.<engine>`). Without `--all-cases` nothing changes. With assertions
+on, the three `pr-xml-*` documents (the XML specification, about 200-300 KB
+with its DTD) take about 16 s each on the student PC, so they need
+`--timeout 30` there.
+
 ### Known failures
 
 `benchmarks/w3c-known-failures.tsv` lists the parser gaps that were recorded
