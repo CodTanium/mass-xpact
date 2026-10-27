@@ -392,8 +392,9 @@ class ReportAndCliTests(TemporarySuite):
     def test_all_cases_runs_out_of_profile_cases_in_their_lanes(self):
         self.catalog('<TEST ID="core" TYPE="valid" URI="a.xml"/>'
                      '<TEST ID="old" TYPE="not-wf" EDITION="1 2 3 4" URI="a.xml"/>'
-                     '<TEST ID="ext" TYPE="valid" ENTITIES="general" URI="a.xml"/>'
-                     '<TEST ID="opt" TYPE="error" URI="a.xml"/>')
+                     '<TEST ID="ext" TYPE="error" ENTITIES="general" URI="a.xml"/>'
+                     '<TEST ID="opt" TYPE="error" URI="a.xml"/>'
+                     '<TEST ID="coreext" TYPE="valid" ENTITIES="general" URI="a.xml"/>')
         self.write("a.xml", "<r/>")
         engine = self.root / "parser.exe"
         checker = self.root / "checker.exe"
@@ -404,17 +405,21 @@ class ReportAndCliTests(TemporarySuite):
         verdicts = [subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b""),
                     subprocess.CompletedProcess([], 1, b"XPACT_CONFORMANCE\tREJECT\n", b""),
                     subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b""),
+                    subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b""),
                     subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b"")]
         with mock.patch.object(runner.subprocess, "run", side_effect=verdicts) as process, contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(runner.main(arguments), 0)
         commands = [call.args[0] for call in process.call_args_list]
+        # In-profile entity cases run in the core lane with the suite root (#150); only
+        # out-of-profile entity cases go to the DLL checker.
         self.assertEqual([Path(command[0]).name for command in commands],
-                         ["parser.exe", "parser.exe", "checker.exe", "parser.exe"])
+                         ["parser.exe", "parser.exe", "checker.exe", "parser.exe", "parser.exe"])
         self.assertIn("--legacy-names", commands[1])
         self.assertEqual(commands[2][-2:], ["--entity-root", str(self.suite.resolve())])
+        self.assertIn("--suite-root", commands[4])
         report = json.loads((self.output / "summary.json").read_text())
         self.assertEqual({key: report["engines"][0][key] for key in ("passed", "no_crash_only", "skipped")},
-                         {"passed": 3, "no_crash_only": 1, "skipped": 0})
+                         {"passed": 3, "no_crash_only": 2, "skipped": 0})
 
     def test_all_cases_requires_an_entity_engine_for_every_engine(self):
         self.catalog('<TEST ID="core" TYPE="valid" URI="a.xml"/>')
