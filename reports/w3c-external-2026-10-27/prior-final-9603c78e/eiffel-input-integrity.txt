@@ -1,0 +1,1 @@
+Verified: source inputs unchanged across both compiled assertion modes.

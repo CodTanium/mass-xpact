@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-26T21:45:46.866462+00:00",
+  "source_revision": "687f6cfdb7137abd302f2b2f534bce2f59dcc0da",
+  "parser_sources": {
+    "src/xp_attribute_decl.e": "4973246d0b6008f8e7410bc2d55298f1e60adfdaf27032ebd63059f6b7fa3305",
+    "src/xp_attribute_name_range_set.e": "437e89f9841b256ddb906fa96c4e84a09a51b10b79d8ae9b2ddb6506352353fa",
+    "src/xp_attributes.e": "e0980b9ebdfe02dd162a9d5877f4f7cfcae19a888fc44e341f70e961cdb43e0c",
+    "src/xp_cli.e": "9324d803eb35babeb8afc32df491aabcc8c38b61dddf9c663e61551d186cce5c",
+    "src/xp_content_model.e": "43915d03e34ed6ed448acc92a55969729adc98dff07b5a622d94c1dd932686bd",
+    "src/xp_event_handler.e": "28ecf759614ce3a66adb4985c1894067c896b27441b50b8663ccda4b0a6380e3",
+    "src/xp_expat_api.e": "12097d2cbbf79252baa75c8d636e56bb8daf343d635bcc323ab66c11b58e0d96",
+    "src/xp_expat_port_parse_session.e": "f438d538c284595dca830cf1036ed9f9dad0e81fb2a769f632cfb1e6c60b3d97",
+    "src/xp_external_entity.e": "7ae99956c5940d4a4a5c0539682c0d4569373252848843a8840c40fd957ca854",
+    "src/xp_external_entity_policy.e": "a5249442ad11b773ce193069355608c32ff5c752ac9901022988eb9098761a5c",
+    "src/xp_external_entity_resolver.e": "0bad08034760313bc632ca78494a9dd91cc9590d06fd7d05676eeb7c5f0e1076",
+    "src/xp_gc_critical_section.e": "871891b6fbfa74efd05f97cc40ab26ad91d8ce7a7a626319e7e2a4caa4960867",
+    "src/xp_incremental_parse_session.e": "e28b2cac32bf634e59eb6ff686e8f1a447f09ff8db7b9c09ba95f6f984bd2716",
+    "src/xp_limits.e": "0d6b9d55126fbeb2b1d2a71660d36c02b3fa51a1fea16f7576f239dd4d0970f4",
+    "src/xp_native_bridge_export.e": "80d3cf3c7ecc66b7ab57557fbc31e167844b488e623e13534f331a23405e95cf",
+    "src/xp_native_bridge_installer.e": "7c8cce6ffccaeeadb52b7d3d9571d5c7cfb2d3825a4486e9a3eb7ff97310ea70",
+    "src/xp_native_callback_handler.e": "60abcd15f4c4be7e2fca4c76dc4816343dc5c54eba59b810d621b4328d727234",
+    "src/xp_native_library_root.e": "12a6d0dcb2c3682579c577934a8b8edaccba478cc94356b4a3bb053e1ea76d58",
+    "src/xp_native_parser.e": "e487523eb24e1c9a7394f30f55934a96bc95aa67ef13e95d89acbc17a1d5e23c",
+    "src/xp_null_event_handler.e": "162c60ac51e2f2b2dae3c0493c284d31e6f5062cac3fed0fc97882a5fbe7663d",
+    "src/xp_parser.e": "bb0cd74c5423d727c5724521dedeb73b0349993cce0449f2573c76d6f5436426",
+    "src/xp_token_slice.e": "045df4e825be5aae4ee244bc8356187c268c7364681744791fae789b48313f23"
+  },
+  "parser_source_fingerprint_sha256": "658153356bd5b00f48a1a2532e5af357528d25a54562f6966dc012d08b8a498e",
+  "probe_sources": {
+    "build_probe.ps1": "487cdafbaffe477b76f7fe9ed2acfa6a7d5342a133004e12552e360267c2e8cd",
+    "external_probe.e": "234c8f3807c61d0f56f34de8b9cfab84f32a4cbf9e200ba81c092a75916ba1f1",
+    "probe.ecf": "7de2b053fa36a313ad3002a315214ef624b5db257461a3a8f45ebae35f3eada9",
+    "probe_file_resolver.e": "9cc96e43fa45a4a27a9d47613ab050ee235cad432308d8cc00d7fe84b6b16111",
+    "run_probe.py": "ce30c1e702a1e20f5c766ede2dccecdc0f562d3b04189ed69fe3cdc8d5022cee"
+  },
+  "probe_source_fingerprint_sha256": "8c633f6795ae6c959b181567c73b4a70b6685f628a8b15e57b3fa07bb8332d04",
+  "fingerprint_method": "SHA-256 over UTF-8 JSON of path-to-SHA256 mapping; sorted keys and compact separators",
+  "executable_sha256": "e14a4eea5f5587b777e5536c861aa1b3477356419900aa911b21a8c536941222",
+  "executable_path": "build/w3c-skip-investigation/portable-external-probe/project/EIFGENs/probe/F_code/external_probe.exe",
+  "assertions": "All enabled; finalized -keep",
+  "eiffel_compiler": "EiffelStudio 25.02.9.8723 Enterprise Edition - win64",
+  "c_compiler": "MSVC x64 19.44.35229 / linker 14.44.35229.0",
+  "suite_version": "20130923",
+  "suite_archive_sha256": "f9510b3532926e1b4c2e54855b021e4b8a66ec98a5337dcf4ff07e8a41968deb",
+  "suite_files_verified_against_archive": 3386,
+  "suite_path": "build/validation-corpora/w3c-xml-20130923/xmlconf",
+  "commands": [
+    "reports/w3c-skips-2026-10-26/external-probe/build_probe.ps1",
+    "ec -batch -clean -finalize -keep -config $REPO/reports/w3c-skips-2026-10-26/external-probe/probe.ecf -target probe -project_path $REPO/build/w3c-skip-investigation/portable-external-probe/project",
+    "finish_freezing (working directory: $REPO/build/w3c-skip-investigation/portable-external-probe/project/EIFGENs/probe/F_code)",
+    "python reports/w3c-skips-2026-10-26/external-probe/run_probe.py --executable build/w3c-skip-investigation/portable-external-probe/project/EIFGENs/probe/F_code/external_probe.exe"
+  ],
+  "normal_outcomes": 247,
+  "crashes": 0,
+  "timeouts": 0,
+  "inconclusive_cases": [
+    "not-wf-sa-081",
+    "not-wf-sa-082",
+    "rmt-e2e-18"
+  ],
+  "portable_results_campaign": "build/w3c-skip-investigation/external-probe-runs/20261026T214615Z-54e3da288584",
+  "results_sha256": "d7e202bf9ac2d072d1a5b5c89ceae4e566dfab27eefc6986bc573b6284dc6a60",
+  "build_logs": {
+    "eiffel": "eiffel-build.txt",
+    "c": "c-build.txt"
+  },
+  "reproduction_entrypoint": "reports/w3c-skips-2026-10-26/external-probe/build_probe.ps1",
+  "final_runner_note": "Python source updated after executable build to require consistent exit/marker and create unique campaign output. Final 247-case rerun preserved outcomes. ECF/Eiffel sources unchanged.",
+  "final_runner_command": [
+    "python",
+    "reports/w3c-skips-2026-10-26/external-probe/run_probe.py",
+    "--executable",
+    "build/w3c-skip-investigation/portable-external-probe/project/EIFGENs/probe/F_code/external_probe.exe"
+  ]
+}
