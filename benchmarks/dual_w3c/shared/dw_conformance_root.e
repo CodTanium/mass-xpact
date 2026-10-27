@@ -15,27 +15,35 @@ feature {NONE} -- Initialization
 	make
 		local
 			arguments: ARGUMENTS_32
-			path: PATH
-			namespaces: BOOLEAN
+			path, suite_root: detachable PATH
+			namespaces, invalid: BOOLEAN
+			i: INTEGER
 		do
 			create arguments
 			if arguments.argument_count = 1 and then arguments.argument (1).same_string ("--identity") then
 				put_identity
 			elseif arguments.argument_count = 1 and then arguments.argument (1).same_string ("--qualify") then
 				qualify
-			elseif (arguments.argument_count = 2 or arguments.argument_count = 3)
-				and then arguments.argument (1).same_string ("--conformance-file")
-				and then not arguments.argument (2).is_empty
-			then
-				namespaces := arguments.argument_count = 3
-				if not namespaces or else arguments.argument (3).same_string ("--namespaces") then
-					create path.make_from_string (arguments.argument (2))
-					conformance (path, namespaces)
+			else
+				from i := 1 until i > arguments.argument_count or invalid loop
+					if arguments.argument (i).same_string ("--conformance-file") and path = Void and then i < arguments.argument_count and then not arguments.argument (i + 1).is_empty then
+						create path.make_from_string (arguments.argument (i + 1))
+						i := i + 2
+					elseif arguments.argument (i).same_string ("--suite-root") and suite_root = Void and then i < arguments.argument_count and then not arguments.argument (i + 1).is_empty then
+						create suite_root.make_from_string (arguments.argument (i + 1))
+						i := i + 2
+					elseif arguments.argument (i).same_string ("--namespaces") and not namespaces then
+						namespaces := True
+						i := i + 1
+					else
+						invalid := True
+					end
+				end
+				if not invalid and attached path as document_path then
+					conformance (document_path, namespaces, suite_root)
 				else
 					usage_error
 				end
-			else
-				usage_error
 			end
 		end
 
@@ -48,15 +56,24 @@ feature {NONE} -- Initialization
 			backend.close
 		end
 
-	conformance (path: PATH; namespaces: BOOLEAN)
+	conformance (path: PATH; namespaces: BOOLEAN; suite_root: detachable PATH)
 		local
 			backend: DW_BACKEND
 			accepted: BOOLEAN
 		do
-			if attached raw_file_bytes (path) as bytes then
-				create backend.make (namespaces)
+			create backend.make (namespaces)
+			if attached suite_root as root then backend.configure_external_resources (root, path) end
+			if not backend.resource_error.is_empty then
+				io.error.put_string ("conformance external resource error: " + backend.resource_error + "%N")
+				backend.close
+				exit_with_code (2)
+			elseif attached raw_file_bytes (path) as bytes then
 				accepted := backend.parse (bytes)
-				if accepted then
+				if not backend.resource_error.is_empty then
+					io.error.put_string ("conformance external resource error: " + backend.resource_error + "%N")
+					backend.close
+					exit_with_code (2)
+				elseif accepted then
 					backend.close
 					io.put_string ("XPACT_CONFORMANCE%TACCEPT%N")
 				else
@@ -67,6 +84,7 @@ feature {NONE} -- Initialization
 				end
 			else
 				io.error.put_string ("Cannot read conformance input as original bytes%N")
+				backend.close
 				exit_with_code (2)
 			end
 		end
@@ -79,7 +97,7 @@ feature {NONE} -- Initialization
 			if file.exists and then file.is_readable then
 				create Result.make (file.count)
 				file.open_read
-				from until file.end_of_file loop
+				from until Result.count >= file.count or else file.end_of_file loop
 					file.read_stream (65536)
 					Result.append (file.last_string)
 				end
@@ -246,7 +264,7 @@ feature {NONE} -- Directed observations; semantic failures do not alter full-sui
 
 	usage_error
 		do
-			io.error.put_string ("usage: --identity | --qualify | --conformance-file PATH [--namespaces]%N")
+			io.error.put_string ("usage: --identity | --qualify | --conformance-file PATH [--suite-root ROOT] [--namespaces]%N")
 			exit_with_code (2)
 		end
 

@@ -26,6 +26,24 @@ feature -- Resolution
 			accepted: True
 		end
 
+	last_resolved_resource: detachable STRING_8
+			-- Absolute UTF-8 resource path used for the last successful resolution, if known.
+			-- Cleared on unsuccessful resolution; legacy resolvers may leave it Void.
+		do
+		end
+
+	resolve_external_entity_from_base (a_name, a_public_id, a_system_id: READABLE_STRING_8; a_is_parameter: BOOLEAN; a_base: detachable READABLE_STRING_8): detachable STRING_8
+			-- Resolve relative to the resource containing the declaration.
+			-- Existing in-memory and native callback resolvers retain their original behavior.
+		require
+			name_attached: a_name /= Void
+			name_not_empty: not a_name.is_empty
+			public_id_attached: a_public_id /= Void
+			system_id_attached: a_system_id /= Void
+		do
+			Result := resolve_external_entity (a_name, a_public_id, a_system_id, a_is_parameter)
+		end
+
 	resolve_external_entity (a_name, a_public_id, a_system_id: READABLE_STRING_8; a_is_parameter: BOOLEAN): detachable STRING_8
 			-- Replacement text for external entity, or Void to deny/not-found.
 			--

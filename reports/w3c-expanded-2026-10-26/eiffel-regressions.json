@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "source_revision": "687f6cfdb7137abd302f2b2f534bce2f59dcc0da",
+  "command": ".\\scripts\\run_eiffel_test_matrix.ps1 -AssertionMode All -BuildMode Finalized",
+  "build_mode": "Finalized",
+  "assertions_modes": [
+    "off",
+    "on"
+  ],
+  "tests_per_mode": 70,
+  "new_regression_routines": [
+    "test_internal_parameter_xml_declaration_context",
+    "test_nonvalidating_general_entity_skip_lifecycle",
+    "test_nonvalidating_parameter_entity_skip_lifecycle"
+  ],
+  "source_sha256": {
+    "src/xp_parser.e": "f78a57551eeae76d4761dee680f826bdaf1ea25918afc161ac70fcdffb5f469c",
+    "tests/xp_test_root.e": "cc10b3cf683d06a6898988999347cb7c5cbb8bc7d5f242a38a0298ca5b73d2ff",
+    "tests/xp_skipped_entity_handler.e": "3a2573e4fff463e73ecc602d07d3c966b38b201d1aa8fb47a4ec0094042f0160"
+  },
+  "executable_sha256": {
+    "EIFGENs/xpact_tests/F_code/xpact_tests.exe": "cc8f8b0c258227d591cf241d0f800e25e01213f42553a5d1daa330a835dbfc50",
+    "EIFGENs/xpact_tests_assertions/F_code/xpact_tests.exe": "6d94be54b5f639bd97919db2b3e4171cd9c05429bb6a03f3cf0c749773e5af2b"
+  },
+  "log": "matrix.txt"
+}

@@ -20,6 +20,7 @@ feature {NONE} -- Initialization
 		do
 			create memory
 			create last_error.make_empty
+			create resource_error.make_empty
 			if namespaces then
 				create data.make (NM_uri_SEP_localname, '|')
 			else
@@ -31,6 +32,13 @@ feature {NONE} -- Initialization
 		end
 
 feature -- Whole-document boundary
+
+	configure_external_resources (suite_root, document_path: PATH)
+			-- Pinned core remains a no-loader comparison; keep its existing verdict behavior.
+		do
+		end
+
+	resource_error: STRING_8
 
 	parse (document: STRING_8): BOOLEAN
 		local

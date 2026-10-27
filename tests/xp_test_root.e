@@ -30,12 +30,18 @@ feature {NONE} -- Initialization
 			run_test ("test_internal_entity_declarations", agent test_internal_entity_declarations)
 			run_test ("test_parameter_entity_declarations", agent test_parameter_entity_declarations)
 			run_test ("test_parameter_subset_expansion_depth", agent test_parameter_subset_expansion_depth)
+			run_test ("test_internal_parameter_xml_declaration_context", agent test_internal_parameter_xml_declaration_context)
 			run_test ("test_cached_doctype_replay_lifecycle", agent test_cached_doctype_replay_lifecycle)
 			run_test ("test_entity_markup_expansion", agent test_entity_markup_expansion)
 			run_test ("test_async_internal_entities_are_rejected", agent test_async_internal_entities_are_rejected)
 			run_test ("test_attribute_entity_expansion", agent test_attribute_entity_expansion)
 			run_test ("test_recursive_entity_is_rejected", agent test_recursive_entity_is_rejected)
 			run_test ("test_external_entity_is_rejected", agent test_external_entity_is_rejected)
+			run_test ("test_nonvalidating_general_entity_skip_lifecycle", agent test_nonvalidating_general_entity_skip_lifecycle)
+			run_test ("test_nonvalidating_parameter_entity_skip_lifecycle", agent test_nonvalidating_parameter_entity_skip_lifecycle)
+			run_test ("test_external_declaration_parameter_tokens", agent test_external_declaration_parameter_tokens)
+			run_test ("test_external_raw_entity_boundaries", agent test_external_raw_entity_boundaries)
+			run_test ("test_local_external_entity_boundaries", agent test_local_external_entity_boundaries)
 			run_test ("test_external_general_entity_resolver", agent test_external_general_entity_resolver)
 			run_test ("test_external_entity_resolver_denial", agent test_external_entity_resolver_denial)
 			run_test ("test_external_parameter_entity_resolver", agent test_external_parameter_entity_resolver)
@@ -724,6 +730,38 @@ feature {NONE} -- Tests
 		end
 
 
+	test_internal_parameter_xml_declaration_context
+			-- A parameter replacement does not create an external-text-declaration context.
+			-- Reusing the same parser must restore context after both normal and failed parses.
+		local
+			l_handler: XP_NULL_EVENT_HANDLER
+			l_parser: XP_PARSER
+			l_invalid, l_valid_prefix: STRING_8
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			l_invalid := "<!DOCTYPE doc [<!ENTITY %% e %"<?xml version='1.0' encoding='UTF-8'?>%">%%e;]><doc/>"
+			l_valid_prefix := "<!DOCTYPE doc [<!ENTITY %% e '<!--kept-->'>%%e;]>"
+			from i := 1 until i > 2 loop
+				assert ("XML declaration in internal parameter entity rejected", not l_parser.parse (l_invalid) and then not l_parser.last_error.is_empty)
+				assert ("plain document recovers after parameter declaration error", l_parser.parse ("<doc/>") and then l_parser.last_error.is_empty)
+				assert ("external subset text declaration still accepted", l_parser.parse_external_subset ("<?xml version='1.0' encoding='UTF-8'?><!ENTITY e 'value'>"))
+				assert ("external subset prefix text declaration still accepted", l_parser.parse_external_subset_prefix ("<?xml version='1.0' encoding='UTF-8'?><!ENTITY e 'value'>"))
+				assert ("external subset cannot grant text declaration context to internal PE", not l_parser.parse_external_subset ("<?xml version='1.0' encoding='UTF-8'?><!ENTITY %% e %"<?xml version='1.0' encoding='UTF-8'?>%">%%e;"))
+				assert ("external subset context does not permit next internal declaration", not l_parser.parse (l_invalid))
+				assert ("ordinary internal processing instruction accepted after rejection", l_parser.parse ("<!DOCTYPE doc [<!ENTITY %% e '<?ok value?>'>%%e;]><doc/>"))
+				i := i + 1
+			end
+			assert ("XML declaration directly in internal subset rejected", not l_parser.parse ("<!DOCTYPE doc [<?xml version='1.0' encoding='UTF-8'?>]><doc/>"))
+			assert ("invalid declaration cannot populate completed DTD cache", not l_parser.parse_with_cached_doctype (l_invalid, False))
+			assert ("failed parameter declaration releases cached source", l_parser.cached_doctype_byte_count = 0)
+			assert ("valid parameter subset can be cached after context failure", l_parser.parse_with_cached_doctype (l_valid_prefix, False))
+			assert ("cached parameter subset can complete after context failure", l_parser.parse_with_cached_doctype (l_valid_prefix + "<doc/>", True))
+			assert ("successful parameter subset completion releases cached source", l_parser.cached_doctype_byte_count = 0)
+		end
+
+
 	test_cached_doctype_replay_lifecycle
 		local
 			l_handler: XP_COLLECTING_HANDLER
@@ -908,6 +946,209 @@ feature {NONE} -- Tests
 			assert ("external entity rejected", not l_ok)
 			assert ("external entity error reported", l_parser.last_error.same_string ("external entity not loaded"))
 		end
+
+	test_nonvalidating_general_entity_skip_lifecycle
+			-- Skipping is explicit configuration, never a fallback for failed resolution.
+		local
+			l_handler: XP_SKIPPED_ENTITY_HANDLER
+			l_parser: XP_PARSER
+			l_resolver: XP_TEST_EXTERNAL_ENTITY_RESOLVER
+			l_prefix, l_document: STRING_8
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			l_prefix := "<!DOCTYPE doc [<!ENTITY ext SYSTEM 'mem://missing'>]>"
+			l_document := l_prefix + "<doc>left&ext;right</doc>"
+			assert ("new parser retains deny policy", not l_parser.skip_unread_external_entities and then not l_parser.parse (l_document))
+			l_parser.set_skip_unread_external_entities (True)
+			from i := 1 until i > 2 loop
+				l_handler.events.wipe_out
+				assert ("configured nonvalidating parse skips general entity", l_parser.parse (l_document) and then l_parser.last_error.is_empty)
+				assert ("skip preserves text on both sides", collected_character_data (l_handler).same_string ("leftright"))
+				assert ("known general skip reports exactly one callback", l_handler.events.count = 5 and then l_handler.events.i_th (3).same_string ("skipped:ext:0"))
+				assert ("skipped reference contributes its source positions", l_parser.current_byte_index = l_document.count)
+				assert ("errors after skipped general entity still rejected", not l_parser.parse (l_prefix + "<doc>&ext;</wrong>"))
+				assert ("skip does not mask mismatched tag diagnostic", l_parser.last_error.same_string ("mismatched end tag"))
+				i := i + 1
+			end
+			assert ("known general entity can be skipped in standalone document", l_parser.parse ("<?xml version='1.0' standalone='yes'?>" + l_document))
+			assert ("standalone still rejects undeclared general entity", not l_parser.parse ("<?xml version='1.0' standalone='yes'?><!DOCTYPE doc SYSTEM 'mem://subset'><doc>&missing;</doc>"))
+			assert ("external entity in attribute remains forbidden", not l_parser.parse (l_prefix + "<doc a='&ext;'/>") and then not l_parser.last_error.is_empty)
+			assert ("unparsed entity remains forbidden", not l_parser.parse ("<!DOCTYPE doc [<!NOTATION n SYSTEM 'image'><!ENTITY ext SYSTEM 'image' NDATA n>]><doc>&ext;</doc>"))
+			l_parser.set_external_entity_policy (l_parser.External_general_entities)
+			assert ("enabled loading without resolver is not silently skipped", not l_parser.parse (l_document) and then l_parser.last_error.same_string ("external entity resolver missing"))
+			create l_resolver.make
+			l_parser.set_external_entity_resolver (l_resolver)
+			assert ("resolver denial is not silently skipped", not l_parser.parse (l_document) and then l_parser.last_error.same_string ("external entity not resolved"))
+			l_parser.set_external_entity_policy (l_parser.No_external_entities)
+			l_parser.set_external_entity_resolver (Void)
+			l_handler.set_stop_on_skip (True)
+			assert ("general skip callback can abort parse", not l_parser.parse (l_document) and then l_parser.last_error.same_string ("parsing aborted"))
+			l_handler.set_stop_on_skip (False)
+			assert ("general skip parse recovers after callback abort", l_parser.parse (l_document) and then l_parser.current_byte_index = l_document.count)
+			assert ("general skip DTD can be cached", l_parser.parse_with_cached_doctype (l_prefix, False))
+			assert ("general skip DTD cache owns source before configuration change", l_parser.cached_doctype_byte_count = l_prefix.count)
+			l_parser.set_skip_unread_external_entities (False)
+			assert ("changing skip configuration releases cached source", l_parser.cached_doctype_byte_count = 0)
+			assert ("turning skipping off restores rejection on reused parser", not l_parser.parse_with_cached_doctype (l_document, True) and then l_parser.last_error.same_string ("external entity not loaded"))
+			assert ("ordinary document recovers after skip policy reversal", l_parser.parse ("<doc/>") and then l_parser.last_error.is_empty)
+		end
+
+
+	test_nonvalidating_parameter_entity_skip_lifecycle
+			-- An unread PE disables later declarations only for a non-standalone DTD.
+		local
+			l_handler: XP_SKIPPED_ENTITY_HANDLER
+			l_parser: XP_PARSER
+			l_prefix, l_document: STRING_8
+			i: INTEGER
+		do
+			create l_handler.make
+			l_handler.enable_entity_decl_events
+			l_handler.enable_attlist_events
+			create l_parser.make (l_handler)
+			l_parser.set_skip_unread_external_entities (True)
+			l_prefix := "<!DOCTYPE doc [<!ENTITY kept 'before'><!ENTITY %% ext SYSTEM 'mem://missing'>%%ext;<!ENTITY later 'after'><!ATTLIST doc a CDATA 'ignored'><!--kept--><?continue now?>]>"
+			l_document := l_prefix + "<doc>&kept;&later;</doc>"
+			from i := 1 until i > 2 loop
+				l_handler.events.wipe_out
+				l_handler.last_attribute_value.wipe_out
+				assert ("nonvalidating parameter entity skip accepted", l_parser.parse (l_document))
+				assert ("unread parameter entity disables subsequent declarations", collected_character_data (l_handler).same_string ("before") and then l_handler.last_attribute_value.is_empty)
+				assert ("parameter skip preserves comments and processing instructions", l_handler.events.count = 8)
+				if l_handler.events.count = 8 then
+					assert ("parameter skip callback recorded", l_handler.events.i_th (3).same_string ("skipped:ext:1"))
+					assert ("comment following unread parameter entity preserved", l_handler.events.i_th (4).same_string ("comment:kept"))
+					assert ("PI following unread parameter entity preserved", l_handler.events.i_th (5).same_string ("pi:continue:now"))
+				end
+				assert ("malformed body after unread parameter entity rejected", not l_parser.parse (l_prefix + "<doc></wrong>"))
+				l_handler.events.wipe_out
+				assert ("declarations restored after skipped-PE parse failure", l_parser.parse ("<!DOCTYPE doc [<!ENTITY later 'restored'><!ATTLIST doc a CDATA 'value'>]><doc>&later;</doc>"))
+				assert ("fresh declarations supply text and default after skipped PE", collected_character_data (l_handler).same_string ("restored") and then l_handler.last_attribute_value.same_string ("value"))
+				i := i + 1
+			end
+			l_handler.events.wipe_out
+			assert ("standalone permits known parameter entity skip", l_parser.parse ("<?xml version='1.0' standalone='yes'?>" + l_document))
+			assert ("standalone retains following internal declarations", collected_character_data (l_handler).same_string ("beforeafter") and then l_handler.last_attribute_value.same_string ("ignored"))
+			l_handler.set_stop_on_skip (True)
+			assert ("parameter skip callback can abort parse", not l_parser.parse (l_document) and then l_parser.last_error.same_string ("parsing aborted"))
+			l_handler.set_stop_on_skip (False)
+			assert ("unread-PE DTD can be cached after callback abort", l_parser.parse_with_cached_doctype (l_prefix, False))
+			assert ("cached unread-PE state applies to later content", l_parser.parse_with_cached_doctype (l_document, True))
+			assert ("completed unread-PE cache releases source", l_parser.cached_doctype_byte_count = 0)
+			assert ("skip configuration survives reset and cache completion", l_parser.skip_unread_external_entities and then l_parser.parse (l_document))
+		end
+
+
+	test_external_declaration_parameter_tokens
+			-- External declaration grammar sees PE tokens after replacement and token padding.
+		local
+			l_handler: XP_COLLECTING_HANDLER
+			l_parser: XP_PARSER
+			l_resolver: XP_MAPPED_ENTITY_RESOLVER
+			l_document, l_declarations: STRING_8
+			l_position_handler: XP_DTD_POSITION_HANDLER
+			l_position_parser: XP_PARSER
+			l_expected_position: INTEGER
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			create l_resolver.make
+			l_parser.set_external_entity_policy (l_parser.All_external_entities)
+			l_parser.set_external_entity_resolver (l_resolver)
+			l_document := "<!DOCTYPE doc SYSTEM 'mem://tokens'><doc>text</doc>"
+			l_declarations := "<!ENTITY %% attrs %"a CDATA '100&#37;'%"><!ENTITY %% model '(#PCDATA)'><!ENTITY %% close '>'><!ENTITY %% open 'INCLUDE['><!ENTITY %% left '(a|'><!ENTITY %% right 'b)'><!ELEMENT doc %%model; %%close;<!ELEMENT alternatives %%left;%%right;><![%%open;<!ATTLIST doc%%attrs;>]]><![IGNORE[%%undefined;<!ATTLIST doc invalid CDATA 'ignored'>]]>"
+			from i := 1 until i > 2 loop
+				l_resolver.put_resource ("mem://tokens", l_declarations)
+				l_handler.events.wipe_out
+				assert ("external PE token and split-delimiter declarations accepted", l_parser.parse (l_document))
+				assert ("PE-generated quoted percent default retained", l_handler.last_attribute_value.same_string ("100%%"))
+				assert ("inline PE replacement leaves document text unchanged", collected_character_data (l_handler).same_string ("text"))
+				l_resolver.put_resource ("mem://tokens", "<!ENTITY %% recursive '&#37;recursive;'><!ELEMENT doc %%recursive;>")
+				assert ("recursive inline PE rejected", not l_parser.parse (l_document) and then l_parser.last_error.same_string ("recursive entity reference"))
+				assert ("internal subset still forbids PE within declarations", not l_parser.parse ("<!DOCTYPE doc [<!ENTITY %% attrs %"a CDATA 'v'%"><!ATTLIST doc %%attrs;>]><doc/>"))
+				i := i + 1
+			end
+			l_resolver.put_resource ("mem://tokens", l_declarations)
+			assert ("fresh external declarations recover after PE recursion", l_parser.parse (l_document) and then l_parser.last_error.is_empty)
+			create l_position_handler.make
+			create l_position_parser.make (l_position_handler)
+			l_position_handler.set_parser (l_position_parser)
+			l_declarations := "<!ENTITY %% model '(#PCDATA)'><!ELEMENT doc %%model;><!ELEMENT other %%model;><!--after-->"
+			l_expected_position := l_declarations.substring_index ("<!--after-->", 1) - 1
+			assert ("direct external subset with inline replacements parses", l_position_parser.parse_external_subset (l_declarations))
+			assert ("multiple replacements preserve later callback source index", l_position_handler.events.count = 3 and then l_position_handler.events.last.same_string ("comment:after:1:" + l_expected_position.out + ":" + l_expected_position.out + ":0"))
+			l_declarations.replace_substring_all ("<!--after-->", "<?xml version='1.0' encoding='UTF-8'?>")
+			assert ("DTD error after replacements rejects at original input index", not l_position_parser.parse_external_subset (l_declarations) and then l_position_parser.current_byte_index = l_expected_position)
+		end
+
+
+	test_external_raw_entity_boundaries
+			-- Raw external encodings and text declarations have a separate grammar and state.
+		local
+			l_handler: XP_COLLECTING_HANDLER
+			l_parser: XP_PARSER
+			l_resolver: XP_MAPPED_ENTITY_RESOLVER
+			l_document: STRING_8
+			l_stopping_handler: XP_XML_DECLARATION_STOP_HANDLER
+			l_stopping_parser: XP_PARSER
+			i: INTEGER
+		do
+			create l_handler.make
+			create l_parser.make (l_handler)
+			create l_resolver.make
+			l_parser.set_external_entity_policy (l_parser.All_external_entities)
+			l_parser.set_external_entity_resolver (l_resolver)
+			l_document := "<!DOCTYPE doc [<!ENTITY ext SYSTEM 'mem://entity'>]><doc>&ext;</doc>"
+			from i := 1 until i > 2 loop
+				l_resolver.put_resource ("mem://entity", "<?xml encoding='UTF-8'?><i>ok</i>")
+				l_handler.events.wipe_out
+				assert ("external text declaration may omit XML version", l_parser.parse (l_document) and then collected_character_data (l_handler).same_string ("ok"))
+				l_resolver.put_resource ("mem://entity", "<?xml version='1.0'?>ok")
+				assert ("external text declaration requires encoding", not l_parser.parse (l_document))
+				l_resolver.put_resource ("mem://entity", "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>ok")
+				assert ("external text declaration forbids standalone", not l_parser.parse (l_document))
+				l_resolver.put_resource ("mem://entity", "%/255/%/254/<%Ui%U>%Uo%Uk%U<%U/%Ui%U>%U")
+				l_handler.events.wipe_out
+				assert ("raw UTF-16 external entity decodes after declaration failures", l_parser.parse (l_document) and then collected_character_data (l_handler).same_string ("ok"))
+				l_resolver.put_resource ("mem://entity", "%/255/%/254/o%Uq")
+				assert ("odd UTF-16 external entity byte count rejected", not l_parser.parse (l_document))
+				l_resolver.put_resource ("mem://entity", "<i>")
+				assert ("external general entity cannot leave an element open", not l_parser.parse (l_document))
+				l_resolver.put_resource ("mem://entity", "</doc>")
+				assert ("external general entity cannot close caller element", not l_parser.parse (l_document))
+				l_resolver.put_resource ("mem://entity", "<i>restored</i>")
+				l_handler.events.wipe_out
+				assert ("external resource parse recovers after encoding and nesting failures", l_parser.parse (l_document) and then l_parser.last_error.is_empty and then collected_character_data (l_handler).same_string ("restored"))
+				i := i + 1
+			end
+			create l_stopping_handler.make
+			create l_stopping_parser.make (l_stopping_handler)
+			l_stopping_parser.set_external_entity_policy (l_stopping_parser.All_external_entities)
+			l_stopping_parser.set_external_entity_resolver (l_resolver)
+			l_resolver.put_resource ("mem://subset", "<!ENTITY %% type SYSTEM 'mem://type'><!ELEMENT doc %%type;>")
+			l_resolver.put_resource ("mem://type", "<?xml encoding='UTF-8'?>(#PCDATA)")
+			l_document := "<!DOCTYPE doc SYSTEM 'mem://subset'><doc/>"
+			l_stopping_handler.set_stop_on_declaration (True)
+			assert ("inline external PE text declaration may suspend parsing", not l_stopping_parser.parse (l_document))
+			assert ("declaration suspension is not replaced by raw-PE grammar error", l_stopping_parser.is_suspended and then not l_stopping_parser.has_error and then l_stopping_parser.last_error.is_empty)
+			assert ("external text-declaration mode restored after suspension", not l_stopping_parser.parsing_external_entity)
+			l_stopping_handler.set_stop_on_declaration (False)
+			assert ("inline PE parse recovers after text-declaration suspension", l_stopping_parser.parse (l_document) and then not l_stopping_parser.is_suspended and then l_stopping_parser.last_error.is_empty)
+			assert ("document declaration grammar restored after suspended external PE", l_stopping_parser.parse ("<?xml version='1.0'?><doc/>"))
+		end
+
+
+	test_local_external_entity_boundaries
+		local
+			l_tests: XP_LOCAL_EXTERNAL_ENTITY_TESTS
+		do
+			create l_tests.make
+			assert ("local external entity loader confines resources and restores base state", l_tests.run)
+		end
+
 
 	test_external_general_entity_resolver
 		local
@@ -1552,7 +1793,7 @@ feature {NONE} -- Tests
 				assert ("raw replacement attribute preserves partial-character diagnostic", l_parser.last_error.same_string ("partial character"))
 				l_resolver.set_replacement ("<n %/181/='v'/>")
 				assert ("malformed name byte in raw replacement rejected", not l_parser.parse (l_input))
-				assert ("raw replacement name preserves diagnostic", l_parser.last_error.same_string ("invalid name character"))
+				assert ("raw resource decoder rejects malformed UTF-8 before name parsing", l_parser.last_error.same_string ("invalid XML character"))
 				i := i + 1
 			end
 			assert ("unrelated document recovers after replacement failures", l_parser.parse ("<fresh/>") and then l_parser.last_error.is_empty)

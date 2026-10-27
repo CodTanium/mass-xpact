@@ -130,6 +130,26 @@ Policies:
 - `External_parameter_entities`: allow external parameter entities and external DTD subsets only.
 - `All_external_entities`: allow both classes.
 
+For nonvalidating document acceptance without resource loading, callers can
+explicitly use `parser.set_skip_unread_external_entities (True)`. References to
+unread external general entities in content and parameter entities between DTD
+declarations then emit `on_skipped_entity`. After an unread parameter entity,
+later entity and attribute-list declarations are not used unless the document
+is standalone. References in literals, unparsed entities, missing resolvers when
+loading is enabled, and resolver denials remain errors. This option defaults to
+False, survives parse resets, and releases the completed-DOCTYPE cache when
+changed. W3C runs with `--suite-root` instead disable skips and enable the local
+external-resource loader; the native wrapper retains its existing callback
+policy.
+
+`XP_LOCAL_EXTERNAL_ENTITY_RESOLVER` reads original resource bytes from the local
+suite directory. The parser supplies the declaring resource's base through
+`resolve_external_entity_from_base`, so nested relative references keep their
+own origin. The older resolver callback remains available for application
+resolvers. The W3C CLI treats missing, denied or unreadable resources as harness
+errors, separately from XML rejection; it never opens NOTATION or unparsed
+NDATA identifiers merely because they were declared.
+
 The resolver returns replacement text or `Void`. Replacement text is still parsed under the same contracts, recursion detection, and expansion byte/depth limits as internal entities.
 
 ## Local Commands
