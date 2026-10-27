@@ -360,6 +360,11 @@ def unexpected(row: Result) -> bool:
     return row.status in {"failed", "error"} and not row.known
 
 
+def no_crash_only(row: Result) -> bool:
+    """A pass in a lane that accepts either verdict: it only shows that the parser did not fail."""
+    return row.status == "passed" and row.expected == "ANY"
+
+
 def xml_text(value: str) -> str:
     # Malformed-input diagnostics may contain NUL or invalid XML characters.
     return re.sub(r"[^\x09\x0a\x0d\x20-\ud7ff\ue000-\ufffd\U00010000-\U0010ffff]", "?", value)
@@ -371,6 +376,25 @@ def tsv_row(row: Result) -> dict:
             for key, value in asdict(row).items()}
 
 
+def add_junit_suite(suites: ET.Element, name: str, rows: list[Result], profile: str) -> None:
+    counts = Counter(row.status for row in rows)
+    elapsed_ms = round(sum(row.elapsed_ms for row in rows), 3)
+    suite = ET.SubElement(suites, "testsuite", name=name, tests=str(len(rows)),
+                          failures=str(counts["failed"]), errors=str(counts["error"]),
+                          skipped=str(counts["skipped"]), time=f"{elapsed_ms / 1000:.6f}")
+    properties = ET.SubElement(suite, "properties")
+    ET.SubElement(properties, "property", name="profile", value=profile)
+    for row in rows:
+        classname = f"w3c.xml.{row.engine}" if row.lane == "core" else f"w3c.xml.{row.engine}.{row.lane}"
+        test = ET.SubElement(suite, "testcase", classname=classname,
+                             name=row.case_id, time=f"{row.elapsed_ms / 1000:.6f}", file=row.path)
+        if row.status in {"failed", "error", "skipped"}:
+            tag = {"failed": "failure", "error": "error", "skipped": "skipped"}[row.status]
+            text = f"[known: {row.known}] {row.message}" if row.known else row.message
+            detail = ET.SubElement(test, tag, message=xml_text(text.splitlines()[0] if text else row.status))
+            detail.text = xml_text(text)
+
+
 def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     suites = ET.Element("testsuites")
@@ -379,27 +403,22 @@ def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> di
         rows = [row for row in results if row.engine == engine]
         counts = Counter(row.status for row in rows)
         elapsed_ms = round(sum(row.elapsed_ms for row in rows), 3)
-        summary = {"engine": engine, "total": len(rows), "passed": counts["passed"],
+        robust = sum(map(no_crash_only, rows))
+        summary = {"engine": engine, "total": len(rows), "passed": counts["passed"] - robust,
+                   "no_crash_only": robust,
                    "failed": counts["failed"], "errors": counts["error"], "skipped": counts["skipped"],
                    "accepted": sum(row.actual == "ACCEPT" for row in rows),
                    "rejected": sum(row.actual == "REJECT" for row in rows),
                    "known": sum(bool(row.known) for row in rows), "unexpected": sum(map(unexpected, rows)),
                    "elapsed_ms": elapsed_ms}
         summaries.append(summary)
-        suite = ET.SubElement(suites, "testsuite", name=f"w3c-xml-{engine}", tests=str(len(rows)),
-                              failures=str(counts["failed"]), errors=str(counts["error"]),
-                              skipped=str(counts["skipped"]), time=f"{elapsed_ms / 1000:.6f}")
-        properties = ET.SubElement(suite, "properties")
-        ET.SubElement(properties, "property", name="profile", value=PROFILE)
-        for row in rows:
-            classname = f"w3c.xml.{engine}" if row.lane == "core" else f"w3c.xml.{engine}.{row.lane}"
-            test = ET.SubElement(suite, "testcase", classname=classname,
-                                 name=row.case_id, time=f"{row.elapsed_ms / 1000:.6f}", file=row.path)
-            if row.status in {"failed", "error", "skipped"}:
-                tag = {"failed": "failure", "error": "error", "skipped": "skipped"}[row.status]
-                text = f"[known: {row.known}] {row.message}" if row.known else row.message
-                detail = ET.SubElement(test, tag, message=xml_text(text.splitlines()[0] if text else row.status))
-                detail.text = xml_text(text)
+        # Cases whose lane accepts either verdict get their own suite, so that Jenkins
+        # does not show them as checked verdicts.
+        add_junit_suite(suites, f"w3c-xml-{engine}", [row for row in rows if row.expected != "ANY"], PROFILE)
+        any_rows = [row for row in rows if row.expected == "ANY"]
+        if any_rows:
+            add_junit_suite(suites, f"w3c-xml-{engine}-no-crash-only", any_rows,
+                            "either verdict is allowed; only a crash, timeout or missing verdict fails")
     ET.indent(suites)
     ET.ElementTree(suites).write(output_dir / "junit.xml", encoding="utf-8", xml_declaration=True)
     with (output_dir / "results.tsv").open("w", newline="", encoding="utf-8") as target:
@@ -408,21 +427,28 @@ def write_reports(results: list[Result], output_dir: Path, metadata: dict) -> di
         writer.writerows(tsv_row(row) for row in results)
     report = {**metadata, "profile": PROFILE, "engines": summaries}
     (output_dir / "summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    lines = ["# W3C XML conformance", "", f"Source: {SUITE_URL}", "", f"Profile: {PROFILE}", "",
-             "| Engine | Cases | Passed | Failed | Errors | Skipped | Known | Unexpected | Elapsed ms |",
-             "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
-    for row in summaries:
-        lines.append(f"| {row['engine']} | {row['total']} | {row['passed']} | {row['failed']} | {row['errors']} | {row['skipped']} | {row['known']} | {row['unexpected']} | {row['elapsed_ms']} |")
+    lines = ["# W3C XML conformance", "", f"Source: {SUITE_URL}", "", f"Profile: {PROFILE}", ""]
+    if any(row["no_crash_only"] for row in summaries):
+        lines += ["| Engine | Cases | Passed (verdict checked) | No crash only | Failed | Errors | Skipped | Known | Unexpected | Elapsed ms |",
+                  "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+        for row in summaries:
+            lines.append(f"| {row['engine']} | {row['total']} | {row['passed']} | {row['no_crash_only']} | {row['failed']} | {row['errors']} | {row['skipped']} | {row['known']} | {row['unexpected']} | {row['elapsed_ms']} |")
+    else:
+        lines += ["| Engine | Cases | Passed | Failed | Errors | Skipped | Known | Unexpected | Elapsed ms |",
+                  "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
+        for row in summaries:
+            lines.append(f"| {row['engine']} | {row['total']} | {row['passed']} | {row['failed']} | {row['errors']} | {row['skipped']} | {row['known']} | {row['unexpected']} | {row['elapsed_ms']} |")
     lanes = list(dict.fromkeys(row.lane for row in results if row.engine != "harness"))
     if any(row.lane != "core" and row.status != "skipped" for row in results):
         lines += ["", "## Lanes (--all-cases)", "",
-                  "| Engine | Lane | Cases | Passed | Failed | Errors | Skipped | Accepted | Rejected |",
-                  "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
+                  "| Engine | Lane | Judged by | Cases | Passed | Failed | Errors | Skipped | Accepted | Rejected |",
+                  "|---|---|---|---:|---:|---:|---:|---:|---:|---:|"]
         for engine in dict.fromkeys(row.engine for row in results if row.engine != "harness"):
             for lane in lanes:
                 rows = [row for row in results if row.engine == engine and row.lane == lane]
                 counts = Counter(row.status for row in rows)
-                lines.append(f"| {engine} | {lane} | {len(rows)} | {counts['passed']} | {counts['failed']} | "
+                judged = "no crash only" if rows and all(r.expected == "ANY" for r in rows) else "verdict"
+                lines.append(f"| {engine} | {lane} | {judged} | {len(rows)} | {counts['passed']} | {counts['failed']} | "
                              f"{counts['error']} | {counts['skipped']} | {sum(r.actual == 'ACCEPT' for r in rows)} | "
                              f"{sum(r.actual == 'REJECT' for r in rows)} |")
         lines += [""] + [f"- `{lane}`: {LANES[lane]}" for lane in lanes]
