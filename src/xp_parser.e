@@ -265,6 +265,7 @@ feature -- Configuration
 			inherited_parameter_entity_accounting_table := cloned_integer_table (a_parent.parameter_entity_accounting_context_table)
 			inherited_external_entity_table := cloned_external_entity_table (a_parent.external_general_entity_context_table)
 			inherited_external_parameter_entity_table := cloned_external_entity_table (a_parent.external_parameter_entity_context_table)
+			inherited_active_entities := a_parent.active_entity_names
 			install_inherited_entity_context
 		ensure
 			internal_general_entities_imported: attached inherited_entity_table
@@ -404,6 +405,19 @@ feature {XP_PARSER} -- Entity context import
 			-- Logical parameter entity replacement byte counts for child parser import.
 		do
 			Result := parameter_entity_accounting_table
+		ensure
+			result_attached: Result /= Void
+		end
+
+	active_entity_names: ARRAYED_LIST [STRING_8]
+			-- General entities being expanded here or in a parent parser, for
+			-- recursion checks in external entity child parsers.
+		do
+			create Result.make (entity_stack.count)
+			if attached inherited_active_entities as l_inherited then
+				Result.append (l_inherited)
+			end
+			Result.append (entity_stack)
 		ensure
 			result_attached: Result /= Void
 		end
@@ -2727,16 +2741,16 @@ feature {NONE} -- Character data and references
 			elseif external_entity_resolver = Void then
 				set_error ("external entity resolver missing")
 			elseif attached external_entity_resolver as l_resolver then
+				push_entity (a_entity.name)
 				if attached l_resolver.resolve_external_entity (a_entity.name, a_entity.public_id, a_entity.system_id, False) as l_value then
 					note_entity_expansion (l_value.count)
 					if not has_error then
-						push_entity (a_entity.name)
 						parse_entity_content (l_value)
-						pop_entity
 					end
 				else
 					set_error ("external entity not resolved")
 				end
+				pop_entity
 			end
 		end
 
@@ -2754,16 +2768,16 @@ feature {NONE} -- Character data and references
 			elseif external_entity_resolver = Void then
 				set_error ("external entity resolver missing")
 			elseif attached external_entity_resolver as l_resolver then
+				push_entity (a_entity.name)
 				if attached l_resolver.resolve_external_entity (a_entity.name, a_entity.public_id, a_entity.system_id, False) as l_value then
 					note_entity_expansion (l_value.count)
 					if not has_error then
-						push_entity (a_entity.name)
 						expand_literal_text (l_value, a_text)
-						pop_entity
 					end
 				else
 					set_error ("external entity not resolved")
 				end
+				pop_entity
 			end
 		end
 
@@ -7513,6 +7527,20 @@ feature {NONE} -- Entity tables
 			variant
 				entity_stack.count - i + 1
 			end
+			if not Result and then attached inherited_active_entities as l_inherited then
+				from
+					i := 1
+				invariant
+					inherited_index_in_bounds: i >= 1 and i <= l_inherited.count + 1
+				until
+					i > l_inherited.count or Result
+				loop
+					Result := l_inherited.i_th (i).same_string (a_name)
+					i := i + 1
+				variant
+					l_inherited.count - i + 1
+				end
+			end
 		end
 
 	push_entity_reference_position (a_start_index, a_byte_count: INTEGER)
@@ -8009,6 +8037,9 @@ feature {NONE} -- State
 
 	inherited_external_parameter_entity_table: detachable HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8]
 			-- Parent external parameter entity bindings for external entity child parsers.
+
+	inherited_active_entities: detachable ARRAYED_LIST [STRING_8]
+			-- General entities a parent parser was expanding when this external entity child parser was created.
 
 	document_element_count: INTEGER
 			-- Number of root-level document elements seen.
