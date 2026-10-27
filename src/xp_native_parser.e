@@ -2555,7 +2555,7 @@ feature {NONE} -- Error mapping
 				Result := Xml_error_xml_decl
 			elseif a_error.same_string ("invalid text declaration") then
 				Result := Xml_error_text_decl
-			elseif a_error.same_string ("entity declared in parameter entity") then
+			elseif a_error.same_string ("standalone reference to externally declared entity") then
 				Result := Xml_error_entity_declared_in_pe
 			elseif a_error.same_string ("invalid public identifier") then
 				Result := Xml_error_publicid
