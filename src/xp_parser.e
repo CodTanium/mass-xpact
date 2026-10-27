@@ -5301,8 +5301,9 @@ feature {NONE} -- Event dispatch
 				-- A root element whose name differs from the DOCTYPE name violates only the
 				-- "Root Element Type" validity constraint, so a non-validating parser accepts it.
 			else
-				if element_stack.count = 0 then
-					document_element_count := document_element_count + 1
+				if element_stack.count = 0 and then document_element_count = 0 then
+						-- An external parsed entity may hold several top-level elements; count the first only.
+					document_element_count := 1
 				end
 				apply_default_attributes (a_name, a_attributes)
 				if not has_error then
@@ -5378,8 +5379,9 @@ feature {NONE} -- Event dispatch
 			elseif element_stack.count = 0 and then document_element_count > 0 and then not parsing_external_entity then
 				set_error ("multiple document elements")
 			else
-				if element_stack.count = 0 then
-					document_element_count := document_element_count + 1
+				if element_stack.count = 0 and then document_element_count = 0 then
+						-- An external parsed entity may hold several top-level elements; count the first only.
+					document_element_count := 1
 				end
 				create l_name.make (a_input, a_name_start, a_name_end - a_name_start + 1)
 				element_slice_stack.extend (l_name)
@@ -8042,7 +8044,7 @@ feature {NONE} -- State
 			-- General entities a parent parser was expanding when this external entity child parser was created.
 
 	document_element_count: INTEGER
-			-- Number of root-level document elements seen.
+			-- Number of root-level document elements seen (0 or 1).
 
 	expanded_entity_bytes: INTEGER
 			-- Total entity replacement bytes processed in current parse.
