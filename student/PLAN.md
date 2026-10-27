@@ -20,7 +20,8 @@ record of weeks 1-2. Day-to-day status of every issue: the
 | 3 Failure reporting | ✅ | Build fixes in git ✅, W3C run ✅, #28 test and repair ✅, repair and GitHub setup ✅ · **B01 ✅, B02 ✅, runner continues after a failure (#60) ✅** (2026-10-22); Jenkins check of B02 dropped (2026-10-22, not pursued) | [week-03](notes/weekly/week-03.md) |
 | 4 Input matrix | 🟡 | Started 2026-10-26: full check of the merged code ✅, `main` synced (#110) ✅, PC set up like the supervisor's (#113) ✅, weeks 2-3 closed out ✅ · **G01 ✅** 93 reviewed W3C cases ([#118](https://github.com/andersoxie/xpact/issues/118)) · xmlconf verdicts ✅ ([#117](https://github.com/andersoxie/xpact/issues/117)) | [week-04](notes/weekly/week-04.md) |
 | 5 Regressions | ✅ | C02, C03, C10 (part) run through the DLL (3 findings #38-#40, fixed in #80) · **C03 ✅, C10 ✅ compared with Expat 2.8.1** ([#121](https://github.com/andersoxie/xpact/issues/121)): 4,308/4,308 same verdicts, 5 findings (#122-#126) · **C02 ✅ regressions in the smoke test and the Eiffel suite** ([#128](https://github.com/andersoxie/xpact/issues/128)) · review with the supervisor skipped by the student | [expat-2.8.1](results/expat-2.8.1/README.md), [C02-final-input](results/C02-final-input/README.md), [week-05](notes/weekly/week-05.md) |
-| 6-10 | ⬜ | One improvement, Expat comparison, consolidate, report, handover | |
+| 6 One improvement | 🟡 | Started 2026-10-27: Option A all W3C cases (#146), entity speed (#148), **integrated with `main` (#150)** ([#151](https://github.com/andersoxie/xpact/issues/151)): `main` DLL crashes and timeouts fixed, 2,585/2,585 W3C cases · XML version recommendation: XML 1.0 5th edition | [issue-0151](../reports/issue-0151/summary.md) |
+| 7-10 | ⬜ | Expat comparison, consolidate, report, handover | |
 
 ## ✅ Merged since 2026-10-22
 
@@ -49,6 +50,7 @@ record of weeks 1-2. Day-to-day status of every issue: the
 | `-SkipSmoke` removed: assertions DLL smoke back on in both Jenkinsfiles and the release script | [#144](https://github.com/andersoxie/xpact/pull/144) | [#142](https://github.com/andersoxie/xpact/issues/142) 🟡 Jenkins run |
 | 7 skipped native Python tests now run (CMake bundled with Visual Studio found); 178 run, 0 skipped | the pull request | [#143](https://github.com/andersoxie/xpact/issues/143) |
 | **Option A**: all 2,585 W3C cases run (`--all-cases`, 0 skipped); parser fixes F1-F7 (external entities, PE in declarations, standalone, text declarations) | the pull request | [#146](https://github.com/andersoxie/xpact/issues/146) 🟡 Jenkins run |
+| **#146 + #148 integrated with `main` (#150)**: answers the supervisor's 2026-10-27 requests (reproduce and fix failures, more XML 1.0 cases, XML version); all 2,585 W3C cases pass, DLL 247/247 ([summary](../reports/issue-0151/summary.md)) | the pull request | [#151](https://github.com/andersoxie/xpact/issues/151) 🟡 Jenkins run |
 | Keep the machine's MSVC backend in the native build scripts; retested 2026-10-26 | [#76](https://github.com/andersoxie/xpact/pull/76) (`7cf5a94`) | [#74](https://github.com/andersoxie/xpact/issues/74) 🟡 Jenkins run |
 | Merged branches deleted (11 on GitHub, 20 local), PR #76 finished | [#138](https://github.com/andersoxie/xpact/pull/138) | [#137](https://github.com/andersoxie/xpact/issues/137) ✅ |
 | Script for the supervisor: collects the information for the open dual-implementation steps and #74/#79 | (the pull request) | [#140](https://github.com/andersoxie/xpact/issues/140) |
