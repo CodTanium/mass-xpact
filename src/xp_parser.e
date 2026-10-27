@@ -3061,7 +3061,12 @@ feature {NONE} -- DTD entity declarations
 				else
 					note_position (dtd_subset_position_offset + i)
 				end
-				if has_at (a_subset, i, "<!ENTITY") then
+				if (has_at (a_subset, i, "<!ELEMENT") or else has_at (a_subset, i, "<!ATTLIST") or else has_at (a_subset, i, "<!NOTATION"))
+					and then (parsing_external_entity or else external_dtd_depth > 0)
+					and then has_parameter_reference_in_declaration (a_subset, i)
+				then
+					i := parse_declaration_with_parameter_references (a_subset, i)
+				elseif has_at (a_subset, i, "<!ENTITY") then
 					i := parse_entity_declaration (a_subset, i)
 				elseif has_at (a_subset, i, "<!ATTLIST") then
 					i := parse_attlist_declaration (a_subset, i)
@@ -3147,6 +3152,237 @@ feature {NONE} -- DTD entity declarations
 			end
 		end
 
+	has_parameter_reference_in_declaration (a_subset: READABLE_STRING_8; a_start_index: INTEGER): BOOLEAN
+			-- Does the markup declaration at `a_start_index' hold a parameter entity reference outside its literals?
+		require
+			subset_attached: a_subset /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_subset.count
+		local
+			i, l_end: INTEGER
+			c, l_quote: CHARACTER_8
+		do
+			l_end := find_markup_declaration_end (a_subset, a_start_index)
+			if l_end = 0 then
+					-- The declaration may end inside a parameter entity.
+				l_end := a_subset.count
+			end
+			from
+				i := a_start_index
+			invariant
+				index_in_bounds: i >= a_start_index and i <= l_end + 1
+			until
+				i > l_end or Result
+			loop
+				c := a_subset.item (i)
+				if l_quote /= '%U' then
+					if c = l_quote then
+						l_quote := '%U'
+					end
+				elseif c = '"' or c = '%'' then
+					l_quote := c
+				elseif c.code = 37 and then i < l_end and then is_name_start_character (a_subset.item (i + 1)) then
+					Result := True
+				end
+				i := i + 1
+			variant
+				l_end - i + 1
+			end
+		end
+
+	parse_declaration_with_parameter_references (a_subset: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
+			-- Parse the ELEMENT, ATTLIST or NOTATION declaration at `a_start_index' after replacing its
+			-- parameter entity references; allowed outside the internal subset (WFC: PEs in Internal Subset).
+			-- The closing '>' may come from a parameter entity ("Proper Declaration/PE Nesting" is
+			-- only a validity constraint).
+		require
+			subset_attached: a_subset /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_subset.count
+		local
+			i, j, l_reference_end, l_next: INTEGER
+			c, l_quote: CHARACTER_8
+			l_declaration, l_value: STRING_8
+			l_done: BOOLEAN
+		do
+			create l_declaration.make (64)
+			from
+				i := a_start_index
+			invariant
+				index_in_bounds: i >= a_start_index and i <= a_subset.count + 1
+			until
+				i > a_subset.count or l_done or has_error
+			loop
+				c := a_subset.item (i)
+				if c.code = 37 and then l_quote = '%U' and then i < a_subset.count and then is_name_start_character (a_subset.item (i + 1)) then
+					l_reference_end := find_character (a_subset, ';', i + 1)
+					if l_reference_end = 0 then
+						set_error ("unterminated parameter entity reference")
+						i := a_subset.count + 1
+					else
+						l_value := declaration_with_parameter_references_expanded (a_subset.substring (i, l_reference_end), 0)
+						from
+							j := 1
+						invariant
+							value_index_in_bounds: j >= 1 and j <= l_value.count + 1
+						until
+							j > l_value.count or l_done
+						loop
+							c := l_value.item (j)
+							l_declaration.append_character (c)
+							if l_quote /= '%U' then
+								if c = l_quote then
+									l_quote := '%U'
+								end
+							elseif c = '"' or c = '%'' then
+								l_quote := c
+							elseif c = '>' then
+								l_done := True
+							end
+							j := j + 1
+						variant
+							l_value.count - j + 1
+						end
+						if l_done and then not l_value.substring (j, l_value.count).is_whitespace then
+							set_error ("unsupported parameter entity nesting")
+						end
+						i := l_reference_end + 1
+					end
+				else
+					l_declaration.append_character (c)
+					if l_quote /= '%U' then
+						if c = l_quote then
+							l_quote := '%U'
+						end
+					elseif c = '"' or c = '%'' then
+						l_quote := c
+					elseif c = '>' then
+						l_done := True
+					end
+					i := i + 1
+				end
+			variant
+				a_subset.count - i + 1
+			end
+			if not has_error and then not l_done then
+				set_error ("unterminated markup declaration")
+			end
+			if not has_error then
+				if has_at (l_declaration, 1, "<!ELEMENT") then
+					l_next := parse_element_declaration (l_declaration, 1)
+				elseif has_at (l_declaration, 1, "<!ATTLIST") then
+					l_next := parse_attlist_declaration (l_declaration, 1)
+				else
+					l_next := parse_notation_declaration (l_declaration, 1)
+				end
+				if not has_error and then l_next <= l_declaration.count then
+					set_error ("unexpected declaration content")
+				end
+			end
+			if has_error then
+				Result := a_subset.count + 1
+			else
+				Result := i
+			end
+		ensure
+			progress_or_error: Result > a_start_index or has_error
+		end
+
+	declaration_with_parameter_references_expanded (a_declaration: READABLE_STRING_8; a_depth: INTEGER): STRING_8
+			-- `a_declaration' with each parameter entity reference outside a literal replaced by its
+			-- replacement text and one leading and one trailing space (XML 1.0, 4.4.8 "Included as PE").
+		require
+			declaration_attached: a_declaration /= Void
+			non_negative_depth: a_depth >= 0
+		local
+			i, l_end: INTEGER
+			c, l_quote: CHARACTER_8
+			l_name: STRING_8
+		do
+			create Result.make (a_declaration.count)
+			from
+				i := 1
+			invariant
+				index_in_bounds: i >= 1 and i <= a_declaration.count + 1
+			until
+				i > a_declaration.count or has_error
+			loop
+				c := a_declaration.item (i)
+				if l_quote /= '%U' then
+					if c = l_quote then
+						l_quote := '%U'
+					end
+					Result.append_character (c)
+					i := i + 1
+				elseif c = '"' or c = '%'' then
+					l_quote := c
+					Result.append_character (c)
+					i := i + 1
+				elseif c.code = 37 and then i < a_declaration.count and then is_name_start_character (a_declaration.item (i + 1)) then
+					l_end := find_character (a_declaration, ';', i + 1)
+					if l_end = 0 then
+						set_error ("unterminated parameter entity reference")
+						i := a_declaration.count + 1
+					else
+						create l_name.make_from_string (a_declaration.substring (i + 1, l_end - 1))
+						if not is_valid_name (l_name) then
+							set_error ("invalid parameter entity name")
+						elseif a_depth >= Default_max_entity_depth then
+							set_error ("recursive entity reference")
+						elseif attached parameter_entity_value (l_name) as l_value then
+							note_entity_expansion (l_value.count)
+							if not has_error then
+								Result.append_character (' ')
+								Result.append (declaration_with_parameter_references_expanded (l_value, a_depth + 1))
+								Result.append_character (' ')
+							end
+						elseif attached external_parameter_entity (l_name) as l_external then
+							Result.append_character (' ')
+							Result.append (external_parameter_entity_text_in_declaration (l_external, a_depth))
+							Result.append_character (' ')
+						else
+								-- As between declarations: a reference to an undeclared entity contributes nothing.
+							dtd_has_parameter_entity_references := True
+						end
+						i := l_end + 1
+					end
+				else
+					Result.append_character (c)
+					i := i + 1
+				end
+			variant
+				a_declaration.count - i + 1
+			end
+		ensure
+			result_attached: Result /= Void
+		end
+
+	external_parameter_entity_text_in_declaration (a_entity: XP_EXTERNAL_ENTITY; a_depth: INTEGER): STRING_8
+			-- Text that external parameter entity `a_entity' contributes inside a declaration:
+			-- the resolver's text, or nothing when it was parsed by an external child parser
+			-- (as Expat does) or is not read.
+		require
+			entity_attached: a_entity /= Void
+			parameter_entity: a_entity.is_parameter
+			non_negative_depth: a_depth >= 0
+		do
+			create Result.make_empty
+			if not parameter_entity_loading_allowed or else external_entity_resolver = Void then
+				dtd_has_parameter_entity_references := True
+			elseif attached external_entity_resolver as l_resolver then
+				if attached l_resolver.resolve_external_entity (a_entity.name, a_entity.public_id, a_entity.system_id, True) as l_value then
+					if not l_resolver.last_resolution_is_external_child_parse then
+						note_entity_expansion (l_value.count)
+						if not has_error then
+							Result := declaration_with_parameter_references_expanded (l_value, a_depth + 1)
+						end
+					end
+				else
+					set_error ("external entity not resolved")
+				end
+			end
+		ensure
+			result_attached: Result /= Void
+		end
+
 	validate_processing_instruction_target (a_input: READABLE_STRING_8; a_start_index, a_end_index: INTEGER)
 			-- Check the target of a processing instruction (not an XML declaration) that
 			-- starts at `a_start_index' and whose "?>" begins at `a_end_index'.
@@ -3198,6 +3434,7 @@ feature {NONE} -- DTD entity declarations
 			l_end: INTEGER
 			l_inner: STRING_8
 			l_status: STRING_8
+			l_bracket_in_entity: BOOLEAN
 		do
 			l_end := find_conditional_section_end (a_subset, a_start_index)
 			if l_end = 0 then
@@ -3214,7 +3451,7 @@ feature {NONE} -- DTD entity declarations
 				invariant
 					index_in_bounds: i >= a_start_index + 3 and i <= a_subset.count + 1
 				until
-					i > l_end - 1 or has_error or else a_subset.item (i) = '['
+					i > l_end - 1 or has_error or else a_subset.item (i) = '[' or else l_status.has ('[')
 				loop
 					if a_subset.item (i).code = 37 then
 						i := append_parameter_reference_in_entity_value (a_subset, i, l_status)
@@ -3225,9 +3462,17 @@ feature {NONE} -- DTD entity declarations
 				variant
 					a_subset.count - i + 1
 				end
+				create l_inner.make_empty
+				if not has_error and then l_status.has ('[') then
+						-- The keyword's parameter entity also held the opening bracket.
+					l_bracket_in_entity := True
+					l_inner.append (l_status.substring (l_status.index_of ('[', 1) + 1, l_status.count))
+					l_status.keep_head (l_status.index_of ('[', 1) - 1)
+					i := i - 1
+				end
 				if has_error then
 					Result := a_subset.count + 1
-				elseif i > l_end - 1 or else a_subset.item (i) /= '[' then
+				elseif not l_bracket_in_entity and then (i > l_end - 1 or else a_subset.item (i) /= '[') then
 					set_error ("invalid conditional section")
 					Result := a_subset.count + 1
 				else
@@ -3239,7 +3484,9 @@ feature {NONE} -- DTD entity declarations
 					elseif l_status.same_string ("INCLUDE") then
 						l_content_start := i + 1
 						if l_content_start <= l_end - 1 then
-							create l_inner.make_from_string (a_subset.substring (l_content_start, l_end - 1))
+							l_inner.append (a_subset.substring (l_content_start, l_end - 1))
+						end
+						if not l_inner.is_empty then
 							process_internal_subset (l_inner)
 						end
 						if has_error then
