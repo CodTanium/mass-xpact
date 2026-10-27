@@ -1920,6 +1920,9 @@ feature {NONE} -- Markup parsing
 			if not has_error then
 				if l_version.is_empty and then not (parsing_external_entity and then not l_encoding.is_empty) then
 					set_error ("invalid xml declaration")
+				elseif parsing_external_entity and then l_encoding.is_empty then
+						-- A text declaration requires EncodingDecl (XML 1.0, production [77]).
+					set_error ("invalid text declaration")
 				else
 					xml_standalone := l_standalone
 					handler.on_xml_declaration (l_version, l_encoding, l_standalone)

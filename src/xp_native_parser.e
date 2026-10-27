@@ -108,6 +108,8 @@ feature -- Expat-compatible constants
 
 	Xml_error_xml_decl: INTEGER = 30
 
+	Xml_error_text_decl: INTEGER = 31
+
 	Xml_error_publicid: INTEGER = 32
 
 	Xml_error_suspended: INTEGER = 33
@@ -2549,6 +2551,8 @@ feature {NONE} -- Error mapping
 				Result := Xml_error_misplaced_xml_pi
 			elseif a_error.same_string ("invalid xml declaration") then
 				Result := Xml_error_xml_decl
+			elseif a_error.same_string ("invalid text declaration") then
+				Result := Xml_error_text_decl
 			elseif a_error.same_string ("invalid public identifier") then
 				Result := Xml_error_publicid
 			elseif a_error.same_string ("incorrect encoding") then
