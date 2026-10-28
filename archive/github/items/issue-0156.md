@@ -1,6 +1,6 @@
 # Issue #156: Finding: Tokenized attribute values (NMTOKENS, ID, IDREFS, ENTITIES, ...) are not normalized (F01-3)
 
-Archived from <https://github.com/andersoxie/xpact/issues/156> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/156> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|

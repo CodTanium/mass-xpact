@@ -1,6 +1,6 @@
 # Issue #146: Option A: run all 2,585 W3C cases (no skips) and fix the 7 parser bugs they expose (F1-F7)
 
-Archived from <https://github.com/andersoxie/xpact/issues/146> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/146> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|

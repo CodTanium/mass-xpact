@@ -1,6 +1,6 @@
 # Issue #2: Finding: build_native_eiffel.ps1 cannot find the Eiffel runtime include directory
 
-Archived from <https://github.com/andersoxie/xpact/issues/2> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/2> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|

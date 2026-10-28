@@ -1,6 +1,6 @@
 # Issue #79: Finding: parser fails 283 W3C cases and the DLL tests (#38, #39, #40, K3); Jenkins FAILURE on main
 
-Archived from <https://github.com/andersoxie/xpact/issues/79> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/79> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|

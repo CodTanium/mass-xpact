@@ -1,6 +1,6 @@
 # Issue #159: Finding: External parameter entity inside an entity value is parsed as declarations instead of included as text (F01-6)
 
-Archived from <https://github.com/andersoxie/xpact/issues/159> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/159> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|
@@ -33,3 +33,9 @@ Archived from <https://github.com/andersoxie/xpact/issues/159> on 2026-10-28 20:
 **How the test works:** for the 432 W3C cases that have an expected `OUTPUT` file, the document is parsed through the DLL with the Expat C API, the events are written as canonical XML and compared byte for byte. Expat (`pyexpat`) runs the same way as a control.
 
 Related: #154 (F01-1), #155 (F01-2), #156 (F01-3), #157 (F01-4), #158 (F01-5), #159 (F01-6).
+
+## Discussion
+
+### CodTanium, 2026-10-28 21:31: comment
+
+Fixed in PR #164 (merged into `student-Mass` as e5d59e2): the text of an external parameter entity used in an entity literal now goes into the value, checked like DTD text but not declared, as in Expat. W3C output 398 -> 399, 0 worse; Expat's own C tests unchanged (38 allocator fails); all old lanes unchanged in both builds. Report: [reports/issue-0159/report.md](https://github.com/andersoxie/xpact/blob/eaf596b/reports/issue-0159/report.md). Stays open until Jenkins has run.

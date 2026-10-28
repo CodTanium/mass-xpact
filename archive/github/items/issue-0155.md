@@ -1,6 +1,6 @@
 # Issue #155: Finding: Attribute defaults are not applied to elements inside an external general entity (F01-2)
 
-Archived from <https://github.com/andersoxie/xpact/issues/155> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/155> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|

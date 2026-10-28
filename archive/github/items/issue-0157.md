@@ -1,6 +1,6 @@
 # Issue #157: Finding: Public identifier of a NOTATION declaration is not normalized (F01-4)
 
-Archived from <https://github.com/andersoxie/xpact/issues/157> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/157> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|
@@ -33,3 +33,9 @@ Archived from <https://github.com/andersoxie/xpact/issues/157> on 2026-10-28 20:
 **How the test works:** for the 432 W3C cases that have an expected `OUTPUT` file, the document is parsed through the DLL with the Expat C API, the events are written as canonical XML and compared byte for byte. Expat (`pyexpat`) runs the same way as a control.
 
 Related: #154 (F01-1), #155 (F01-2), #156 (F01-3), #157 (F01-4), #158 (F01-5), #159 (F01-6).
+
+## Discussion
+
+### CodTanium, 2026-10-28 20:35: comment
+
+Fix in PR #162: every public identifier (DOCTYPE, NOTATION, ENTITY, unparsed ENTITY) is now normalized like Expat. W3C output test 394 -> 395 (`notation01`), 0 worse; all old lanes unchanged in both builds. Report: [reports/issue-0157/report.md](https://github.com/andersoxie/xpact/blob/69b74a1/reports/issue-0157/report.md). Stays open until merged and Jenkins has run.

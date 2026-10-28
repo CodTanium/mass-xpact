@@ -1,6 +1,6 @@
 # Issue #158: Finding: A second byte order mark at the start of an external entity is dropped (F01-5)
 
-Archived from <https://github.com/andersoxie/xpact/issues/158> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/158> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|
@@ -33,3 +33,9 @@ Archived from <https://github.com/andersoxie/xpact/issues/158> on 2026-10-28 20:
 **How the test works:** for the 432 W3C cases that have an expected `OUTPUT` file, the document is parsed through the DLL with the Expat C API, the events are written as canonical XML and compared byte for byte. Expat (`pyexpat`) runs the same way as a control.
 
 Related: #154 (F01-1), #155 (F01-2), #156 (F01-3), #157 (F01-4), #158 (F01-5), #159 (F01-6).
+
+## Discussion
+
+### CodTanium, 2026-10-28 20:48: comment
+
+Fixed in PR #163 (merged into `student-Mass`): the UTF-16 byte order mark was removed twice, so a following U+FEFF was lost (and two-BOM UTF-16 documents were accepted). W3C output +3, 0 worse; BOM probe 10/10 like Expat; all old lanes unchanged in both builds. Report: [reports/issue-0158/report.md](https://github.com/andersoxie/xpact/blob/8094783/reports/issue-0158/report.md). Stays open until Jenkins has run.

@@ -1,6 +1,6 @@
 # Issue #131: Finding: SonarQube analysis on Jenkins fails with HTTP 401 Unauthorized
 
-Archived from <https://github.com/andersoxie/xpact/issues/131> on 2026-10-28 20:22 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/131> on 2026-10-28 21:36 UTC.
 
 | | |
 |---|---|
