@@ -1,7 +1,9 @@
 # Report: issue #151: integrate the #146 / #148 fixes with `main` (#150)
 
 Issue: [#151](https://github.com/andersoxie/xpact/issues/151)   Branch: `fix/151-integrate-146-148-with-main`   Base: `student-Mass`   Date: 2026-10-27
-Status: 🟡 pull request open · ⬜ Jenkins not run · the issue stays open until Jenkins has run
+Status: ✅ PR #152 merged into `student-Mass` (2026-10-28) · ⬜ Jenkins not run · the issue stays open until Jenkins has run
+
+> **Update 2026-10-28:** rerun on the final branch (with the #148 report and the dual regression lane, #153): the same results. All 2,585 W3C cases at 10 s: 0 failed, 0 errors, 0 skipped. See [latest-2026-10-28](../latest-2026-10-28/README.md).
 
 > 📄 **Short version for the student and the supervisor:** [summary.md](summary.md), with answers to the supervisor's three questions.
 

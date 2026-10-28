@@ -1,5 +1,10 @@
 # #151: summary for the student and the supervisor (2026-10-27)
 
+> **Update 2026-10-28:** all 2,585 W3C cases rerun on the final branch with the Jenkins stage at 10 s:
+> 1,974 normal + 309 old-edition cases checked, 28 optional errors + 274 XML 1.1 "no crash only";
+> **0 failed, 0 errors, 0 skipped** in both builds; DLL entity lane 247/247. Full report:
+> [latest-2026-10-28](../latest-2026-10-28/README.md).
+
 Full report with all data: [report.md](report.md) · Issue: [#151](https://github.com/andersoxie/xpact/issues/151)
 
 The fixes from #146 and #148 were combined with the teacher's latest `main` (#150) on one branch. **Everything passes:** all 2,585 W3C cases in both builds, and the regression suites.

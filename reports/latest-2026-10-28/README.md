@@ -1,12 +1,12 @@
 # W3C report: the latest integrated version (28 October 2026)
 
-> **Branch `latest-integrated`** in `CodTanium/mass-xpact` (the student's own repository).
-> Not sent to `andersoxie/xpact`, not merged anywhere, `main` untouched.
+> Built on branch `latest-integrated` (also in the student's own repository, `CodTanium/mass-xpact`).
+> Merged into `student-Mass` with PR #152 on 2026-10-28; `main` untouched.
 > It combines everything that existed on 28 October:
 > - `main` with the supervisor's **#150** (local external resources in the W3C suite);
 > - the student's **#146** (Option A), **#148** (speed) and **#151** (integration with #150), the same code as PR #152;
 > - the **#148 report**, which #152 did not include;
-> - the **dual regression lane** (CodTanium/mass-xpact#1), which was uncommitted since 26 October.
+> - the **dual regression lane** ([#153](https://github.com/andersoxie/xpact/issues/153), first CodTanium/mass-xpact#1), uncommitted since 26 October.
 
 ## 1. In short
 
@@ -17,7 +17,7 @@
 | ✅ "No crash only" cases (either verdict allowed) | **302 per build**: 28 optional errors + 274 XML 1.1 |
 | ✅ External entities through the DLL (Expat API) | **247 / 247** in both builds |
 | ✅ No regression elsewhere | Eiffel matrix 4/4 · Python 206 OK · DLL smoke ×2 · native stage ok · Expat comparison identical · dual lane 910/910 |
-| ⬜ Jenkins | not run (this branch is not in `andersoxie/xpact`) |
+| ⬜ Jenkins | not run yet; requested from the supervisor on 2026-10-28 |
 
 ## 2. Where we started → where we are
 
