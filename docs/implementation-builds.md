@@ -10,6 +10,8 @@ The [focused dual catalog lane](dual-catalog-lane.md) uses the same build
 infrastructure for assertion-enabled audits and assertion-discarded benchmarks.
 The [dual W3C lane](dual-w3c-lane.md) uses separate harnesses for original-byte
 conformance cases with the same pinned dependency and isolated build provenance.
+The [dual regression lane](dual-regression-lane.md) (profile `regression`) runs
+small functional cases whole and chunked, with event traces, on both parsers.
 
 ## Build both implementations
 
