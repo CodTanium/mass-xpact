@@ -1,6 +1,6 @@
 # Issue #10: Finding: run_native_runtime_smoke.ps1 fails: wrong include fallback, then mingw cannot link the MSVC objects
 
-Archived from <https://github.com/andersoxie/xpact/issues/10> on 2026-10-26 20:59 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/10> on 2026-10-28 01:33 UTC.
 
 | | |
 |---|---|

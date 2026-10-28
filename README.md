@@ -19,6 +19,7 @@ failures, and verify fixes with assertions enabled.
 | **Builds on Windows** | The native Eiffel-backed DLL, smoke tests and test matrix did not build on the student PC. Fixed the include path, the C backend, `PATH` growth and `vswhere` problems, `-keep` for finalized lanes (#2, #4, #7, #10, #48, #51, #53, #55, #73) |
 | **Reliable test results** | Failing tests now exit nonzero in every build (B01, #45); a deliberately failing meta-test proves it (B02, #46); one exception no longer stops the remaining tests (#60) |
 | **Parser correctness** | Strict UTF-8 and XML characters, UTF-16, name rules, DTD declarations, loops that advance on error (#79), CR handling (#28). W3C XML conformance went from 1,491 / 1,444 passed (236 failed, 47 crashes) to **1,727 / 1,727 in both finalized builds**, assertions off and on, on the student PC |
+| **W3C without skips** | All 2,585 W3C XML test cases run, none skipped (was 1,727 run, 858 skipped): 2,283 with a checked verdict + 302 "no crash only", **0 failed, 0 errors** in both builds. Found and fixed DLL crashes with external entities (F1, F3) and a slowdown where each entity reference cost time proportional to the document (XML spec document 16 s → 0.2 s with assertions); integrated with the supervisor's external-resource work (#146, #148, #151, #152, [report](reports/latest-2026-10-28/README.md)) |
 | **DLL testing** | A C# test program for the xpact DLL: 3,360 cases across whole-input and chunked parsing, finding three parser bugs (#37 → #38, #39, #40) |
 | **Versioning workflow** | Every fix: issue → branch → expected result written first → report with before/after logs → pull request → squash merge, revertable in one commit ([`student/VERSIONING.md`](student/VERSIONING.md), [`student/tools/fix.ps1`](student/tools/fix.ps1)) |
 
@@ -34,7 +35,9 @@ failures, and verify fixes with assertions enabled.
 
 Branches: `portfolio` (this page, default) = `student-Mass` + this README and the archive.
 `student-Mass` and `main` are unchanged copies of the original repository's branches
-(last refreshed 2026-10-26: `student-Mass` @ `d2f98a9`, `main` @ `de01371`).
+(last refreshed 2026-10-28: `student-Mass` @ `293918f`; `main` deliberately left at `de01371`,
+the original's `main` is at `1714f31` and is contained in `student-Mass`).
+`latest-integrated` is the branch the 2026-10-28 W3C report was built on.
 
 ---
 

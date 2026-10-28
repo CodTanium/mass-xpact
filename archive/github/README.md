@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-26 20:59 UTC with [`export_github.py`](export_github.py): 64 issues and 74 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-28 01:33 UTC with [`export_github.py`](export_github.py): 71 issues and 82 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -144,3 +144,18 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#136](items/pr-0136.md) | PR | Record the Jenkins verification of the #73 fix | merged | - | 2026-10-26 |
 | [#137](items/issue-0137.md) | Issue | Finish PR #76 and clean up merged branches | closed (completed) | type:task, workflow | 2026-10-26 |
 | [#138](items/pr-0138.md) | PR | Record PR #76 merged and the branch cleanup (#137) | merged | - | 2026-10-26 |
+| [#139](items/pr-0139.md) | PR | Merge student-Mass into main: weeks 4-6 student work (W3C all cases, parser fixes F1/F3/F7, entity speed) | open | - | 2026-10-26 |
+| [#140](items/issue-0140.md) | Issue | Script for the supervisor: collect dual-implementation and Jenkins information into one .txt | closed (completed) | type:task, workflow, group:G-verification | 2026-10-26 |
+| [#141](items/pr-0141.md) | PR | Script for the supervisor: collect dual-implementation and Jenkins information (#140) | merged | - | 2026-10-26 |
+| [#142](items/issue-0142.md) | Issue | Re-enable the DLL smoke tests that CI and the release script skip (-SkipSmoke) | open | type:task, group:B-reliable-results, test, build | 2026-10-26 |
+| [#143](items/issue-0143.md) | Issue | Finding: 7 native Python tests skip because the CMake bundled with Visual Studio is not found | closed (completed) | type:finding, group:B-reliable-results, test | 2026-10-26 |
+| [#144](items/pr-0144.md) | PR | Re-enable the DLL smoke tests in CI and the release script | merged | - | 2026-10-26 |
+| [#145](items/pr-0145.md) | PR | Find the CMake bundled with Visual Studio in the native Python tests | merged | - | 2026-10-26 |
+| [#146](items/issue-0146.md) | Issue | Option A: run all 2,585 W3C cases (no skips) and fix the 7 parser bugs they expose (F1-F7) | open | bug, type:task, group:C-correctness, test | 2026-10-27 |
+| [#147](items/pr-0147.md) | PR | Option A: all W3C cases without skips (--all-cases) and parser fixes F1-F7 | closed | - | 2026-10-27 |
+| [#148](items/issue-0148.md) | Issue | Finding: each internal entity reference costs time proportional to the document (pr-xml 1.1 s, 16 s with assertions) | open | bug, type:finding, group:C-correctness | 2026-10-27 |
+| [#149](items/pr-0149.md) | PR | Fix slow internal entity references by keeping the reference position | closed | - | 2026-10-27 |
+| [#150](items/pr-0150.md) | PR | Enable local external resources in the W3C conformance suite | merged | - | 2026-10-27 |
+| [#151](items/issue-0151.md) | Issue | Integrate the #146 and #148 fixes with main (#150): DLL crashes and pr-xml timeouts on main | open | type:task, group:C-correctness, test, regression | 2026-10-27 |
+| [#152](items/pr-0152.md) | PR | Integrate the #146 and #148 fixes with main (#150) (#151) | merged | type:task, group:C-correctness, test, regression | 2026-10-27 |
+| [#153](items/issue-0153.md) | Issue | Dual regression lane: small functional cases on xpact and Xpact-core, whole and chunked, with event traces | open | type:task, group:B-reliable-results, test | 2026-10-28 |

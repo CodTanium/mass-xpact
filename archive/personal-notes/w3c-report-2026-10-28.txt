@@ -1,0 +1,62 @@
+W3C REPORT - THE NEWEST VERSION (28 October 2026)
+==================================================
+Replaces latest_w3c.txt (written before the supervisor's #150).
+Nothing sent to the supervisor. Nothing pushed to any main.
+
+WHERE THE NEWEST VERSION IS
+---------------------------
+ On this PC:  C:\Users\masou\Desktop\Lia\xpact\w9-latest   (branch latest-integrated)
+ On GitHub:   YOUR repo only: https://github.com/CodTanium/mass-xpact/tree/latest-integrated
+ Full report: https://github.com/CodTanium/mass-xpact/blob/latest-integrated/reports/latest-2026-10-28/README.md
+ Issue:       https://github.com/CodTanium/mass-xpact/issues/1 (the dual regression lane)
+
+WHAT IS IN IT (everything that existed)
+---------------------------------------
+ [x] main with the supervisor's #150 (external files in the W3C test)
+ [x] your Option A #146 + speed fix #148 + integration #151 (= PR #152)
+ [x] the #148 report (was missing in #152)
+ [x] the dual regression lane (uncommitted since 26 Oct)
+
+THE W3C RESULT (Jenkins stage, normal 10 s limit, both builds)
+--------------------------------------------------------------
+ 2,585 tests: 0 failed, 0 errors, 0 SKIPPED
+   1,974  normal XML 1.0 tests (5th edition, incl. external files)   all pass
+     309  old-edition name tests (old rules, as the DLL uses)          all pass
+      28  optional errors (either answer allowed)                     no crash
+     274  XML 1.1 tests (no XML 1.0 answer exists)                     no crash
+ -> Jenkins would show 2,283 checked + 302 "no crash only".
+
+ Started at (Jenkins #70): 1,727 passed, 858 skipped per build.
+
+ External files through the DLL (Expat way): 247 / 247 in both builds.
+ (main without our fixes: 1 crash / 4 crashes + 3 timeouts)
+
+NOTHING ELSE BROKE
+------------------
+ [x] DLL smoke tests: ok, ok
+ [x] Eiffel test matrix: 4/4
+ [x] Python: 206 tests OK
+ [x] native tests (runtime, ABI, CRC 7/7, shim audit): ok
+ [x] same answers as Expat on 4,308 inputs (difference table unchanged)
+ [x] dual regression lane: xpact 910/910, reuse 10/10
+
+YOUR 2003 xmlconf (only for comparison)
+---------------------------------------
+ 2,162 tests: 1,491 checked ok, 79 no crash, 302 failed, 290 errors.
+ 290 errors = files missing in that copy.
+ 302 failed = the old name tests; the 2003 catalog cannot say "old edition".
+ Same tests pass in the 2013 suite. Keep using the 2013 suite.
+
+PROBLEMS MET (not xpact)
+------------------------
+ - No WSL on this PC -> ran the Jenkins stage with -SkipWslC (only difference).
+ - The benchmark run rewrites docs/benchmarks.md -> restored, not committed.
+ - Native tests need vswhere.exe on PATH -> added for the run.
+
+WHAT IS LEFT (your decision)
+----------------------------
+ [ ] Send to the supervisor (not done, as you asked).
+ [ ] On andersoxie/xpact: use PR #152, close #147 and #149 as superseded.
+ [ ] Merge into student-Mass, then a Jenkins run.
+ [ ] latest_w3c.txt is out of date; this file and status-2026-10-28.txt
+     replace it.

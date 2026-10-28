@@ -1,0 +1,110 @@
+WHY 611 W3C CASES ARE SKIPPED - OLD EDITIONS, XML 1.1, OPTIONAL ERRORS
+=========================================================================
+Saved: 27 October 2026. Nothing was changed locally or on GitHub; this is
+an explanation only. Evidence: skipped-analysis-2026-10-27\
+
+These three groups are skipped because the W3C suite does not give an
+expected result that applies to xpact. Each group below has a real case
+from the suite.
+
+
+1. WRITTEN FOR OLDER XML EDITIONS (311 cases)
+---------------------------------------------
+Background:
+  - XML 1.0 has five editions: 1998, 2000, 2004, 2006 and 2008.
+  - The 5th edition (2008) changed which characters are allowed in names.
+    Before 2008 there was a strict list; since then, almost any
+    letter-like character is allowed.
+  - xpact follows the 5th edition.
+
+What these cases test: the old, stricter name rules. Each one is marked
+EDITION="1 2 3 4", which means "only for parsers of editions 1-4".
+
+Example: not-wf-sa-140
+    <!ENTITY e "<&#x309a;></&#x309a;>">
+  - The W3C says: REJECT, because character U+309A may not start a name.
+  - That was true in editions 1-4. In the 5th edition it is allowed, so a
+    5th-edition parser must ACCEPT it.
+  - xpact accepts it, which is correct for the 5th edition. The W3C's
+    answer here is "reject", which is the old rule.
+
+Result of running all 311 anyway:
+  - xpact accepts 302. That is the 5th-edition behaviour.
+  - xpact rejects 7 (ibm89n06-n12). I opened one: it also has a second
+    root element (<animal/><IllegalExtender.../>). That is an error in
+    every edition, so xpact rejects it for that other reason. That is
+    consistent, not a bug.
+  - 1 case left (also marked 1st-4th edition only) has no answer to check,
+    because it is an optional error.
+
+Why skip: the W3C's answer is "reject", but the correct answer for xpact is
+usually "accept". Judging xpact against these would count correct
+behaviour as failures. The 5th-edition rules have their own tests, which
+are among the 1,727 that pass.
+
+
+2. XML 1.1 (273 cases)
+----------------------
+Background:
+  - XML 1.1 (2004) is a separate version of the language. It allows
+    control characters, other line-end characters (NEL, U+2028) and
+    different name rules.
+  - Almost nobody uses it, and xpact is an XML 1.0 parser.
+
+What these cases test: what an XML 1.1 parser must do. Most are marked
+VERSION="1.1".
+
+Example: rmt-001
+    <?xml version="1.0"?>
+    <!DOCTYPE foo SYSTEM "001.dtd">   <- that file says version="1.1"
+  - The W3C says: REJECT, because a 1.0 document may not load a 1.1 file.
+    The rule tested is how a 1.1 parser mixes the versions.
+
+Why skip: XML 1.0 does not say exactly what a 1.0 parser must do with a
+1.1 document. It may refuse it or try to read it as 1.0. So the W3C's
+answer for a 1.1 parser is not the answer for xpact.
+
+
+3. OPTIONAL ERRORS (27 cases)
+-----------------------------
+Background: the XML spec has three levels of mistake:
+
+  | Level                  | Meaning                     | Parser must...              |
+  | fatal error (not-wf)   | broken document             | REJECT it                   |
+  | validity error         | breaks the document's own   | only a validating parser    |
+  | (invalid)              | rules (its DTD)             | checks it                   |
+  | error (error)          | the spec calls it an error  | MAY report it or ignore it; |
+  |                        |                             | both are allowed            |
+
+These 27 cases are the third kind: TYPE="error".
+
+Examples:
+  - uri01: <!ENTITY foo SYSTEM "foo#bar">
+    A file link containing "#bar" is an "error", but parsers may ignore it.
+  - rmt-e2e-34: <!ELEMENT bar (foo|foo)>
+    An ambiguous content rule is an "error" even if "bar" is never used,
+    but a non-validating parser like xpact does not need to check it.
+
+Why skip: accepting and rejecting are both correct, so there is nothing
+to judge. The only thing worth checking is that xpact does not crash or
+hang on them, and it does not (from the run-them-anyway test).
+
+
+IN SHORT
+--------
+  | Group                  | W3C's answer is for | Correct answer for xpact          |
+  | Old editions (311)     | editions 1-4        | usually the OPPOSITE (5th edition)|
+  | XML 1.1 (273)          | XML 1.1 parsers     | not defined by XML 1.0            |
+  | Optional errors (27)   | anyone              | both answers allowed              |
+
+So these skips are correct: the W3C's answer for these cases does not
+apply to xpact.
+
+
+NEXT STEPS, WHEN YOU ARE READY
+------------------------------
+[ ] 1. The 247 external-entity cases can become real tests: add a file
+       resolver locally, run them, and see what xpact gets right.
+[ ] 2. For the old-edition cases, we could write our own expected results
+       under the 5th-edition rules and keep them in a separate list,
+       clearly marked as ours and not the W3C's.

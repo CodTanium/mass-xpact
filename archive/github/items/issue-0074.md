@@ -1,6 +1,6 @@
 # Issue #74: Finding: native build scripts override the machine's MSVC backend with msc_vc140
 
-Archived from <https://github.com/andersoxie/xpact/issues/74> on 2026-10-26 20:59 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/74> on 2026-10-28 01:33 UTC.
 
 | | |
 |---|---|

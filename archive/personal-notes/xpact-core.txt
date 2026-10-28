@@ -1,0 +1,120 @@
+XPACT vs XPACT-CORE - GYM SESSION RESULTS (26 October 2026, evening)
+=====================================================================
+Saved: 27 October 2026
+Rules kept: nothing committed, pushed or sent to GitHub. main untouched.
+Clone: C:\Users\masou\Desktop\Lia\xpact\xpactGit, student-Mass @ 36509b8,
+0 commits ahead of origin. The new work is UNCOMMITTED files in the clone.
+
+Start here for full details:
+  session-2026-10-26-evening\README.txt
+  session-2026-10-26-evening\issue-drafts.txt
+  session-2026-10-26-evening\evidence\
+  session-2026-10-26-evening\new-files\
+
+
+1. SUMMARY
+----------
+[x] a. Supervisor's two dual lanes (xpact vs Xpact-core) run on this PC
+       - Catalog benchmark: xpact takes 2.41x as long as Xpact-core
+         (supervisor's run: 2.48x). Different machine: "about the same".
+       - W3C lane: EXACTLY the supervisor's numbers
+           xpact       1,727 passed, 0 wrong, 0 errors, controls 5/5
+           Xpact-core  1,051 passed, 662 wrong, 14 timeouts, controls 2/5
+[x] b. NEW dual regression lane (plan step 4 checkpoint)
+       C02, CR, UTF-8 and basic cases on both parsers: whole, split at
+       every byte, byte by byte; with event traces.
+         | Build                      | Runs | PASS | Wrong verdict |
+         | xpact, assertions on       |  910 |  910 |  0            |
+         | xpact, assertions off      |  910 |  910 |  0            |
+         | Xpact-core, assertions on  |  910 |  887 | 23            |
+         | Xpact-core, assertions off |  910 |  887 | 23            |
+       Lifecycle (one reused parser, 10 steps, after success, failure
+       and partial input): both parsers 10/10.
+[x] c. Draft of the shared adapter contract (step 3):
+       docs\dual-adapter-contract-draft.md, marked DRAFT, 4 questions
+       for the supervisor.
+[x] Python tests: 192 OK (178 before + 14 new for the lane), 7 skipped.
+
+
+2. XPACT-CORE FINDINGS (only in Xpact-core, not in xpact)
+--------------------------------------------------------
+Environment: student PC, Windows 11, EiffelStudio 25.12.9.8922,
+MSVC 19.51; Xpact-core 6c017fb5b6e04fd0ae401bc54bb3c6a3c3bd6676;
+finalized, assertions on and off (same result).
+Command: .\scripts\run_dual_regression.ps1 -Offline
+
+Finding 1 - empty final call is rejected (14 runs)
+  Expected: ACCEPT (xpact accepts; Expat 2.8.1 accepts, #121)
+  Actual:   REJECT, "status 0, code 3: No element found", for every
+            valid document without a CR, chunking "bytes".
+            Same inputs pass when the last byte itself is final.
+  Example:  "<root/>" as "<","r","o","o","t","/",">" non-final,
+            then "" final.
+
+Finding 2 - lone-CR chunk gives "error" with no error code (8 + 1 runs)
+  Expected: ACCEPT (the cr-* inputs pass whole); and in any case an
+            error code on Status_error (postcondition
+            error_code_set_on_error).
+  Actual:   8 runs "status 0, code 0" (cr-crlf, cr-lone, cr-attribute
+            in "bytes" and "bytes-final"; cr-last-byte split after
+            "<r/>"); 1 run "No element found" when the CR is the
+            final chunk.
+  Example:  "<r/>" non-final, then "\r" final -> REJECT, code 0.
+
+Cause of 1 and 2: SUSPECTED (from reading the code, NOT traced).
+  XT_XML_PARSER_BASE.parse only calls parse_buffer when
+  utf_8_copied_count > 0. An empty chunk, or a lone CR that the codec
+  holds back waiting for a possible LF, gives no bytes, so parse
+  returns its default 0 (= Status_error) without parsing the buffered
+  rest. The postcondition is not checked because the library's own
+  assertions are off.
+Fix: none. Xpact-core is the pinned upstream parser; not changed.
+
+
+3. FRAMEWORK LIMITATION (affects every finalized lane)
+------------------------------------------------------
+Builds made with "-finalize -keep" do NOT check loop invariants or
+variants. Cause: CONFIRMED for this build (generated C inspected:
+preconditions kept, no index_in_bounds check in F_code).
+Impact: the regression lane cannot catch the #40 bug; only the
+workbench Eiffel test suite does (#128).
+
+
+4. DOES THE LANE CATCH REAL BUGS? (src\ changed temporarily, restored;
+   "git diff src\" empty afterwards)
+------------------------------------------------------------------
+  [x] CR not normalized (#28 undone)   -> CAUGHT, 21 wrong events
+  [ ] #40 fix undone                   -> NOT caught (see section 3)
+  [-] one UTF-8 check skipped          -> no change, other checks
+                                          still reject the input
+
+
+5. PROBLEM MET (my mistake, kept separate)
+------------------------------------------
+Problem: first W3C run FAILED: "Build inputs changed while compiling xpact".
+Cause: CONFIRMED - I edited build_implementations.py during the build;
+the framework's safety check correctly stopped it.
+Fix: reran on a clean local copy (git worktree
+C:\Users\masou\Desktop\Lia\xpact\w6-clean, detached at 36509b8).
+Verification: rerun passed with the supervisor's exact numbers.
+Log: session-2026-10-26-evening\evidence\logs\
+     dual-w3c-FAILED-because-I-edited-during-the-run.txt
+
+
+6. UNCOMMITTED FILES IN THE CLONE
+---------------------------------
+  scripts\build_implementations.py      (+ "regression" profile)
+  scripts\run_dual_regression.py / .ps1 (new)
+  benchmarks\dual_regression\           (shared root + trace,
+                                         xpact and Xpact-core adapters)
+  tests\python\test_dual_regression.py  (new, 14 tests)
+  docs\dual-regression-lane.md          (new)
+  docs\dual-adapter-contract-draft.md   (new)
+  docs\implementation-builds.md         (one sentence added)
+
+
+7. YOUR DECISIONS (TODO)
+------------------------
+[ ] Turn the lane into an issue + PR into student-Mass?
+[ ] Create the 3 finding issues? (texts ready in issue-drafts.txt)
+[ ] Send the contract draft to the supervisor?

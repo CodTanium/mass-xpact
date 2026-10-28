@@ -1,0 +1,45 @@
+There was one test you had turned off on purpose: the assertions-DLL smoke test (K3 / issue 07). CI and the release script ran -BuildTier Assertions -SkipSmoke to hide the crash. Your own notes say the crash was fixed today in PR #80 and verified in #104, so the skip isn't needed anymore and I've turned the smoke test back on.
+Changes in re-enable-assertions-smoke.patch:
+ci/Jenkinsfile.all-tests: removed -SkipSmoke from the assertions build.
+ci/Jenkinsfile.windows-phase1: the same change.
+scripts/package_windows_release.ps1: the same change.
+student/PLAN2.md, finding 5: now says it's fixed and CI has the smoke test back on. "CI run not yet verified" stays unticked until you've checked it.
+Apply and check on your PC:
+git apply re-enable-assertions-smoke.patch on student-Mass (not main).
+Run .\scripts\build_native_eiffel.ps1 -BuildTier Assertions. It should print xpact Eiffel DLL smoke: ok with exit 0.
+Run the Jenkins all-tests job and confirm the "build Eiffel-backed DLLs" step passes.
+Only then tick the box and close the issue, as your CLAUDE.md rules say.
+I couldn't run the Windows/Eiffel build here, so the fix itself hasn't been tested yet. The Python suite still passes after the change (178 tests, OK).
+Skips I left alone on purpose:
+The 7 skipped Python tests in your Windows runs (14 here on Linux). They only skip when PowerShell, CMake/MSVC or long Windows paths aren't available. Those are environment checks, not temporary skips.
+The 858 skipped W3C cases. They're outside the parser's profile (XML 1.1, external entities, and so on), and each has a recorded reason.
+The remaining -SkipSmoke uses on production-tier builds in the benchmark and audit scripts. The production smoke test already runs in the native tests stage, so skipping it there just saves time.
+If you meant a different set of skipped tests, tell me which, and I'll look at those
+
+
+
+
+=====================================================================
+UPDATE 27 October 2026 - DONE (merged into student-Mass, main untouched)
+=====================================================================
+[x] Assertions DLL smoke test back on   issue #142, PR #144 -> 3daef15
+    -SkipSmoke removed from: ci/Jenkinsfile.all-tests (native stage AND
+    libexpat stage), ci/Jenkinsfile.windows-phase1,
+    scripts/package_windows_release.ps1
+    Local check: both DLLs "xpact Eiffel DLL smoke: ok", exit 0; release
+    package built. Logs: reports/issue-0142/
+    [ ] Jenkins run not checked yet -> #142 stays OPEN (board: In progress)
+
+[x] The 7 "skipped" Python tests now run   issue #143, PR #145 -> ec1705d
+    Cause (confirmed): they only looked for cmake on PATH or in
+    Program Files\CMake; Visual Studio's own CMake was never found.
+    Fix: also find it with vswhere.
+    Before: Ran 178, OK (skipped=7)   After: Ran 178, OK, 0 skipped
+    #143 closed (verified). Logs: reports/issue-0143/
+
+Still skipped ON PURPOSE (not workarounds):
+  - 858 W3C cases outside the parser's profile (XML 1.1, external
+    entities...), each with a recorded reason.
+  - -SkipSmoke inside the benchmark/audit tools (run_benchmarks,
+    large-XML, CRC harness, shim audit): measurement tools; in CI they use
+    -SkipBuild after the native stage, which now runs both smoke tests.

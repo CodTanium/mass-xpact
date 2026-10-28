@@ -18,6 +18,12 @@ unchanged so the record is complete. They are snapshots: the reports in
 | [`reportweek.txt`](reportweek.txt) | 2026-10-23 | Weekly report, week 3 (19-23 October) |
 | [`w3cerror.txt`](w3cerror.txt) | 2026-10-24 | Analysis of the Jenkins W3C skips: where 1,716 skipped and 3,497 passed come from, and which skips can be fixed |
 | [`newChanges.txt`](newChanges.txt) | 2026-10-25, updated 2026-10-26 | The supervisor's changes on `main` (#82-#101) in plain words, what they mean for the student work, and the sync of `main` into `student-Mass` (#102, #103) |
+| [`xpact-core.txt`](xpact-core.txt) | 2026-10-27 | The supervisor's xpact vs Xpact-core lanes on the student PC, the new dual regression lane, and two Xpact-core behaviours (empty final call, lone-CR chunk) |
+| [`smoke-test.txt`](smoke-test.txt) | 2026-10-27 | The assertions DLL smoke test switched back on (#142) and the 7 skipped Python tests fixed (#143) |
+| [`versionisseu.txt`](versionisseu.txt) | 2026-10-27 | Why W3C cases were skipped: old XML editions, XML 1.1, optional errors, in plain words |
+| [`latest_w3c.txt`](latest_w3c.txt) | 2026-10-27 | Option A step by step (#146, F1-F7), the `--all-cases` flag, the speed finding. **Out of date:** written before the supervisor's #150; F6b in it was wrong (dropped in #151) |
+| [`status-2026-10-28.txt`](status-2026-10-28.txt) | 2026-10-28 | "Where am I?": timeline of 24-28 October, the supervisor's #150, the #151/#152 integration, and what was left |
+| [`w3c-report-2026-10-28.txt`](w3c-report-2026-10-28.txt) | 2026-10-28 | The W3C result of the integrated version in plain words: 2,585 cases, 0 failed, 0 errors, 0 skipped (full report: [`reports/latest-2026-10-28`](../../reports/latest-2026-10-28/README.md)) |
 
 The Jenkins log of `main` at `cf12dee` (`jenkinReport.txt`) is already in the
 repository as [`reports/issue-0079/jenkins-log-cf12dee-before.txt`](../../reports/issue-0079/jenkins-log-cf12dee-before.txt).

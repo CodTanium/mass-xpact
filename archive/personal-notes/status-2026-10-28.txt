@@ -1,0 +1,137 @@
+WHERE AM I? - STATUS REPORT (28 October 2026)
+==============================================
+Checked read-only. Nothing committed, pushed or changed on GitHub.
+
+Legend:  [x] done   [ ] still to do   (!) needs attention
+
+
+1. IN ONE MINUTE
+----------------
+- Your supervisor merged a big W3C change into main on 27 Oct (PR #150).
+  It overlaps with our "Option A" work.
+- On 27 Oct at 13:40 a session under your name (on another machine or in
+  the cloud) already COMBINED everything: your Option A fixes + the speed fix +
+  your supervisor's main. That is issue #151 / PR #152, and it was tested.
+- So the newest and correct version of all the W3C work is PR #152.
+  PR #147 and PR #149 are older pieces that #152 already contains.
+- Nothing is merged into student-Mass yet; student-Mass is still where it was
+  on 27 Oct (ec1705d). Your supervisor has not commented on any PR yet.
+- No work is lost: every branch is on GitHub. The only uncommitted work on
+  this PC is the old "dual regression lane" from 26 Oct.
+
+
+2. TIMELINE (what happened, in order)
+-------------------------------------
+ 24 Oct  w3cerror.txt: your plan. Jenkins said 1,716 skipped; you found 247
+         external-entity cases could really be tested.
+ 26 Oct  Gym session: dual regression lane built locally (never committed).
+ 27 Oct  ~01:00 versionisseu.txt: why old-edition / XML 1.1 / optional cases
+         are skipped.
+ 27 Oct  ~03:00 Option A (issue #146, PR #147): all 2,585 cases run, 7 bugs
+         found and fixed (F1-F7).
+ 27 Oct  ~04:30 Speed fix (issue #148, PR #149) + Jenkins runs all cases +
+         honest "no crash only" counts (added to PR #147).
+         latest_w3c.txt was last updated here.
+ 27 Oct  06:45 SUPERVISOR: "Enable local external resources in the W3C
+         conformance suite" (PR #150) MERGED INTO MAIN.
+         Result on main: 1,974 cases pass, 611 still skipped.
+ 27 Oct  13:40 YOUR NAME (other machine/session): issue #151, PR #152 =
+         Option A + speed fix + supervisor's main, combined and tested.
+         It answers the supervisor's 3 questions (in Swedish):
+           1. continue with the failing cases (reproduce and fix them)
+           2. can more cases be run as XML 1.0?
+           3. which XML version should xpact support long term?
+ 28 Oct  today: this check.
+
+
+3. WHAT YOUR SUPERVISOR DID (PR #150, now in main)
+--------------------------------------------------
+- Taught xpact's Eiffel parser to load external files during the W3C test
+  (only files inside the test folder; network is blocked).
+- 247 more W3C cases are tested -> 1,974 pass, 0 fail, both builds.
+- Still skipped: 611 (old editions 310, XML 1.1 273, optional errors 27+1).
+- He found that the test "rmt-e2e-38" must be ACCEPTED in the 5th edition
+  (erratum E10). Our Option A fix F6b rejected it -> F6b was WRONG.
+  This was already corrected in #151/#152 (F6b removed).
+
+
+4. WHAT IS ON GITHUB FROM YOU (open, not merged)
+------------------------------------------------
+ PR    | What                                     | Status
+ #139  | student-Mass -> main (weeks 4-5 work)    | open, waiting for supervisor
+ #147  | Option A (F1-F7, --all-cases, Jenkins)   | open - CONTAINED IN #152
+ #149  | speed fix for entity references          | open - CONTAINED IN #152
+ #152  | everything combined with main            | open, checks pass,
+       | (the newest, recommended one)            | mergeable, tested
+
+What #152 kept from each side (from the #151 report):
+ F1  recursion crash in the DLL      -> YOURS kept (main still crashed)
+ F2  %pe; inside DTD declarations     -> SUPERVISOR's version kept
+ F3  2-element entity crash (DLL)    -> YOURS kept (main still crashed)
+ F4  standalone + outside entity     -> SUPERVISOR's version kept
+ F5  text declaration encoding       -> already in main
+ F6a misplaced <?xml               -> SUPERVISOR's version kept
+ F6b reject version 1.1 entity      -> REMOVED (it was wrong, see 3.)
+ F7  base passed to the handler      -> YOURS kept
+ speed fix (#148)                    -> YOURS kept (main timed out)
+ --all-cases lanes                   -> YOURS kept
+
+#152 test results: all 2,585 cases, 0 failed, 0 errors, 0 skipped
+(2,283 checked + 302 "no crash only"), the 247 DLL entity cases 247/247,
+Eiffel matrix 4/4, Python 192 OK. Jenkins: not run yet.
+
+
+5. WHAT IS ON THIS PC (local only)
+----------------------------------
+ Folder (C:\Users\masou\Desktop\Lia\xpact\...) | What                        | Note
+ xpactGit (student-Mass)  | 7 uncommitted files: the dual    | (!) never committed
+                          | regression lane from 26 Oct     |   (issue drafts in
+                          |                                  |   session-2026-10-26-evening)
+ w7-smoke                 | Option A branch                  | same as GitHub, nothing new
+ w8-speed                 | speed-fix branch                 | same as GitHub, nothing new
+ w6-clean                 | old clean copy for a W3C run     | can be deleted
+ mass-portfolio           | your portfolio copy              | behind (d2f98a9)
+ The #151/#152 work is NOT on this PC (only on GitHub).
+
+ Your VS Code folder (xpact3.0\...) is synced to student-Mass @ ec1705d, which
+ is still the newest student-Mass, so it is up to date.
+
+
+6. YOUR TEXT FILES - WHICH ARE STILL TRUE?
+------------------------------------------
+ w3cerror.txt (24 Oct)     PLAN. Mostly done:
+                           [ ] step 1 "remove the known-failures tool":
+                               NOT done, but harmless - the list is empty
+                               on main (only comments).
+                           [x] step 2 test the 247 external-entity cases
+                               (supervisor #150 + Option A)
+                           [x] step 3 fix what fails (F1-F7, #151)
+                           [x] skips: 1,716 -> 0 in #152 (1,222 on main)
+ versionisseu.txt (27 Oct) Still TRUE (explains the skipped groups).
+                           One update: 309 old-edition cases are now tested
+                           with the old name rules (legacy-names lane).
+ latest_w3c.txt (27 Oct)   OUT OF DATE. Written before the supervisor's #150
+                           and before #151/#152. In particular, F6b in it is
+                           wrong (removed in #152). Use the #151 report.
+ smoke-test.txt            Still true; #142 still waits for a Jenkins run.
+
+
+7. WHERE YOU ARE / WHAT TO DO NEXT
+----------------------------------
+ [ ] 1. Decide: use PR #152 as THE W3C change (recommended). Then #147 and
+        #149 can be closed as "superseded by #152" (nothing gets lost, #152
+        contains them). Ask me before I close anything.
+ [ ] 2. Merge #152 into student-Mass (it also brings the supervisor's main
+        #150 into student-Mass) - your OK needed.
+ [ ] 3. Jenkins run on student-Mass after that. If green: close #146, #148,
+        #151 and #142 with the evidence.
+ [ ] 4. Tell the supervisor: the #151 summary answers his 3 questions:
+        https://github.com/andersoxie/xpact/blob/fix/151-integrate-146-148-with-main/reports/issue-0151/summary.md
+ [ ] 5. Dual regression lane (26 Oct, uncommitted in xpactGit): decide if it
+        becomes an issue + PR (drafts ready), or is dropped.
+ [ ] 6. PR #139 (student-Mass -> main) is out of date after #152; update its
+        list when #152 is merged.
+ [ ] 7. Housekeeping: delete the w6-clean copy; refresh the portfolio.
+
+ Still-open older findings (unchanged): #122-#126 (Expat differences),
+ #130, #131 (Jenkins/SonarQube), #79, #74, #13.
