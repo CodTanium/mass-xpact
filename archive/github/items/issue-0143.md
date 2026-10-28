@@ -1,6 +1,6 @@
 # Issue #143: Finding: 7 native Python tests skip because the CMake bundled with Visual Studio is not found
 
-Archived from <https://github.com/andersoxie/xpact/issues/143> on 2026-10-28 19:58 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/143> on 2026-10-28 20:22 UTC.
 
 | | |
 |---|---|

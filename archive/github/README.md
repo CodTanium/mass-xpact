@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-28 19:58 UTC with [`export_github.py`](export_github.py): 77 issues and 83 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-28 20:22 UTC with [`export_github.py`](export_github.py): 77 issues and 84 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -166,3 +166,4 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#158](items/issue-0158.md) | Issue | Finding: A second byte order mark at the start of an external entity is dropped (F01-5) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
 | [#159](items/issue-0159.md) | Issue | Finding: External parameter entity inside an entity value is parsed as declarations instead of included as text (F01-6) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
 | [#160](items/pr-0160.md) | PR | Apply attribute defaults declared in external DTDs and entities | merged | - | 2026-10-28 |
+| [#161](items/pr-0161.md) | PR | Normalize the declared default of tokenized attributes | merged | - | 2026-10-28 |

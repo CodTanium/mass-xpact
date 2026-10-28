@@ -1,6 +1,6 @@
 # Issue #28: Finding: loop variant in XP_PARSER.normalized_input fails on every input that contains a CR
 
-Archived from <https://github.com/andersoxie/xpact/issues/28> on 2026-10-28 19:58 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/28> on 2026-10-28 20:22 UTC.
 
 | | |
 |---|---|

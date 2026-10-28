@@ -1,6 +1,6 @@
 # Issue #156: Finding: Tokenized attribute values (NMTOKENS, ID, IDREFS, ENTITIES, ...) are not normalized (F01-3)
 
-Archived from <https://github.com/andersoxie/xpact/issues/156> on 2026-10-28 19:58 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/156> on 2026-10-28 20:22 UTC.
 
 | | |
 |---|---|
@@ -39,3 +39,7 @@ Related: #154 (F01-1), #155 (F01-2), #156 (F01-3), #157 (F01-4), #158 (F01-5), #
 ### CodTanium, 2026-10-28 19:48: comment
 
 3 of the 4 cases (`ibm-invalid-P32-ibm32i03`, `not-sa02`, `not-sa03`) pass with the #154 fix (PR #160): their declarations are in an external file. `valid-sa-096` is left: the declared default value of an NMTOKENS attribute is not normalized.
+
+### CodTanium, 2026-10-28 20:10: comment
+
+Fix in PR #161: the declared default of a non-CDATA attribute is now space-normalized where it is parsed (as Expat reports it). W3C output test 393 -> 394 (`valid-sa-096`), 0 worse; #156 now 4/4; all old lanes unchanged in both builds. Report: [reports/issue-0156/report.md](https://github.com/andersoxie/xpact/blob/60c28e4/reports/issue-0156/report.md). Stays open until the PR is merged and Jenkins has run.

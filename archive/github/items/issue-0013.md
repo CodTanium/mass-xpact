@@ -1,6 +1,6 @@
 # Issue #13: Finding: XP_GC_CRITICAL_SECTION.execute silently swallows exceptions from GC-suspended parses
 
-Archived from <https://github.com/andersoxie/xpact/issues/13> on 2026-10-28 19:58 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/13> on 2026-10-28 20:22 UTC.
 
 | | |
 |---|---|
