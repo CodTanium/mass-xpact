@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "python",
+    "scripts/run_w3c_conformance.py",
+    "--engine",
+    "Finalized=C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+    "--engine",
+    "FinalizedAssertions=C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+    "--output-dir",
+    "build/w3c-external-2026-10-27/conformance-final2",
+    "--timeout",
+    "10"
+  ],
+  "working_directory": "C:\\Users\\ander\\Documents\\xpact",
+  "execution": "PowerShell expands engine executable paths from recorded manifests; no suite-directory override or known-failure allowlist."
+}

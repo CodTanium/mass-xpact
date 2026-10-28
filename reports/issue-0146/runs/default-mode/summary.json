@@ -1,0 +1,43 @@
+{
+  "suite_version": "20130923",
+  "source": "https://www.w3.org/XML/Test/xmlts20130923.zip",
+  "archive_sha256": null,
+  "source_mode": "local-directory",
+  "known_failures_file": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\benchmarks\\w3c-known-failures.tsv",
+  "known_failures_listed": 0,
+  "suite_directory": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\xpactGit\\build\\validation-corpora\\w3c-xml-20130923\\xmlconf",
+  "executables": {
+    "Finalized": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+    "FinalizedAssertions": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe"
+  },
+  "catalog_cases": 2585,
+  "profile": "XML 1.0 fifth edition; namespaces unless NAMESPACE=no; nonvalidating; no external entities; binary verdicts only",
+  "engines": [
+    {
+      "engine": "Finalized",
+      "total": 2585,
+      "passed": 1727,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 858,
+      "accepted": 776,
+      "rejected": 951,
+      "known": 0,
+      "unexpected": 0,
+      "elapsed_ms": 25506.021
+    },
+    {
+      "engine": "FinalizedAssertions",
+      "total": 2585,
+      "passed": 1727,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 858,
+      "accepted": 776,
+      "rejected": 951,
+      "known": 0,
+      "unexpected": 0,
+      "elapsed_ms": 26166.794
+    }
+  ]
+}

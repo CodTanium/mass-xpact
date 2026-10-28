@@ -14,7 +14,7 @@ feature {NONE} -- Initialization
 
 	make
 		do
-			if has_argument ("--conformance-file") or has_argument ("--namespaces") then
+			if has_argument ("--conformance-file") or has_argument ("--namespaces") or has_argument ("--suite-root") or has_argument ("--legacy-names") then
 				run_conformance
 			else
 				run_benchmark
@@ -22,50 +22,65 @@ feature {NONE} -- Initialization
 		end
 
 	run_conformance
-			-- Parse one raw document and report only normal parser outcomes as markers.
+			-- Parse one original document; local resource failures remain harness errors.
 		local
-			l_arguments: ARGUMENTS
-			l_path: detachable STRING_8
-			l_namespaces, l_invalid: BOOLEAN
+			l_arguments: ARGUMENTS_32
+			l_path, l_suite_root: detachable PATH
+			l_namespaces, l_legacy_names, l_invalid, l_accepted: BOOLEAN
 			l_handler: XP_NULL_EVENT_HANDLER
 			l_parser: XP_PARSER
+			l_resolver: detachable XP_LOCAL_EXTERNAL_ENTITY_RESOLVER
 			i: INTEGER
 		do
 			create l_arguments
-			from
-				i := 1
-			invariant
-				index_in_bounds: i >= 1 and i <= l_arguments.argument_count + 1
-			until
-				i > l_arguments.argument_count or l_invalid
-			loop
-				if l_arguments.argument (i).same_string ("--conformance-file") then
-					if l_path = Void and then i < l_arguments.argument_count and then not l_arguments.argument (i + 1).is_empty then
-						create l_path.make_from_string (l_arguments.argument (i + 1))
-						i := i + 2
-					else
-						l_invalid := True
-					end
-				elseif l_arguments.argument (i).same_string ("--namespaces") and then not l_namespaces then
+			from i := 1 until i > l_arguments.argument_count or l_invalid loop
+				if l_arguments.argument (i).same_string ("--conformance-file") and l_path = Void and then i < l_arguments.argument_count and then not l_arguments.argument (i + 1).is_empty then
+					create l_path.make_from_string (l_arguments.argument (i + 1))
+					i := i + 2
+				elseif l_arguments.argument (i).same_string ("--suite-root") and l_suite_root = Void and then i < l_arguments.argument_count and then not l_arguments.argument (i + 1).is_empty then
+					create l_suite_root.make_from_string (l_arguments.argument (i + 1))
+					i := i + 2
+				elseif l_arguments.argument (i).same_string ("--namespaces") and not l_namespaces then
 					l_namespaces := True
+					i := i + 1
+				elseif l_arguments.argument (i).same_string ("--legacy-names") and then not l_legacy_names then
+						-- Fourth-edition name tables, as the native Expat-compatible parser uses.
+					l_legacy_names := True
 					i := i + 1
 				else
 					l_invalid := True
 				end
-			variant
-				l_arguments.argument_count - i + 2 - l_invalid.to_integer
 			end
 			if l_invalid or l_path = Void then
-				io.error.put_string ("usage: --conformance-file PATH [--namespaces]%N")
+				io.error.put_string ("usage: --conformance-file PATH [--suite-root ROOT] [--namespaces] [--legacy-names]%N")
 				exit_with_code (2)
 			elseif attached l_path as l_file_path then
+				if attached l_suite_root as l_root then
+					create l_resolver.make (l_root)
+					if not l_resolver.last_error.is_empty or else not l_resolver.is_allowed_document (l_file_path) then
+						io.error.put_string ("conformance document/root is outside the ordinary local suite tree%N")
+						exit_with_code (2)
+					end
+				end
 				if attached raw_file_bytes (l_file_path) as l_input then
 					create l_handler.make
 					create l_parser.make (l_handler)
-					if l_namespaces then
-						l_parser.set_namespace_mode ('|')
+					if attached l_resolver as l_loader then
+						l_parser.set_external_entity_base ({UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (l_file_path.canonical_path.name))
+						l_parser.set_external_entity_resolver (l_loader)
+						l_parser.set_external_entity_policy (l_parser.All_external_entities)
+					else
+						l_parser.set_skip_unread_external_entities (True)
 					end
-					if l_parser.parse (l_input) then
+					if l_legacy_names then
+						l_parser.set_legacy_name_character_ranges (True)
+					end
+					if l_namespaces then l_parser.set_namespace_mode ('|') end
+					l_accepted := l_parser.parse (l_input)
+					if attached l_resolver as l_loader and then not l_loader.last_error.is_empty then
+						io.error.put_string ("conformance external resource error: " + l_loader.last_error + "%N")
+						exit_with_code (2)
+					elseif l_accepted then
 						io.put_string ("XPACT_CONFORMANCE%TACCEPT%N")
 					else
 						io.put_string ("XPACT_CONFORMANCE%TREJECT%N")
@@ -149,14 +164,14 @@ feature {NONE} -- Data
 			end
 		end
 
-	raw_file_bytes (a_path: READABLE_STRING_8): detachable STRING_8
+	raw_file_bytes (a_path: PATH): detachable STRING_8
 			-- File contents without newline or encoding conversion.
 		require
 			path_not_empty: not a_path.is_empty
 		local
 			l_file: RAW_FILE
 		do
-			create l_file.make_with_name (a_path)
+			create l_file.make_with_path (a_path)
 			if l_file.exists and then l_file.is_plain and then l_file.is_readable then
 				l_file.open_read
 				create Result.make_empty
@@ -171,6 +186,7 @@ feature {NONE} -- Data
 				l_file.close
 			end
 		rescue
+			if l_file /= Void and then not l_file.is_closed then l_file.close end
 			io.error.put_string ("conformance file read failed%N")
 			exit_with_code (2)
 		end

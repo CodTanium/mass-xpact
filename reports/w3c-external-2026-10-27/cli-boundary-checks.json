@@ -1,0 +1,1658 @@
+{
+  "campaign": "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074",
+  "engines": [
+    {
+      "label": "BenchmarkAssertionsOff",
+      "executable": "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+      "executable_sha256": "4f07a6422b6830baf3987b066a1000d057b55043ecd483bcbdcc9e7aa421a471",
+      "results": [
+        {
+          "case": "local_external_markup",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\local_external_markup\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\local_external_markup\\suite"
+          ]
+        },
+        {
+          "case": "empty_external_file",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\empty_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\empty_external_file\\suite"
+          ]
+        },
+        {
+          "case": "raw_utf16_external",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\raw_utf16_external\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\raw_utf16_external\\suite"
+          ]
+        },
+        {
+          "case": "percent_encoded_name",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\percent_encoded_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\percent_encoded_name\\suite"
+          ]
+        },
+        {
+          "case": "declaring_resource_base",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\declaring_resource_base\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\declaring_resource_base\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_file",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_external_file\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_subset",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_external_subset\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_external_subset\\suite"
+          ]
+        },
+        {
+          "case": "path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\path_escape\\suite"
+          ]
+        },
+        {
+          "case": "percent_path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\percent_path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\percent_path_escape\\suite"
+          ]
+        },
+        {
+          "case": "network_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\network_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\network_resource\\suite"
+          ]
+        },
+        {
+          "case": "file_uri",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\file_uri\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\file_uri\\suite"
+          ]
+        },
+        {
+          "case": "zero_identifier",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: invalid or empty external resource identifier\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\zero_identifier\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\zero_identifier\\suite"
+          ]
+        },
+        {
+          "case": "win32_parent_alias",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\win32_parent_alias\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\win32_parent_alias\\suite"
+          ]
+        },
+        {
+          "case": "win32_device_name",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\win32_device_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\win32_device_name\\suite"
+          ]
+        },
+        {
+          "case": "junction_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite"
+          ]
+        },
+        {
+          "case": "attribute_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\nreference to external entity in attribute\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\attribute_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\attribute_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "attlist_default_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\nreference to external entity in attribute\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\attlist_default_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\attlist_default_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "standalone_external_declaration_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\nstandalone reference to externally declared entity\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\standalone_external_declaration_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\standalone_external_declaration_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "notation_and_unparsed_ids_not_loaded",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\notation_and_unparsed_ids_not_loaded\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\notation_and_unparsed_ids_not_loaded\\suite"
+          ]
+        },
+        {
+          "case": "outside_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance document/root is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\outside_primary\\outside.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\outside_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance cannot read XML file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_primary\\suite\\missing.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance document/root is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\missing_root\\missing-root"
+          ]
+        },
+        {
+          "case": "unc_root_no_network",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance document/root is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\unc_root_no_network\\suite\\document.xml",
+            "--suite-root",
+            "\\\\invalid-local-resolver-test.invalid\\share"
+          ]
+        },
+        {
+          "case": "duplicate_suite_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\duplicate_suite_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\duplicate_suite_root\\suite",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\irrelevant"
+          ]
+        },
+        {
+          "case": "unknown_option",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOff\\project\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\unknown_option\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOff\\unknown_option\\suite",
+            "--unexpected"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "BenchmarkAssertionsOn",
+      "executable": "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+      "executable_sha256": "e80e523b8da689ac1baec438e5ac7c51d7d6e80783aa40fd2bc1e55657d58751",
+      "results": [
+        {
+          "case": "local_external_markup",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\local_external_markup\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\local_external_markup\\suite"
+          ]
+        },
+        {
+          "case": "empty_external_file",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\empty_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\empty_external_file\\suite"
+          ]
+        },
+        {
+          "case": "raw_utf16_external",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\raw_utf16_external\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\raw_utf16_external\\suite"
+          ]
+        },
+        {
+          "case": "percent_encoded_name",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\percent_encoded_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\percent_encoded_name\\suite"
+          ]
+        },
+        {
+          "case": "declaring_resource_base",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\declaring_resource_base\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\declaring_resource_base\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_file",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_external_file\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_subset",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_external_subset\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_external_subset\\suite"
+          ]
+        },
+        {
+          "case": "path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\path_escape\\suite"
+          ]
+        },
+        {
+          "case": "percent_path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\percent_path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\percent_path_escape\\suite"
+          ]
+        },
+        {
+          "case": "network_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\network_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\network_resource\\suite"
+          ]
+        },
+        {
+          "case": "file_uri",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\file_uri\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\file_uri\\suite"
+          ]
+        },
+        {
+          "case": "zero_identifier",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: invalid or empty external resource identifier\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\zero_identifier\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\zero_identifier\\suite"
+          ]
+        },
+        {
+          "case": "win32_parent_alias",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\win32_parent_alias\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\win32_parent_alias\\suite"
+          ]
+        },
+        {
+          "case": "win32_device_name",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\win32_device_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\win32_device_name\\suite"
+          ]
+        },
+        {
+          "case": "junction_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite"
+          ]
+        },
+        {
+          "case": "attribute_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\nreference to external entity in attribute\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\attribute_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\attribute_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "attlist_default_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\nreference to external entity in attribute\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\attlist_default_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\attlist_default_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "standalone_external_declaration_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\nstandalone reference to externally declared entity\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\standalone_external_declaration_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\standalone_external_declaration_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "notation_and_unparsed_ids_not_loaded",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\notation_and_unparsed_ids_not_loaded\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\notation_and_unparsed_ids_not_loaded\\suite"
+          ]
+        },
+        {
+          "case": "outside_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance document/root is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\outside_primary\\outside.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\outside_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance cannot read XML file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_primary\\suite\\missing.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance document/root is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\missing_root\\missing-root"
+          ]
+        },
+        {
+          "case": "unc_root_no_network",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance document/root is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\unc_root_no_network\\suite\\document.xml",
+            "--suite-root",
+            "\\\\invalid-local-resolver-test.invalid\\share"
+          ]
+        },
+        {
+          "case": "duplicate_suite_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\duplicate_suite_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\duplicate_suite_root\\suite",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\irrelevant"
+          ]
+        },
+        {
+          "case": "unknown_option",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-benchmarks\\20261027T053727Z-165bb49bf504\\AssertionsOn\\project\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\unknown_option\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\BenchmarkAssertionsOn\\unknown_option\\suite",
+            "--unexpected"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "DualAssertionsOff",
+      "executable": "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+      "executable_sha256": "ec890e66957bcc3c31ec837913cbbecc4c263f7900b0cb059864d01b808ac088",
+      "results": [
+        {
+          "case": "local_external_markup",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\local_external_markup\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\local_external_markup\\suite"
+          ]
+        },
+        {
+          "case": "empty_external_file",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\empty_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\empty_external_file\\suite"
+          ]
+        },
+        {
+          "case": "raw_utf16_external",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\raw_utf16_external\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\raw_utf16_external\\suite"
+          ]
+        },
+        {
+          "case": "percent_encoded_name",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\percent_encoded_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\percent_encoded_name\\suite"
+          ]
+        },
+        {
+          "case": "declaring_resource_base",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\declaring_resource_base\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\declaring_resource_base\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_file",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_external_file\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_subset",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_external_subset\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_external_subset\\suite"
+          ]
+        },
+        {
+          "case": "path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\path_escape\\suite"
+          ]
+        },
+        {
+          "case": "percent_path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\percent_path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\percent_path_escape\\suite"
+          ]
+        },
+        {
+          "case": "network_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\network_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\network_resource\\suite"
+          ]
+        },
+        {
+          "case": "file_uri",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\file_uri\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\file_uri\\suite"
+          ]
+        },
+        {
+          "case": "zero_identifier",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: invalid or empty external resource identifier\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\zero_identifier\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\zero_identifier\\suite"
+          ]
+        },
+        {
+          "case": "win32_parent_alias",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\win32_parent_alias\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\win32_parent_alias\\suite"
+          ]
+        },
+        {
+          "case": "win32_device_name",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\win32_device_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\win32_device_name\\suite"
+          ]
+        },
+        {
+          "case": "junction_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite"
+          ]
+        },
+        {
+          "case": "attribute_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\n",
+          "stderr": "reference to external entity in attribute\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\attribute_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\attribute_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "attlist_default_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\n",
+          "stderr": "reference to external entity in attribute\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\attlist_default_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\attlist_default_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "standalone_external_declaration_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\n",
+          "stderr": "standalone reference to externally declared entity\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\standalone_external_declaration_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\standalone_external_declaration_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "notation_and_unparsed_ids_not_loaded",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\notation_and_unparsed_ids_not_loaded\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\notation_and_unparsed_ids_not_loaded\\suite"
+          ]
+        },
+        {
+          "case": "outside_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: document is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\outside_primary\\outside.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\outside_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "Cannot read conformance input as original bytes\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_primary\\suite\\missing.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: suite root must be a readable ordinary local directory without links/reparse points\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\missing_root\\missing-root"
+          ]
+        },
+        {
+          "case": "unc_root_no_network",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: suite root must be a readable ordinary local directory without links/reparse points\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\unc_root_no_network\\suite\\document.xml",
+            "--suite-root",
+            "\\\\invalid-local-resolver-test.invalid\\share"
+          ]
+        },
+        {
+          "case": "duplicate_suite_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --identity | --qualify | --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\duplicate_suite_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\duplicate_suite_root\\suite",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\irrelevant"
+          ]
+        },
+        {
+          "case": "unknown_option",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --identity | --qualify | --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-02ac64f18224\\xpact\\project\\EIFGENs\\conformance\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\unknown_option\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOff\\unknown_option\\suite",
+            "--unexpected"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "DualAssertionsOn",
+      "executable": "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+      "executable_sha256": "e847b8cf9eae21ee78f73d2d243bc992ade2c9da4de1a556ac6b384330f868a5",
+      "results": [
+        {
+          "case": "local_external_markup",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\local_external_markup\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\local_external_markup\\suite"
+          ]
+        },
+        {
+          "case": "empty_external_file",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\empty_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\empty_external_file\\suite"
+          ]
+        },
+        {
+          "case": "raw_utf16_external",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\raw_utf16_external\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\raw_utf16_external\\suite"
+          ]
+        },
+        {
+          "case": "percent_encoded_name",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\percent_encoded_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\percent_encoded_name\\suite"
+          ]
+        },
+        {
+          "case": "declaring_resource_base",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\declaring_resource_base\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\declaring_resource_base\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_file",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_external_file\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_external_file\\suite"
+          ]
+        },
+        {
+          "case": "missing_external_subset",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource is missing, unreadable or not a regular file\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_external_subset\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_external_subset\\suite"
+          ]
+        },
+        {
+          "case": "path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\path_escape\\suite"
+          ]
+        },
+        {
+          "case": "percent_path_escape",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\percent_path_escape\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\percent_path_escape\\suite"
+          ]
+        },
+        {
+          "case": "network_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\network_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\network_resource\\suite"
+          ]
+        },
+        {
+          "case": "file_uri",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\file_uri\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\file_uri\\suite"
+          ]
+        },
+        {
+          "case": "zero_identifier",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: invalid or empty external resource identifier\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\zero_identifier\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\zero_identifier\\suite"
+          ]
+        },
+        {
+          "case": "win32_parent_alias",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\win32_parent_alias\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\win32_parent_alias\\suite"
+          ]
+        },
+        {
+          "case": "win32_device_name",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: only relative local external resource identifiers are allowed\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\win32_device_name\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\win32_device_name\\suite"
+          ]
+        },
+        {
+          "case": "junction_resource",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: external resource escapes the suite or contains a symbolic link/reparse point\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053055Z-daf917627dff\\BenchmarkAssertionsOff\\junction_resource\\suite"
+          ]
+        },
+        {
+          "case": "attribute_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\n",
+          "stderr": "reference to external entity in attribute\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\attribute_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\attribute_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "attlist_default_rejected_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\n",
+          "stderr": "reference to external entity in attribute\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\attlist_default_rejected_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\attlist_default_rejected_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "standalone_external_declaration_before_missing_resource",
+          "passed": true,
+          "expected_exit": 1,
+          "expected_marker": "REJECT",
+          "exit_code": 1,
+          "stdout": "XPACT_CONFORMANCE\tREJECT\r\n",
+          "stderr": "standalone reference to externally declared entity\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\standalone_external_declaration_before_missing_resource\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\standalone_external_declaration_before_missing_resource\\suite"
+          ]
+        },
+        {
+          "case": "notation_and_unparsed_ids_not_loaded",
+          "passed": true,
+          "expected_exit": 0,
+          "expected_marker": "ACCEPT",
+          "exit_code": 0,
+          "stdout": "XPACT_CONFORMANCE\tACCEPT\r\n",
+          "stderr": "",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\notation_and_unparsed_ids_not_loaded\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\notation_and_unparsed_ids_not_loaded\\suite"
+          ]
+        },
+        {
+          "case": "outside_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: document is outside the ordinary local suite tree\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\outside_primary\\outside.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\outside_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_primary",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "Cannot read conformance input as original bytes\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_primary\\suite\\missing.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_primary\\suite"
+          ]
+        },
+        {
+          "case": "missing_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: suite root must be a readable ordinary local directory without links/reparse points\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\missing_root\\missing-root"
+          ]
+        },
+        {
+          "case": "unc_root_no_network",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "conformance external resource error: suite root must be a readable ordinary local directory without links/reparse points\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\unc_root_no_network\\suite\\document.xml",
+            "--suite-root",
+            "\\\\invalid-local-resolver-test.invalid\\share"
+          ]
+        },
+        {
+          "case": "duplicate_suite_root",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --identity | --qualify | --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\duplicate_suite_root\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\duplicate_suite_root\\suite",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\irrelevant"
+          ]
+        },
+        {
+          "case": "unknown_option",
+          "passed": true,
+          "expected_exit": 2,
+          "expected_marker": null,
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "usage: --identity | --qualify | --conformance-file PATH [--suite-root ROOT] [--namespaces]\r\n",
+          "command": [
+            "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T053714Z-7f44161ca1cb\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+            "--conformance-file",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\unknown_option\\suite\\document.xml",
+            "--suite-root",
+            "C:\\Users\\ander\\Documents\\xpact\\build\\local-resolver-cli-checks\\20261027T053853Z-42b28f3ee074\\DualAssertionsOn\\unknown_option\\suite",
+            "--unexpected"
+          ]
+        }
+      ]
+    }
+  ],
+  "junction_fixture": {
+    "creation": "New-Item -ItemType Junction after tool auto-review allowed reversible workspace-contained fixture",
+    "exercised_by_all_four_engines": true,
+    "removed": true,
+    "target_entity_retained": true,
+    "cleanup": "Verified exact Junction LinkType/target, Remove-Item -LiteralPath -Force, no recursion",
+    "ordering_review": "Link components checked root-to-leaf before leaf stat/open; constructor local drive/UNC guard precedes file metadata."
+  },
+  "mapped_network_drive_guard": {
+    "implemented": true,
+    "live_exercised": false,
+    "reason": "No existing mapped network drive was present; only local C,D,E drives available. No network mapping created."
+  }
+}

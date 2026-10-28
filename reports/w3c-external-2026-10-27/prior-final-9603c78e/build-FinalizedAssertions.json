@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "status": "verified",
+  "implementation": "xpact",
+  "profile": "w3c",
+  "source": {
+    "repository": "https://github.com/andersoxie/xpact.git",
+    "revision": "687f6cfdb7137abd302f2b2f534bce2f59dcc0da",
+    "source_dir": "C:\\Users\\ander\\Documents\\xpact",
+    "source_sha256": "9603c78e9d8bb32adfb7e5d925c82c7eec1a76efd5fd58fb7963068033aaed42",
+    "worktree_dirty": true
+  },
+  "build_inputs_sha256": "9603c78e9d8bb32adfb7e5d925c82c7eec1a76efd5fd58fb7963068033aaed42",
+  "build": {
+    "configuration": "finalized/assertions-on/msvc-x64",
+    "mode": "finalized",
+    "assertions": true,
+    "void_safety": "all",
+    "command": [
+      "C:\\El2502E\\studio\\spec\\win64\\bin\\ec.EXE",
+      "-batch",
+      "-clean",
+      "-finalize",
+      "-keep",
+      "-config",
+      "C:\\Users\\ander\\Documents\\xpact\\benchmarks\\dual_w3c\\xpact\\conformance.ecf",
+      "-target",
+      "conformance_assertions",
+      "-project_path",
+      "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T052905Z-e022d32dbb4e\\xpact\\project"
+    ],
+    "makefile": {
+      "CC": "cl",
+      "CPP": "cl",
+      "CFLAGS": "-Ox -MT -w -nologo -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_CRT_SECURE_NO_DEPRECATE -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -I\"C:\\El2502E\\studio\\spec\\win64\\include\" -I. $(INCLUDE_PATH)",
+      "CPPFLAGS": "-Ox -MT -w -nologo -D_WIN32_WINNT=0x0500 -DWINVER=0x0500 -D_CRT_SECURE_NO_DEPRECATE -D_UNICODE -DUNICODE -DWIN32_LEAN_AND_MEAN   -I\"C:\\El2502E\\studio\\spec\\win64\\include\" -I. $(INCLUDE_PATH)",
+      "LDFLAGS": "-STACK:5000000 -NODEFAULTLIB:libc",
+      "CCLDFLAGS": "-STACK:5000000 -NODEFAULTLIB:libc  -SUBSYSTEM:CONSOLE",
+      "EIFLIB": "\"C:\\El2502E\\studio\\spec\\win64\\lib\\msc_vc140\\finalized.lib\""
+    },
+    "native_helpers": []
+  },
+  "toolchain": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "x64",
+    "eiffel_compiler": "C:\\El2502E\\studio\\spec\\win64\\bin\\ec.EXE",
+    "eiffel_version": "ISE EiffelStudio version 25.02.9.8723 Enterprise Edition - win64",
+    "c_compiler": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.EXE",
+    "c_compiler_version": "Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35229 for x64\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\nusage: cl [ option... ] filename... [ /link linkoption... ]",
+    "ise_eiffel": "C:\\El2502E",
+    "ise_library": "C:\\El2502E",
+    "ise_c_compiler": "msc_vc140",
+    "dependencies": [
+      {
+        "path": "C:\\El2502E\\library\\base\\base.ecf",
+        "sha256": "aebd21bdfa85f5dd943a43166ca5fe52e2818415aa29998237ee93774c8270f5"
+      },
+      {
+        "path": "C:\\El2502E\\library\\base_extension\\base_extension.ecf",
+        "sha256": "3b0bf259b6abefc36baac706c49263da06cbb94b3e58a257b7eca4a331943289"
+      },
+      {
+        "path": "C:\\El2502E\\library\\time\\time.ecf",
+        "sha256": "e2a97232eb1f5d351083733b23c6e97beef34ee7a4ef4cf6655f8dd2177530ae"
+      },
+      {
+        "path": "C:\\El2502E\\C_library\\zlib\\clibs_zlib.ecf",
+        "sha256": "3e8b23b5db824bdbd3eb39f233f46c18e273925fcbae5a81285f46588406bb41"
+      },
+      {
+        "path": "C:\\El2502E\\C_library\\zlib\\spec\\msc_vc140\\win64\\lib\\zlib.lib",
+        "sha256": "716d7073fd30f9814113b54c1caa76e0ea820476f9936b7cc4f9956cd760f6ee"
+      }
+    ]
+  },
+  "executable": "C:\\Users\\ander\\Documents\\xpact\\build\\implementations\\20261027T052905Z-e022d32dbb4e\\xpact\\project\\EIFGENs\\conformance_assertions\\F_code\\xpact_w3c_conformance.exe",
+  "executable_sha256": "40298a98405a2dffa575682074ff51b3cb93aee862ee6cc570bebf811e1fa6b3",
+  "probe_output": "XPACT_W3C_IDENTITY\txpact\t687f6cfdb7137abd302f2b2f534bce2f59dcc0da\tfinalized/assertions-on/msvc-x64\tnormal",
+  "gc_policy": "normal"
+}

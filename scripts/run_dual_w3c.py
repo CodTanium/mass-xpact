@@ -146,6 +146,9 @@ def comparison_rows(cases, results):
         for result in (own, core):
             if result.expected != case.expected or result.kind != case.kind or result.known:
                 raise LaneError("W3C result expectations changed or a failure was suppressed")
+            if ((result.catalog_expected or result.expected) != (case.catalog_expected or case.expected)
+                    or result.expectation_adjustment != case.expectation_adjustment):
+                raise LaneError("W3C catalog expectation adjustment changed for one implementation")
             if case.skip_reason:
                 if result.status != "skipped" or result.actual != "not-run" or result.message != case.skip_reason:
                     raise LaneError("W3C profile exclusion changed for one implementation")
@@ -158,6 +161,8 @@ def comparison_rows(cases, results):
                     raise LaneError("W3C verdict, status and process exit code are inconsistent")
         rows.append({"case_id": case.id, "kind": case.kind, "namespaces": case.namespaces,
                      "expected": case.expected, "skip_reason": case.skip_reason,
+                     "catalog_expected": case.catalog_expected or case.expected,
+                     "expectation_adjustment": case.expectation_adjustment,
                      "xpact_status": own.status, "xpact_actual": own.actual, "xpact_exit_code": own.exit_code,
                      "core_status": core.status, "core_actual": core.actual, "core_exit_code": core.exit_code,
                      "agreement": (own.status, own.actual) == (core.status, core.actual)})
@@ -230,6 +235,8 @@ def run_lane(repo_root, run_root, *, suite_dir=None, offline=False, timeout_seco
         manifest = {"suite": str(suite), **before, "cases": [
             {"case_id": case.id, "path": str(case.path.relative_to(suite)), "kind": case.kind,
              "namespaces": case.namespaces, "expected": case.expected, "skip_reason": case.skip_reason,
+             "catalog_expected": case.catalog_expected or case.expected,
+             "expectation_adjustment": case.expectation_adjustment,
              "input_sha256": before["files"].get(case.path.relative_to(suite).as_posix())}
             for case in cases]}
         tools, environment, compiler_metadata = builds.toolchain()
@@ -282,7 +289,7 @@ def run_lane(repo_root, run_root, *, suite_dir=None, offline=False, timeout_seco
                     case_work.mkdir()
                 verify_case_input(case, suite, before)
                 results.append(w3c.run_case(case, implementation, Path(artifact["executable"]),
-                                           timeout_seconds, case_work, diagnostic_dir=case_work))
+                                           timeout_seconds, case_work, diagnostic_dir=case_work, suite_root=suite))
                 verify_case_input(case, suite, before)
                 if index % 250 == 0:
                     print("  {}: {}/{}".format(implementation, index, len(cases)), flush=True)
@@ -305,7 +312,11 @@ def run_lane(repo_root, run_root, *, suite_dir=None, offline=False, timeout_seco
         failures = failures or any(case["status"] == "FAIL" for row in qualification for case in row["cases"])
         status = "complete_with_failures" if failures else "complete"
         metadata = {"suite_version": w3c.SUITE_VERSION, "source": w3c.SUITE_URL, **provenance,
-                    "suite_directory": str(suite), "suite_sha256": before["sha256"], "catalog_cases": len(cases)}
+                    "suite_directory": str(suite), "suite_sha256": before["sha256"], "catalog_cases": len(cases),
+                    "expectation_adjustments": [{"case_id": case.id,
+                        "catalog_expected": case.catalog_expected, "expected": case.expected,
+                        "reason": case.expectation_adjustment}
+                        for case in cases if case.expectation_adjustment]}
         report = {"schema_version": 1, "status": status, "lane": state["lane"], "profile": w3c.PROFILE,
                   "source": metadata, "artifacts": artifacts, "qualification": qualification, "engines": summaries,
                   "agreement": {"same_outcome": sum(row["agreement"] for row in rows),

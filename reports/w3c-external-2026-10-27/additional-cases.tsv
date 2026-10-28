@@ -1,0 +1,259 @@
+engine	case_id	path	catalog_expected	profile_expected	prior_status	actual	status	elapsed_ms	diagnostic	expectation_adjustment
+Finalized	not-wf-sa-081	xmltest/not-wf/sa/081.xml	REJECT	REJECT	skipped	REJECT	passed	26.385	"XPACT_CONFORMANCE	REJECT
+reference to external entity in attribute"	
+Finalized	not-wf-sa-082	xmltest/not-wf/sa/082.xml	REJECT	REJECT	skipped	REJECT	passed	28.317	"XPACT_CONFORMANCE	REJECT
+reference to external entity in attribute"	
+Finalized	not-wf-sa-185	xmltest/not-wf/sa/185.xml	REJECT	REJECT	skipped	REJECT	passed	42.419	"XPACT_CONFORMANCE	REJECT
+undefined entity"	
+Finalized	not-wf-not-sa-001	xmltest/not-wf/not-sa/001.xml	REJECT	REJECT	skipped	REJECT	passed	42.332	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	not-wf-not-sa-003	xmltest/not-wf/not-sa/003.xml	REJECT	REJECT	skipped	REJECT	passed	39.076	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	not-wf-not-sa-004	xmltest/not-wf/not-sa/004.xml	REJECT	REJECT	skipped	REJECT	passed	38.525	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	not-wf-not-sa-006	xmltest/not-wf/not-sa/006.xml	REJECT	REJECT	skipped	REJECT	passed	38.571	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	not-wf-not-sa-007	xmltest/not-wf/not-sa/007.xml	REJECT	REJECT	skipped	REJECT	passed	38.017	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+Finalized	not-wf-not-sa-008	xmltest/not-wf/not-sa/008.xml	REJECT	REJECT	skipped	REJECT	passed	39.414	"XPACT_CONFORMANCE	REJECT
+unterminated parameter entity reference"	
+Finalized	not-wf-not-sa-009	xmltest/not-wf/not-sa/009.xml	REJECT	REJECT	skipped	REJECT	passed	36.188	"XPACT_CONFORMANCE	REJECT
+unterminated comment"	
+Finalized	not-wf-ext-sa-001	xmltest/not-wf/ext-sa/001.xml	REJECT	REJECT	skipped	REJECT	passed	31.731	"XPACT_CONFORMANCE	REJECT
+recursive entity reference"	
+Finalized	not-wf-ext-sa-002	xmltest/not-wf/ext-sa/002.xml	REJECT	REJECT	skipped	REJECT	passed	32.121	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+Finalized	not-wf-ext-sa-003	xmltest/not-wf/ext-sa/003.xml	REJECT	REJECT	skipped	REJECT	passed	37.13	"XPACT_CONFORMANCE	REJECT
+misplaced xml declaration"	
+Finalized	not-wf-sa03	sun/not-wf/not-sa03.xml	REJECT	REJECT	skipped	REJECT	passed	30.5	"XPACT_CONFORMANCE	REJECT
+standalone reference to externally declared entity"	
+Finalized	cond01	sun/not-wf/cond01.xml	REJECT	REJECT	skipped	REJECT	passed	35.138	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	cond02	sun/not-wf/cond02.xml	REJECT	REJECT	skipped	REJECT	passed	27.303	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	decl01	sun/not-wf/decl01.xml	REJECT	REJECT	skipped	REJECT	passed	32.861	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+Finalized	dtd07	sun/not-wf/dtd07.xml	REJECT	REJECT	skipped	REJECT	passed	37.562	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+Finalized	encoding07	sun/not-wf/encoding07.xml	REJECT	REJECT	skipped	REJECT	passed	29.41	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+Finalized	o-p09fail1	oasis/p09fail1.xml	REJECT	REJECT	skipped	REJECT	passed	31.495	"XPACT_CONFORMANCE	REJECT
+unterminated parameter entity reference"	
+Finalized	o-p09fail2	oasis/p09fail2.xml	REJECT	REJECT	skipped	REJECT	passed	33.293	"XPACT_CONFORMANCE	REJECT
+unterminated reference"	
+Finalized	o-p30fail1	oasis/p30fail1.xml	REJECT	REJECT	skipped	REJECT	passed	31.975	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+Finalized	o-p31fail1	oasis/p31fail1.xml	REJECT	REJECT	skipped	REJECT	passed	32.197	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+Finalized	o-p61fail1	oasis/p61fail1.xml	REJECT	REJECT	skipped	REJECT	passed	32.842	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	o-p62fail1	oasis/p62fail1.xml	REJECT	REJECT	skipped	REJECT	passed	31.671	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	o-p62fail2	oasis/p62fail2.xml	REJECT	REJECT	skipped	REJECT	passed	32.693	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	o-p63fail1	oasis/p63fail1.xml	REJECT	REJECT	skipped	REJECT	passed	32.095	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	o-p63fail2	oasis/p63fail2.xml	REJECT	REJECT	skipped	REJECT	passed	33.939	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	o-p64fail1	oasis/p64fail1.xml	REJECT	REJECT	skipped	REJECT	passed	28.416	"XPACT_CONFORMANCE	REJECT
+invalid DTD closing delimiter"	
+Finalized	o-p64fail2	oasis/p64fail2.xml	REJECT	REJECT	skipped	REJECT	passed	33.379	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	ibm-not-wf-p28a-ibm28an01.xml	ibm/not-wf/p28a/ibm28an01.xml	REJECT	REJECT	skipped	REJECT	passed	22.557	"XPACT_CONFORMANCE	REJECT
+unterminated element declaration"	
+Finalized	ibm-not-wf-P30-ibm30n01.xml	ibm/not-wf/P30/ibm30n01.xml	REJECT	REJECT	skipped	REJECT	passed	22.329	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+Finalized	ibm-not-wf-P31-ibm31n01.xml	ibm/not-wf/P31/ibm31n01.xml	REJECT	REJECT	skipped	REJECT	passed	21.333	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+Finalized	ibm-not-wf-P32-ibm32n09.xml	ibm/not-wf/P32/ibm32n09.xml	REJECT	REJECT	skipped	REJECT	passed	22.213	"XPACT_CONFORMANCE	REJECT
+standalone reference to externally declared entity"	
+Finalized	ibm-not-wf-P61-ibm61n01.xml	ibm/not-wf/P61/ibm61n01.xml	REJECT	REJECT	skipped	REJECT	passed	29.324	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P62-ibm62n01.xml	ibm/not-wf/P62/ibm62n01.xml	REJECT	REJECT	skipped	REJECT	passed	21.856	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P62-ibm62n02.xml	ibm/not-wf/P62/ibm62n02.xml	REJECT	REJECT	skipped	REJECT	passed	21.193	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P62-ibm62n03.xml	ibm/not-wf/P62/ibm62n03.xml	REJECT	REJECT	skipped	REJECT	passed	20.952	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+Finalized	ibm-not-wf-P62-ibm62n04.xml	ibm/not-wf/P62/ibm62n04.xml	REJECT	REJECT	skipped	REJECT	passed	21.743	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P62-ibm62n05.xml	ibm/not-wf/P62/ibm62n05.xml	REJECT	REJECT	skipped	REJECT	passed	21.774	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P62-ibm62n06.xml	ibm/not-wf/P62/ibm62n06.xml	REJECT	REJECT	skipped	REJECT	passed	21.714	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P62-ibm62n07.xml	ibm/not-wf/P62/ibm62n07.xml	REJECT	REJECT	skipped	REJECT	passed	20.831	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	ibm-not-wf-P62-ibm62n08.xml	ibm/not-wf/P62/ibm62n08.xml	REJECT	REJECT	skipped	REJECT	passed	20.495	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	ibm-not-wf-P63-ibm63n01.xml	ibm/not-wf/P63/ibm63n01.xml	REJECT	REJECT	skipped	REJECT	passed	20.138	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P63-ibm63n02.xml	ibm/not-wf/P63/ibm63n02.xml	REJECT	REJECT	skipped	REJECT	passed	20.549	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P63-ibm63n03.xml	ibm/not-wf/P63/ibm63n03.xml	REJECT	REJECT	skipped	REJECT	passed	20.826	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+Finalized	ibm-not-wf-P63-ibm63n04.xml	ibm/not-wf/P63/ibm63n04.xml	REJECT	REJECT	skipped	REJECT	passed	20.907	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P63-ibm63n05.xml	ibm/not-wf/P63/ibm63n05.xml	REJECT	REJECT	skipped	REJECT	passed	22.05	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P63-ibm63n06.xml	ibm/not-wf/P63/ibm63n06.xml	REJECT	REJECT	skipped	REJECT	passed	21.361	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+Finalized	ibm-not-wf-P63-ibm63n07.xml	ibm/not-wf/P63/ibm63n07.xml	REJECT	REJECT	skipped	REJECT	passed	21.063	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	ibm-not-wf-P64-ibm64n01.xml	ibm/not-wf/P64/ibm64n01.xml	REJECT	REJECT	skipped	REJECT	passed	22.11	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+Finalized	ibm-not-wf-P64-ibm64n02.xml	ibm/not-wf/P64/ibm64n02.xml	REJECT	REJECT	skipped	REJECT	passed	24.799	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	ibm-not-wf-P64-ibm64n03.xml	ibm/not-wf/P64/ibm64n03.xml	REJECT	REJECT	skipped	REJECT	passed	24.706	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+Finalized	ibm-not-wf-P65-ibm65n01.xml	ibm/not-wf/P65/ibm65n01.xml	REJECT	REJECT	skipped	REJECT	passed	21.074	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+Finalized	ibm-not-wf-P65-ibm65n02.xml	ibm/not-wf/P65/ibm65n02.xml	REJECT	REJECT	skipped	REJECT	passed	20.925	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+Finalized	ibm-not-wf-P68-ibm68n06.xml	ibm/not-wf/P68/ibm68n06.xml	REJECT	REJECT	skipped	REJECT	passed	21.293	"XPACT_CONFORMANCE	REJECT
+standalone reference to externally declared entity"	
+Finalized	ibm-not-wf-P77-ibm77n01.xml	ibm/not-wf/P77/ibm77n01.xml	REJECT	REJECT	skipped	REJECT	passed	21.594	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+Finalized	ibm-not-wf-P77-ibm77n02.xml	ibm/not-wf/P77/ibm77n02.xml	REJECT	REJECT	skipped	REJECT	passed	22.598	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+Finalized	ibm-not-wf-P77-ibm77n03.xml	ibm/not-wf/P77/ibm77n03.xml	REJECT	REJECT	skipped	REJECT	passed	21.96	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+Finalized	ibm-not-wf-P77-ibm77n04.xml	ibm/not-wf/P77/ibm77n04.xml	REJECT	REJECT	skipped	REJECT	passed	21.679	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+Finalized	ibm-not-wf-P78-ibm78n01.xml	ibm/not-wf/P78/ibm78n01.xml	REJECT	REJECT	skipped	REJECT	passed	23.523	"XPACT_CONFORMANCE	REJECT
+misplaced xml declaration"	
+Finalized	ibm-not-wf-P78-ibm78n02.xml	ibm/not-wf/P78/ibm78n02.xml	REJECT	REJECT	skipped	REJECT	passed	22.583	"XPACT_CONFORMANCE	REJECT
+misplaced xml declaration"	
+Finalized	ibm-not-wf-P79-ibm79n01.xml	ibm/not-wf/P79/ibm79n01.xml	REJECT	REJECT	skipped	REJECT	passed	21.93	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+Finalized	ibm-not-wf-P79-ibm79n02.xml	ibm/not-wf/P79/ibm79n02.xml	REJECT	REJECT	skipped	REJECT	passed	21.824	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+Finalized	rmt-e2e-38	eduni/errata-2e/E38.xml	REJECT	ACCEPT	skipped	ACCEPT	passed	20.265	"XPACT_CONFORMANCE	ACCEPT"	XML 1.0 fifth edition permits this 1.1 text declaration without non-1.0 features; fourth-edition erratum E10 reverses second-edition E38: https://www.w3.org/XML/xml-V10-4e-errata#E10
+FinalizedAssertions	not-wf-sa-081	xmltest/not-wf/sa/081.xml	REJECT	REJECT	skipped	REJECT	passed	25.116	"XPACT_CONFORMANCE	REJECT
+reference to external entity in attribute"	
+FinalizedAssertions	not-wf-sa-082	xmltest/not-wf/sa/082.xml	REJECT	REJECT	skipped	REJECT	passed	26.674	"XPACT_CONFORMANCE	REJECT
+reference to external entity in attribute"	
+FinalizedAssertions	not-wf-sa-185	xmltest/not-wf/sa/185.xml	REJECT	REJECT	skipped	REJECT	passed	27.081	"XPACT_CONFORMANCE	REJECT
+undefined entity"	
+FinalizedAssertions	not-wf-not-sa-001	xmltest/not-wf/not-sa/001.xml	REJECT	REJECT	skipped	REJECT	passed	26.695	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	not-wf-not-sa-003	xmltest/not-wf/not-sa/003.xml	REJECT	REJECT	skipped	REJECT	passed	26.689	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	not-wf-not-sa-004	xmltest/not-wf/not-sa/004.xml	REJECT	REJECT	skipped	REJECT	passed	27.178	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	not-wf-not-sa-006	xmltest/not-wf/not-sa/006.xml	REJECT	REJECT	skipped	REJECT	passed	27.296	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	not-wf-not-sa-007	xmltest/not-wf/not-sa/007.xml	REJECT	REJECT	skipped	REJECT	passed	27.083	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+FinalizedAssertions	not-wf-not-sa-008	xmltest/not-wf/not-sa/008.xml	REJECT	REJECT	skipped	REJECT	passed	27.152	"XPACT_CONFORMANCE	REJECT
+unterminated parameter entity reference"	
+FinalizedAssertions	not-wf-not-sa-009	xmltest/not-wf/not-sa/009.xml	REJECT	REJECT	skipped	REJECT	passed	27.776	"XPACT_CONFORMANCE	REJECT
+unterminated comment"	
+FinalizedAssertions	not-wf-ext-sa-001	xmltest/not-wf/ext-sa/001.xml	REJECT	REJECT	skipped	REJECT	passed	27.55	"XPACT_CONFORMANCE	REJECT
+recursive entity reference"	
+FinalizedAssertions	not-wf-ext-sa-002	xmltest/not-wf/ext-sa/002.xml	REJECT	REJECT	skipped	REJECT	passed	27.635	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+FinalizedAssertions	not-wf-ext-sa-003	xmltest/not-wf/ext-sa/003.xml	REJECT	REJECT	skipped	REJECT	passed	27.573	"XPACT_CONFORMANCE	REJECT
+misplaced xml declaration"	
+FinalizedAssertions	not-wf-sa03	sun/not-wf/not-sa03.xml	REJECT	REJECT	skipped	REJECT	passed	27.222	"XPACT_CONFORMANCE	REJECT
+standalone reference to externally declared entity"	
+FinalizedAssertions	cond01	sun/not-wf/cond01.xml	REJECT	REJECT	skipped	REJECT	passed	27.604	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	cond02	sun/not-wf/cond02.xml	REJECT	REJECT	skipped	REJECT	passed	28.867	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	decl01	sun/not-wf/decl01.xml	REJECT	REJECT	skipped	REJECT	passed	29.335	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+FinalizedAssertions	dtd07	sun/not-wf/dtd07.xml	REJECT	REJECT	skipped	REJECT	passed	29.233	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+FinalizedAssertions	encoding07	sun/not-wf/encoding07.xml	REJECT	REJECT	skipped	REJECT	passed	26.903	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+FinalizedAssertions	o-p09fail1	oasis/p09fail1.xml	REJECT	REJECT	skipped	REJECT	passed	25.628	"XPACT_CONFORMANCE	REJECT
+unterminated parameter entity reference"	
+FinalizedAssertions	o-p09fail2	oasis/p09fail2.xml	REJECT	REJECT	skipped	REJECT	passed	25.603	"XPACT_CONFORMANCE	REJECT
+unterminated reference"	
+FinalizedAssertions	o-p30fail1	oasis/p30fail1.xml	REJECT	REJECT	skipped	REJECT	passed	26.841	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+FinalizedAssertions	o-p31fail1	oasis/p31fail1.xml	REJECT	REJECT	skipped	REJECT	passed	27.066	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+FinalizedAssertions	o-p61fail1	oasis/p61fail1.xml	REJECT	REJECT	skipped	REJECT	passed	27.666	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	o-p62fail1	oasis/p62fail1.xml	REJECT	REJECT	skipped	REJECT	passed	30.051	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	o-p62fail2	oasis/p62fail2.xml	REJECT	REJECT	skipped	REJECT	passed	28.116	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	o-p63fail1	oasis/p63fail1.xml	REJECT	REJECT	skipped	REJECT	passed	28.284	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	o-p63fail2	oasis/p63fail2.xml	REJECT	REJECT	skipped	REJECT	passed	29.974	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	o-p64fail1	oasis/p64fail1.xml	REJECT	REJECT	skipped	REJECT	passed	29.966	"XPACT_CONFORMANCE	REJECT
+invalid DTD closing delimiter"	
+FinalizedAssertions	o-p64fail2	oasis/p64fail2.xml	REJECT	REJECT	skipped	REJECT	passed	36.485	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	ibm-not-wf-p28a-ibm28an01.xml	ibm/not-wf/p28a/ibm28an01.xml	REJECT	REJECT	skipped	REJECT	passed	31.529	"XPACT_CONFORMANCE	REJECT
+unterminated element declaration"	
+FinalizedAssertions	ibm-not-wf-P30-ibm30n01.xml	ibm/not-wf/P30/ibm30n01.xml	REJECT	REJECT	skipped	REJECT	passed	29.342	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+FinalizedAssertions	ibm-not-wf-P31-ibm31n01.xml	ibm/not-wf/P31/ibm31n01.xml	REJECT	REJECT	skipped	REJECT	passed	36.585	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+FinalizedAssertions	ibm-not-wf-P32-ibm32n09.xml	ibm/not-wf/P32/ibm32n09.xml	REJECT	REJECT	skipped	REJECT	passed	28.33	"XPACT_CONFORMANCE	REJECT
+standalone reference to externally declared entity"	
+FinalizedAssertions	ibm-not-wf-P61-ibm61n01.xml	ibm/not-wf/P61/ibm61n01.xml	REJECT	REJECT	skipped	REJECT	passed	30.24	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n01.xml	ibm/not-wf/P62/ibm62n01.xml	REJECT	REJECT	skipped	REJECT	passed	28.764	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n02.xml	ibm/not-wf/P62/ibm62n02.xml	REJECT	REJECT	skipped	REJECT	passed	28.097	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n03.xml	ibm/not-wf/P62/ibm62n03.xml	REJECT	REJECT	skipped	REJECT	passed	27.999	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n04.xml	ibm/not-wf/P62/ibm62n04.xml	REJECT	REJECT	skipped	REJECT	passed	28.202	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n05.xml	ibm/not-wf/P62/ibm62n05.xml	REJECT	REJECT	skipped	REJECT	passed	28.379	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n06.xml	ibm/not-wf/P62/ibm62n06.xml	REJECT	REJECT	skipped	REJECT	passed	28.696	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n07.xml	ibm/not-wf/P62/ibm62n07.xml	REJECT	REJECT	skipped	REJECT	passed	27.281	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	ibm-not-wf-P62-ibm62n08.xml	ibm/not-wf/P62/ibm62n08.xml	REJECT	REJECT	skipped	REJECT	passed	26.853	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	ibm-not-wf-P63-ibm63n01.xml	ibm/not-wf/P63/ibm63n01.xml	REJECT	REJECT	skipped	REJECT	passed	34.443	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P63-ibm63n02.xml	ibm/not-wf/P63/ibm63n02.xml	REJECT	REJECT	skipped	REJECT	passed	27.834	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P63-ibm63n03.xml	ibm/not-wf/P63/ibm63n03.xml	REJECT	REJECT	skipped	REJECT	passed	27.728	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+FinalizedAssertions	ibm-not-wf-P63-ibm63n04.xml	ibm/not-wf/P63/ibm63n04.xml	REJECT	REJECT	skipped	REJECT	passed	28.204	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P63-ibm63n05.xml	ibm/not-wf/P63/ibm63n05.xml	REJECT	REJECT	skipped	REJECT	passed	27.065	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P63-ibm63n06.xml	ibm/not-wf/P63/ibm63n06.xml	REJECT	REJECT	skipped	REJECT	passed	27.076	"XPACT_CONFORMANCE	REJECT
+invalid conditional section"	
+FinalizedAssertions	ibm-not-wf-P63-ibm63n07.xml	ibm/not-wf/P63/ibm63n07.xml	REJECT	REJECT	skipped	REJECT	passed	27.858	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	ibm-not-wf-P64-ibm64n01.xml	ibm/not-wf/P64/ibm64n01.xml	REJECT	REJECT	skipped	REJECT	passed	26.874	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+FinalizedAssertions	ibm-not-wf-P64-ibm64n02.xml	ibm/not-wf/P64/ibm64n02.xml	REJECT	REJECT	skipped	REJECT	passed	27.139	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	ibm-not-wf-P64-ibm64n03.xml	ibm/not-wf/P64/ibm64n03.xml	REJECT	REJECT	skipped	REJECT	passed	27.093	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+FinalizedAssertions	ibm-not-wf-P65-ibm65n01.xml	ibm/not-wf/P65/ibm65n01.xml	REJECT	REJECT	skipped	REJECT	passed	33.396	"XPACT_CONFORMANCE	REJECT
+unexpected DTD content"	
+FinalizedAssertions	ibm-not-wf-P65-ibm65n02.xml	ibm/not-wf/P65/ibm65n02.xml	REJECT	REJECT	skipped	REJECT	passed	27.307	"XPACT_CONFORMANCE	REJECT
+incomplete conditional section"	
+FinalizedAssertions	ibm-not-wf-P68-ibm68n06.xml	ibm/not-wf/P68/ibm68n06.xml	REJECT	REJECT	skipped	REJECT	passed	27.261	"XPACT_CONFORMANCE	REJECT
+standalone reference to externally declared entity"	
+FinalizedAssertions	ibm-not-wf-P77-ibm77n01.xml	ibm/not-wf/P77/ibm77n01.xml	REJECT	REJECT	skipped	REJECT	passed	32.959	"XPACT_CONFORMANCE	REJECT
+invalid xml declaration"	
+FinalizedAssertions	ibm-not-wf-P77-ibm77n02.xml	ibm/not-wf/P77/ibm77n02.xml	REJECT	REJECT	skipped	REJECT	passed	28.648	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+FinalizedAssertions	ibm-not-wf-P77-ibm77n03.xml	ibm/not-wf/P77/ibm77n03.xml	REJECT	REJECT	skipped	REJECT	passed	28.034	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+FinalizedAssertions	ibm-not-wf-P77-ibm77n04.xml	ibm/not-wf/P77/ibm77n04.xml	REJECT	REJECT	skipped	REJECT	passed	35.27	"XPACT_CONFORMANCE	REJECT
+unterminated processing instruction"	
+FinalizedAssertions	ibm-not-wf-P78-ibm78n01.xml	ibm/not-wf/P78/ibm78n01.xml	REJECT	REJECT	skipped	REJECT	passed	28.036	"XPACT_CONFORMANCE	REJECT
+misplaced xml declaration"	
+FinalizedAssertions	ibm-not-wf-P78-ibm78n02.xml	ibm/not-wf/P78/ibm78n02.xml	REJECT	REJECT	skipped	REJECT	passed	27.385	"XPACT_CONFORMANCE	REJECT
+misplaced xml declaration"	
+FinalizedAssertions	ibm-not-wf-P79-ibm79n01.xml	ibm/not-wf/P79/ibm79n01.xml	REJECT	REJECT	skipped	REJECT	passed	27.295	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+FinalizedAssertions	ibm-not-wf-P79-ibm79n02.xml	ibm/not-wf/P79/ibm79n02.xml	REJECT	REJECT	skipped	REJECT	passed	27.514	"XPACT_CONFORMANCE	REJECT
+reserved processing instruction target"	
+FinalizedAssertions	rmt-e2e-38	eduni/errata-2e/E38.xml	REJECT	ACCEPT	skipped	ACCEPT	passed	27.09	"XPACT_CONFORMANCE	ACCEPT"	XML 1.0 fifth edition permits this 1.1 text declaration without non-1.0 features; fourth-edition erratum E10 reverses second-edition E38: https://www.w3.org/XML/xml-V10-4e-errata#E10

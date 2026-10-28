@@ -1,0 +1,8 @@
+async     w7-smoke  line 3 column 3: asynchronous entity
+async     w8-speed  line 3 column 3: asynchronous entity
+badchar   w7-smoke  line 1 column 13: reference to invalid character number
+badchar   w8-speed  line 1 column 13: reference to invalid character number
+mismatch  w7-smoke  line 1 column 8: mismatched tag
+mismatch  w8-speed  line 4 column 3: mismatched tag
+after     w7-smoke  line 4 column 5: mismatched tag
+after     w8-speed  line 4 column 5: mismatched tag

@@ -13,6 +13,12 @@
 #               47 errors), the same totals as the Jenkins build of main cf12dee.
 #   2026-10-23  All 519 fixed in the parser; the list is empty. Every applicable case
 #               (1,727 per build) must pass.
+#   2026-10-26  Expanded to 1,909 applicable cases per build; all pass in both
+#               finalized assertion modes. The list remains empty.
+#
+#   2026-10-27  Expanded to 1,974 applicable cases per build with local resources;
+#               all pass in both assertion modes; no allowlist rows added.
+#               The documented E38 fifth-edition correction retains both expectations.
 #
 # Add a row only for a confirmed parser gap with an open issue, using
 # scripts/run_w3c_conformance.py --write-known-failures <file> to get its exact form.
