@@ -110,7 +110,7 @@ class W3CLaneLifecycleTests(unittest.TestCase):
             '<TEST ID="utf16-valid" TYPE="valid" URI="good.xml"/>'
             '<TEST ID="malformed" TYPE="not-wf" URI="broken.xml"/>'
             '<TEST ID="namespace-optout" TYPE="valid" NAMESPACE="no" URI="no-namespace.xml"/>'
-            '<TEST ID="profile-exclusion" TYPE="valid" ENTITIES="general" URI="excluded.xml"/>'
+            '<TEST ID="profile-exclusion" TYPE="valid" RECOMMENDATION="XML1.1" URI="excluded.xml"/>'
             '</TESTCASES></TESTSUITE>', encoding="utf-8")
         self.original_files = self.snapshot()
         self.build_calls = []
@@ -182,6 +182,7 @@ class W3CLaneLifecycleTests(unittest.TestCase):
             return subprocess.CompletedProcess(command, 1 if failing else 0,
                                                output.encode("utf-8"), b"")
         self.assertEqual(command[1], "--conformance-file")
+        self.assertEqual(command[3:5], ["--suite-root", str(self.suite.resolve())])
         self.assertFalse(metadata["build"]["assertions"], "The full W3C lane must use the OFF builds")
         self.assertEqual(len(self.qualifications) - self.qualification_start, 4,
                          "Every audit and benchmark must be qualified first")
@@ -205,7 +206,7 @@ class W3CLaneLifecycleTests(unittest.TestCase):
             raise subprocess.TimeoutExpired(command, kwargs["timeout"], output=b"partial stdout", stderr=b"partial stderr")
         if behavior == "crash":
             return subprocess.CompletedProcess(command, 0xC0000409, b"", b"fixture crash detail")
-        expected = "REJECT" if path.name == "broken.xml" else "ACCEPT"
+        expected = "REJECT" if path.name in {"broken.xml", "external-malformed.xml"} else "ACCEPT"
         actual = ("ACCEPT" if expected == "REJECT" else "REJECT") if behavior == "wrong" else expected
         return subprocess.CompletedProcess(command, 0 if actual == "ACCEPT" else 1,
                                            ("XPACT_CONFORMANCE\t" + actual + "\n").encode("ascii"), b"")
@@ -249,7 +250,7 @@ class W3CLaneLifecycleTests(unittest.TestCase):
             self.assertEqual(by_key[engine, "malformed"]["actual"], "REJECT")
             skipped = by_key[engine, "profile-exclusion"]
             self.assertEqual((skipped["status"], skipped["actual"]), ("skipped", "not-run"))
-            self.assertIn("resolver is disabled", skipped["message"])
+            self.assertIn("XML 1.1", skipped["message"])
             self.assertTrue(all(not row["known"] for row in rows if row["engine"] == engine))
         self.assertEqual(len(self.parser_calls), 6)
         self.assertEqual({(name, ns) for _, name, ns, _ in self.parser_calls},
@@ -280,6 +281,44 @@ class W3CLaneLifecycleTests(unittest.TestCase):
         self.assertIn('"FAIL"', serialized)
         self.assertIn("raw_utf8", serialized)
         self.assertIn("Exit code: 1", (output / "audit/xpact-core/qualification.log").read_text(encoding="utf-8"))
+
+    def test_entity_tagged_binary_inputs_execute_for_both_implementations(self):
+        self.documents.update({
+            "external-valid.xml": b"<!DOCTYPE r SYSTEM 'unread.dtd'><r/>",
+            "external-invalid.xml": b"<!DOCTYPE r [<!ELEMENT r EMPTY>]><r>text</r>",
+            "external-malformed.xml": b"<!DOCTYPE r SYSTEM 'malformed.dtd'><r/>",
+        })
+        for name in ("external-valid.xml", "external-invalid.xml", "external-malformed.xml"):
+            (self.suite / name).write_bytes(self.documents[name])
+        catalog = self.suite / "xmlconf.xml"
+        catalog.write_text(catalog.read_text(encoding="utf-8").replace(
+            "</TESTCASES>",
+            '<TEST ID="external-valid" TYPE="valid" ENTITIES="parameter" URI="external-valid.xml"/>'
+            '<TEST ID="external-invalid" TYPE="invalid" ENTITIES="both" URI="external-invalid.xml"/>'
+            '<TEST ID="external-malformed" TYPE="not-wf" ENTITIES="general" URI="external-malformed.xml"/>'
+            '</TESTCASES>'), encoding="utf-8")
+        original_files = self.snapshot()
+
+        report, output = self.invoke("entity-acceptance")
+
+        self.assertEqual(report["status"], "complete")
+        rows = self.results(output)
+        self.assertEqual(len(rows), 14)
+        for engine in ("xpact", "xpact-core"):
+            acceptance = [row for row in rows if row["engine"] == engine
+                          and row["case_id"] in {"external-valid", "external-invalid"}]
+            self.assertEqual(len(acceptance), 2)
+            self.assertTrue(all((row["expected"], row["actual"], row["status"])
+                                == ("ACCEPT", "ACCEPT", "passed") for row in acceptance))
+            malformed, = [row for row in rows if row["engine"] == engine
+                          and row["case_id"] == "external-malformed"]
+            self.assertEqual((malformed["expected"], malformed["actual"], malformed["status"]),
+                             ("REJECT", "REJECT", "passed"))
+            excluded, = [row for row in rows if row["engine"] == engine
+                         and row["case_id"] == "profile-exclusion"]
+            self.assertEqual(excluded["status"], "skipped")
+        self.assertEqual(len(self.parser_calls), 12)
+        self.assertEqual(self.snapshot(), original_files)
 
     def test_wrong_verdict_crash_and_timeout_remain_gaps_and_other_engine_continues(self):
         self.case_behavior[("xpact-core", "good.xml")] = "wrong"
@@ -505,6 +544,7 @@ class ResultMatrixIntegrityTests(unittest.TestCase):
     def test_changed_expectation_suppressed_failure_or_forged_exclusion_is_rejected(self):
         from dataclasses import replace
         mutations = ((0, {"expected": "REJECT"}), (0, {"known": "unapproved allowlist"}),
+                     (0, {"catalog_expected": "REJECT"}), (0, {"expectation_adjustment": "unqualified correction"}),
                      (0, {"status": "skipped", "actual": "not-run"}),
                      (1, {"status": "passed", "actual": "ACCEPT"}),
                      (1, {"message": "different exclusion for this backend"}))

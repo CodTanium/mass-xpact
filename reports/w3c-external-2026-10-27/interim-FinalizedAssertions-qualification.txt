@@ -1,0 +1,6 @@
+XPACT_W3C_IDENTITY	xpact	687f6cfdb7137abd302f2b2f534bce2f59dcc0da	finalized/assertions-on/msvc-x64	normal
+XPACT_W3C_CASE	raw_utf8	PASS	UTF-8 non-ASCII bytes with and without BOM; malformed final input rejected
+XPACT_W3C_CASE	raw_utf16	PASS	Original UTF-16 little- and big-endian BOM control bytes accepted
+XPACT_W3C_CASE	namespace_switch	PASS	Bound prefix accepted; unbound and multi-colon names rejected with namespaces, accepted when disabled
+XPACT_W3C_CASE	reuse_recovery	PASS	Same parser reuses original bytes, rejects mismatch/unbound prefix after reset, then accepts valid input
+XPACT_W3C_CASE	gc_restoration	PASS	Incoming GC on/off restored after valid, mismatched and empty final input; closed references released

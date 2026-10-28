@@ -36,6 +36,19 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
+	declaration_base: detachable STRING_8
+			-- UTF-8 resource path containing the declaration; absent for in-memory input.
+
+	set_declaration_base (a_base: detachable READABLE_STRING_8)
+			-- Keep a detached declaration origin for later expansion and child-parser snapshots.
+		do
+			if a_base /= Void then
+				create declaration_base.make_from_string (a_base)
+			else
+				declaration_base := Void
+			end
+		end
+
 	name: STRING_8
 			-- Entity name.
 

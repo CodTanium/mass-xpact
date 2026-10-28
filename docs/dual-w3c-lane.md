@@ -31,8 +31,8 @@ directories must be separate. Existing run directories are never reused.
 ## Shared cases and expectations
 
 The driver uses the [existing W3C importer and profile](w3c-xml-conformance.md#conformance-profile),
-without a known-failure allowlist. The pinned catalog has 2,585 rows: **1,727
-applicable cases per implementation** and **858 explicit exclusions per
+without a known-failure allowlist. The pinned catalog has 2,585 rows: **1,974
+applicable cases per implementation** and **611 explicit exclusions per
 implementation**. Every row is retained for both engines.
 
 | Profile choice | Behavior |
@@ -40,7 +40,7 @@ implementation**. Every row is retained for both engines.
 | XML version | XML 1.0, fifth edition |
 | Namespaces | Enabled unless the catalog says `NAMESPACE="no"` |
 | Nonvalidating processor | Both `valid` and `invalid` require ACCEPT; `not-wf` requires REJECT |
-| External resources | No external entity loader; cases requiring external entities excluded |
+| External resources | All entity-tagged binary cases selected; the local suite root is supplied to each engine; xpact loads suite-contained resources while pinned core retains its no-loader behavior |
 | Other exclusions | Other XML versions/editions and optional-error cases, with explicit reasons |
 
 Each applicable case starts a fresh executable and reads the original file bytes,
@@ -52,7 +52,19 @@ include process startup and file reading and are not parser-only throughput.
 Both adapters use their direct Eiffel parser with no-op events. Core naming mode
 is selected before parser construction because it determines internal cache
 classes. This lane does not cover native DLLs, .NET, canonical output, event
-equality, external entity processing or all XML conformance profiles.
+equality or all XML conformance profiles.
+
+The 27 October expansion includes the remaining 65 external-resource cases.
+Our adapter enables suite-local loading, resolves nested identifiers against the
+declaring file and reports resource I/O failures as harness errors rather than
+normal XML rejections. The E38 fifth-edition correction retains catalog and
+profile expectations in the report. The pinned core source and no-loader
+behavior are unchanged, so a future expanded comparison must retain its wrong
+verdicts or unsupported-resource errors; it cannot claim external-resource
+conformance from an ignored entity. No expanded core comparison has been verified.
+The 25 October results below retain their original 1,727-case profile; see
+[the xpact verification](w3c-xml-conformance.md) for later assertion-enabled and
+assertion-disabled campaigns.
 
 ## Directed controls and build identity
 

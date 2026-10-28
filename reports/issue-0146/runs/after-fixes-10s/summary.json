@@ -1,0 +1,54 @@
+{
+  "suite_version": "20130923",
+  "source": "https://www.w3.org/XML/Test/xmlts20130923.zip",
+  "archive_sha256": null,
+  "source_mode": "local-directory",
+  "known_failures_file": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\benchmarks\\w3c-known-failures.tsv",
+  "known_failures_listed": 0,
+  "suite_directory": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\xpactGit\\build\\validation-corpora\\w3c-xml-20130923\\xmlconf",
+  "executables": {
+    "Finalized": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\EIFGENs\\xpact_benchmarks\\F_code\\xpact_benchmarks.exe",
+    "FinalizedAssertions": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\EIFGENs\\xpact_benchmarks_assertions\\F_code\\xpact_benchmarks.exe"
+  },
+  "entity_executables": {
+    "Finalized": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\build\\w3c-dll\\xpact_w3c_case.exe",
+    "FinalizedAssertions": "C:\\Users\\masou\\Desktop\\Lia\\xpact\\w7-smoke\\build\\w3c-dll\\xpact_w3c_case_assertions.exe"
+  },
+  "lanes": {
+    "core": "the profile above",
+    "legacy-names": "XML 1.0 editions 1-4: fourth-edition name tables (--legacy-names, as the native DLL parser uses); W3C verdict",
+    "external-entities": "external entities loaded through the Expat-compatible DLL (child parsers, files below the suite root); W3C verdict, nonvalidating",
+    "optional-error": "TYPE=error: the specification allows either verdict; only a crash, timeout or missing verdict fails",
+    "xml-1.1": "XML 1.1 / Namespaces 1.1: no XML 1.0 verdict exists; only a crash, timeout or missing verdict fails"
+  },
+  "catalog_cases": 2585,
+  "profile": "XML 1.0 fifth edition; namespaces unless NAMESPACE=no; nonvalidating; no external entities; binary verdicts only",
+  "engines": [
+    {
+      "engine": "Finalized",
+      "total": 2585,
+      "passed": 2585,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "accepted": 1095,
+      "rejected": 1490,
+      "known": 0,
+      "unexpected": 0,
+      "elapsed_ms": 56575.794
+    },
+    {
+      "engine": "FinalizedAssertions",
+      "total": 2585,
+      "passed": 2582,
+      "failed": 0,
+      "errors": 3,
+      "skipped": 0,
+      "accepted": 1092,
+      "rejected": 1490,
+      "known": 0,
+      "unexpected": 3,
+      "elapsed_ms": 74937.387
+    }
+  ]
+}

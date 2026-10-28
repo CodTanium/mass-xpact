@@ -58,6 +58,9 @@ def source_fingerprint(repo_root, implementation, profile="probe"):
     elif profile == "w3c":
         source = root / "benchmarks/dual_w3c"
         directories = [source / "shared", source / implementation.replace("-", "_")]
+    elif profile == "regression":
+        source = root / "benchmarks/dual_regression"
+        directories = [source / "shared", source / implementation.replace("-", "_")]
     else:
         raise BuildError("Unknown build profile: " + str(profile))
     paths = [path for directory in directories for pattern in ("*.e", "*.ecf")
@@ -67,6 +70,9 @@ def source_fingerprint(repo_root, implementation, profile="probe"):
     if profile == "catalog":
         paths += [root / relative for relative in ("scripts/run_dual_catalog.py",
                   "scripts/run_dual_catalog.ps1", "scripts/compare_eiffel_benchmarks.py")
+                  if (root / relative).is_file()]
+    elif profile == "regression":
+        paths += [root / relative for relative in ("scripts/run_dual_regression.py",)
                   if (root / relative).is_file()]
     elif profile == "w3c":
         paths += [root / relative for relative in ("scripts/run_dual_w3c.py",
@@ -169,6 +175,15 @@ def validate_catalog_identity(output, implementation, revision, configuration):
     return GC_POLICIES[implementation]
 
 
+def validate_regression_identity(output, implementation, revision, configuration):
+    expected = "\t".join(("XPACT_REGRESSION_IDENTITY", implementation, revision,
+                           configuration, GC_POLICIES[implementation]))
+    if output.splitlines() != [expected]:
+        raise BuildError("Regression executable did not confirm the expected identity/GC policy: "
+                         + repr(output))
+    return GC_POLICIES[implementation]
+
+
 def validate_w3c_identity(output, implementation, revision, configuration):
     expected = "\t".join(("XPACT_W3C_IDENTITY", implementation, revision,
                            configuration, GC_POLICIES[implementation]))
@@ -192,7 +207,7 @@ def makefile_settings(code_directory):
 
 def build_one(repo_root, run_root, implementation, tools, environment, compiler_metadata,
               *, offline=False, profile="probe", assertions=True):
-    if implementation not in GC_POLICIES or profile not in ("probe", "catalog", "w3c"):
+    if implementation not in GC_POLICIES or profile not in ("probe", "catalog", "w3c", "regression"):
         raise BuildError("Unknown implementation or build profile")
     if type(assertions) is not bool:
         raise BuildError("assertions must be a boolean")
@@ -234,7 +249,8 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
                         "object": str(helper_object), "object_sha256": file_sha256(helper_object),
                         "command": helper_command})
         build_environment["XPACT_SHIFT_JIS_OBJECT"] = str(helper_object)
-    suffix = {"probe": "_build_probe", "catalog": "_catalog_benchmark", "w3c": "_w3c_conformance"}[profile]
+    suffix = {"probe": "_build_probe", "catalog": "_catalog_benchmark", "w3c": "_w3c_conformance",
+              "regression": "_regression"}[profile]
     name = implementation.replace("-", "_") + suffix
     project = destination / "project"
     project.mkdir()
@@ -244,6 +260,9 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
     elif profile == "catalog":
         ecf = root / "benchmarks/dual_catalog" / implementation.replace("-", "_") / "catalog.ecf"
         target = "catalog_assertions" if assertions else "catalog"
+    elif profile == "regression":
+        ecf = root / "benchmarks/dual_regression" / implementation.replace("-", "_") / "regression.ecf"
+        target = "regression_assertions" if assertions else "regression"
     else:
         ecf = root / "benchmarks/dual_w3c" / implementation.replace("-", "_") / "conformance.ecf"
         target = "conformance_assertions" if assertions else "conformance"
@@ -268,6 +287,8 @@ def build_one(repo_root, run_root, implementation, tools, environment, compiler_
         validate_catalog_identity(output, implementation, revision, configuration)
     elif profile == "w3c":
         validate_w3c_identity(output, implementation, revision, configuration)
+    elif profile == "regression":
+        validate_regression_identity(output, implementation, revision, configuration)
     else:
         validate_probe(output, implementation, revision, configuration)
     if source_fingerprint(root, implementation, profile) != fingerprint:
@@ -300,7 +321,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--implementation", choices=("both", "xpact", "xpact-core"), default="both")
     parser.add_argument("--offline", action="store_true", help="Require an already verified core checkout")
-    parser.add_argument("--profile", choices=("probe", "catalog", "w3c"), default="probe")
+    parser.add_argument("--profile", choices=("probe", "catalog", "w3c", "regression"), default="probe")
     parser.add_argument("--assertions", choices=("on", "off"), default="on")
     args = parser.parse_args(argv)
     root = Path(__file__).resolve().parents[1]

@@ -1447,7 +1447,7 @@ feature -- External entity resolution
 					end
 					mark_next_external_entity_is_parameter (native_parser_handle, a_is_parameter)
 					mark_next_external_entity_is_parameter_literal (native_parser_handle, next_resolution_is_parameter_literal)
-					l_status := call_external_entity_ref_callback (external_entity_ref_callback, external_entity_callback_argument, l_context.item, default_pointer, l_system_id.item, l_public_pointer)
+					l_status := call_external_entity_ref_callback (external_entity_ref_callback, external_entity_callback_argument, l_context.item, native_parser_base (native_parser_handle), l_system_id.item, l_public_pointer)
 					active_external_entity_callback_index := 0
 					mark_next_external_entity_is_parameter (native_parser_handle, False)
 					mark_next_external_entity_is_parameter_literal (native_parser_handle, False)
@@ -2030,6 +2030,14 @@ feature {NONE} -- Native callback calls
 			"C inline"
 		alias
 			"((void (*)(void *, const char *, const char *, const char *, const char *, const char *)) $a_callback) ((void *) $a_user_data, (const char *) $a_name, (const char *) $a_base, (const char *) $a_system_id, (const char *) $a_public_id, (const char *) $a_notation_name);"
+		end
+
+	native_parser_base (a_parser: POINTER): POINTER
+			-- Base set with `XML_SetBase' on the native parser, or null.
+		external
+			"C inline use %"xpact_native_private.h%""
+		alias
+			"return $a_parser != 0 ? (EIF_POINTER) ((struct XML_ParserStruct *) $a_parser)->base : (EIF_POINTER) 0;"
 		end
 
 	call_external_entity_ref_callback (a_callback, a_parser, a_context, a_base, a_system_id, a_public_id: POINTER): INTEGER

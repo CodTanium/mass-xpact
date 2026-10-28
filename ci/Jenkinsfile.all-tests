@@ -1197,7 +1197,7 @@ pipeline {
               if ($LASTEXITCODE -ne 0) {
                 throw "W3C conformance runner unit tests failed."
               }
-              $BenchmarkArguments = @{ EiffelBuild = @("Finalized", "FinalizedAssertions") }
+              $BenchmarkArguments = @{ EiffelBuild = @("Finalized", "FinalizedAssertions"); W3cAllCases = $true }
               if (-not [string]::IsNullOrWhiteSpace($env:W3C_SUITE_DIRECTORY)) {
                 $BenchmarkArguments.W3cSuiteDirectory = $env:W3C_SUITE_DIRECTORY
               }

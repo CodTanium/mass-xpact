@@ -34,6 +34,7 @@ feature {NONE} -- Initialization
 			create entity_reference_count_stack.make (8)
 			create entity_table.make (8)
 			create parameter_entity_table.make (4)
+			create general_entity_external_origin_table.make (8)
 			create parameter_entity_accounting_table.make (4)
 			create external_entity_table.make (4)
 			create external_parameter_entity_table.make (4)
@@ -76,6 +77,7 @@ feature {NONE} -- Initialization
 			create entity_reference_count_stack.make (8)
 			create entity_table.make (8)
 			create parameter_entity_table.make (4)
+			create general_entity_external_origin_table.make (8)
 			create parameter_entity_accounting_table.make (4)
 			create external_entity_table.make (4)
 			create external_parameter_entity_table.make (4)
@@ -179,6 +181,10 @@ feature -- Access
 	external_entity_resolver: detachable XP_EXTERNAL_ENTITY_RESOLVER
 			-- Application-provided external entity resolver.
 
+	skip_unread_external_entities: BOOLEAN
+			-- May a nonvalidating caller skip references whose external loading policy is disabled?
+			-- Disabled by default; resolver failures and literal references remain errors.
+
 	parsing_external_entity: BOOLEAN
 			-- Is the active parse for an external parsed entity fragment?
 
@@ -240,6 +246,32 @@ feature -- Configuration
 			policy_set: external_entity_policy = a_policy
 		end
 
+	external_entity_base: detachable STRING_8
+			-- Configured original document resource path, encoded as UTF-8.
+
+	set_external_entity_base (a_base: detachable READABLE_STRING_8)
+			-- Select the document origin and invalidate declarations from any prior input.
+		do
+			clear_cached_doctype
+			if a_base /= Void then
+				create external_entity_base.make_from_string (a_base)
+			else
+				external_entity_base := Void
+			end
+			current_external_entity_base := external_entity_base
+		end
+
+	is_general_entity_declared_externally (a_name: READABLE_STRING_8): BOOLEAN
+			-- Was the first binding declared in external or parameter-entity markup?
+		local
+			l_name: STRING_8
+		do
+			create l_name.make_from_string (a_name)
+			if general_entity_external_origin_table.has (l_name) then
+				Result := general_entity_external_origin_table.item (l_name) /= 0
+			end
+		end
+
 	set_external_entity_resolver (a_resolver: detachable XP_EXTERNAL_ENTITY_RESOLVER)
 			-- Set resolver used when `external_entity_policy' permits loading.
 		do
@@ -249,6 +281,18 @@ feature -- Configuration
 			external_entity_resolver := a_resolver
 		ensure
 			resolver_set: external_entity_resolver = a_resolver
+		end
+
+	set_skip_unread_external_entities (a_enabled: BOOLEAN)
+			-- Opt into nonvalidating skips without enabling external resource access.
+			-- Retained across parse resets; changing it releases the completed-DOCTYPE cache.
+		do
+			if a_enabled /= skip_unread_external_entities then
+				clear_cached_doctype
+			end
+			skip_unread_external_entities := a_enabled
+		ensure
+			value_set: skip_unread_external_entities = a_enabled
 		end
 
 	import_entity_context (a_parent: XP_PARSER)
@@ -262,9 +306,11 @@ feature -- Configuration
 			inherited_dtd_is_standalone := a_parent.dtd_is_standalone
 			inherited_entity_table := cloned_string_table (a_parent.general_entity_context_table)
 			inherited_parameter_entity_table := cloned_string_table (a_parent.parameter_entity_context_table)
+			inherited_general_entity_external_origin_table := cloned_integer_table (a_parent.general_entity_external_origin_context_table)
 			inherited_parameter_entity_accounting_table := cloned_integer_table (a_parent.parameter_entity_accounting_context_table)
 			inherited_external_entity_table := cloned_external_entity_table (a_parent.external_general_entity_context_table)
 			inherited_external_parameter_entity_table := cloned_external_entity_table (a_parent.external_parameter_entity_context_table)
+			inherited_active_entities := a_parent.active_entity_names
 			install_inherited_entity_context
 		ensure
 			internal_general_entities_imported: attached inherited_entity_table
@@ -284,6 +330,8 @@ feature -- Configuration
 			Result.general_entity_context_table.wipe_out
 			copy_string_entity_delta (entity_table, inherited_entity_table, Result.general_entity_context_table, True)
 			copy_string_entity_delta (parameter_entity_table, inherited_parameter_entity_table, Result.parameter_entity_context_table, False)
+			Result.general_entity_external_origin_context_table.wipe_out
+			copy_integer_entity_delta (general_entity_external_origin_table, inherited_general_entity_external_origin_table, Result.general_entity_external_origin_context_table)
 			copy_integer_entity_delta (parameter_entity_accounting_table, inherited_parameter_entity_accounting_table, Result.parameter_entity_accounting_context_table)
 			copy_external_entity_delta (external_entity_table, inherited_external_entity_table, Result.external_general_entity_context_table)
 			copy_external_entity_delta (external_parameter_entity_table, inherited_external_parameter_entity_table, Result.external_parameter_entity_context_table)
@@ -310,6 +358,7 @@ feature -- Configuration
 			dtd_has_parameter_entity_references := dtd_has_parameter_entity_references or else a_child.dtd_declarations_disabled
 			copy_string_table_into (a_child.general_entity_context_table, entity_table)
 			copy_string_table_into (a_child.parameter_entity_context_table, parameter_entity_table)
+			copy_integer_table_into (a_child.general_entity_external_origin_context_table, general_entity_external_origin_table)
 			copy_integer_table_into (a_child.parameter_entity_accounting_context_table, parameter_entity_accounting_table)
 			copy_external_entity_table_into (a_child.external_general_entity_context_table, external_entity_table)
 			copy_external_entity_table_into (a_child.external_parameter_entity_context_table, external_parameter_entity_table)
@@ -400,10 +449,29 @@ feature {XP_PARSER} -- Entity context import
 			result_attached: Result /= Void
 		end
 
+	general_entity_external_origin_context_table: HASH_TABLE [INTEGER, STRING_8]
+			-- External-origin flags paired with the first general-entity binding.
+		do
+			Result := general_entity_external_origin_table
+		end
+
 	parameter_entity_accounting_context_table: HASH_TABLE [INTEGER, STRING_8]
 			-- Logical parameter entity replacement byte counts for child parser import.
 		do
 			Result := parameter_entity_accounting_table
+		ensure
+			result_attached: Result /= Void
+		end
+
+	active_entity_names: ARRAYED_LIST [STRING_8]
+			-- General entities being expanded here or in a parent parser, for
+			-- recursion checks in external entity child parsers.
+		do
+			create Result.make (entity_stack.count)
+			if attached inherited_active_entities as l_inherited then
+				Result.append (l_inherited)
+			end
+			Result.append (entity_stack)
 		ensure
 			result_attached: Result /= Void
 		end
@@ -744,7 +812,7 @@ feature -- Parsing
 			note_position (1)
 			if not has_error then
 				if looks_like_external_subset (l_input) then
-					process_internal_subset (l_input)
+					process_dtd_subset (l_input, True)
 				else
 					from
 						i := 1
@@ -797,7 +865,7 @@ feature -- Parsing
 			position_input := l_input
 			note_position (1)
 			if not has_error then
-				process_internal_subset (l_input)
+				process_dtd_subset (l_input, True)
 			end
 			if not has_error and not is_suspended then
 				note_position (l_input.count + 1)
@@ -822,7 +890,7 @@ feature -- Parsing
 			l_input := normalized_input (a_input, False)
 			position_input := l_input
 			note_position (1)
-			process_internal_subset_prefix (l_input)
+			process_internal_subset_prefix (l_input, True)
 			if not has_error and not is_suspended then
 				note_position (l_input.count + 1)
 			end
@@ -919,7 +987,7 @@ feature -- Parsing
 				l_has_active_context := True
 			end
 			if not has_error then
-				process_internal_subset (l_input)
+				process_dtd_subset (l_input, True)
 			end
 			if l_has_active_context then
 				pop_entity
@@ -956,7 +1024,7 @@ feature -- Parsing
 			end
 			if not has_error then
 				if looks_like_external_subset (l_input) then
-					process_internal_subset (l_input)
+					process_dtd_subset (l_input, True)
 				else
 					l_content_start := external_parameter_literal_content_start (l_input)
 					if l_content_start <= l_input.count and then is_quote (l_input.item (l_content_start)) then
@@ -1904,8 +1972,12 @@ feature {NONE} -- Markup parsing
 				a_data.count - i + 1
 			end
 			if not has_error then
-				if l_version.is_empty and then not (parsing_external_entity and then not l_encoding.is_empty) then
+				if (parsing_external_entity and then l_encoding.is_empty)
+					or else (not parsing_external_entity and then l_version.is_empty) then
 					set_error ("invalid xml declaration")
+				elseif parsing_external_entity and then l_encoding.is_empty then
+						-- A text declaration requires EncodingDecl (XML 1.0, production [77]).
+					set_error ("invalid text declaration")
 				else
 					xml_standalone := l_standalone
 					handler.on_xml_declaration (l_version, l_encoding, l_standalone)
@@ -2115,7 +2187,7 @@ feature {NONE} -- Character data and references
 								l_subset := a_input.substring (l_subset_start + 1, l_subset_end - 1).to_string_8
 								l_previous_offset := dtd_subset_position_offset
 								dtd_subset_position_offset := l_subset_start
-								process_internal_subset_prefix (l_subset)
+								process_internal_subset_prefix (l_subset, False)
 								dtd_subset_position_offset := l_previous_offset
 							end
 						end
@@ -2628,7 +2700,10 @@ feature {NONE} -- Character data and references
 			until
 				l_done or has_error
 			loop
-				if l_seen.has (Result) or else is_entity_active (Result) then
+				if dtd_is_standalone and then external_dtd_depth = 0 and then parameter_subset_expansion_depth = 0
+					and then not parsing_external_entity and then is_general_entity_declared_externally (Result) then
+					set_error ("standalone reference to externally declared entity")
+				elseif l_seen.has (Result) or else is_entity_active (Result) then
 					set_error ("recursive entity reference")
 				elseif attached entity_value (Result) as l_value and then attached single_entity_reference_name (l_value, '&') as l_next and then not is_predefined_entity (l_next) and then attached entity_value (l_next) then
 					l_seen.force (True, Result)
@@ -2662,7 +2737,9 @@ feature {NONE} -- Character data and references
 					l_previous_floor := entity_element_floor
 					entity_element_floor := l_element_depth
 					push_entity (l_name)
+					internal_entity_expansion_depth := internal_entity_expansion_depth + 1
 					parse_entity_content (l_value)
+					internal_entity_expansion_depth := internal_entity_expansion_depth - 1
 					pop_entity
 					entity_element_floor := l_previous_floor
 					if not has_error and then element_stack.count /= l_element_depth then
@@ -2714,57 +2791,73 @@ feature {NONE} -- Character data and references
 			end
 		end
 
-	include_external_entity_in_content (a_entity: XP_EXTERNAL_ENTITY)
-			-- Resolve and include external parsed entity as content.
-		require
-			entity_attached: a_entity /= Void
-			general_entity: not a_entity.is_parameter
+	resolved_external_replacement (a_name, a_public_id, a_system_id: READABLE_STRING_8; a_is_parameter: BOOLEAN; a_base: detachable READABLE_STRING_8): detachable STRING_8
+			-- Legacy native callbacks return control text; direct loaders return original bytes.
 		do
-			if a_entity.is_unparsed then
-				set_error ("unparsed entity reference")
-			elseif not allows_general_entities (external_entity_policy) then
-				set_error ("external entity not loaded")
-			elseif external_entity_resolver = Void then
-				set_error ("external entity resolver missing")
-			elseif attached external_entity_resolver as l_resolver then
-				if attached l_resolver.resolve_external_entity (a_entity.name, a_entity.public_id, a_entity.system_id, False) as l_value then
-					note_entity_expansion (l_value.count)
-					if not has_error then
-						push_entity (a_entity.name)
-						parse_entity_content (l_value)
-						pop_entity
-					end
+			if attached external_entity_resolver as l_resolver and then
+				attached l_resolver.resolve_external_entity_from_base (a_name, a_public_id, a_system_id, a_is_parameter, a_base) as l_raw
+			then
+				if l_resolver.last_resolution_is_external_child_parse then
+					Result := l_raw
 				else
-					set_error ("external entity not resolved")
+					Result := normalized_external_replacement (l_raw)
 				end
 			end
 		end
 
+	include_external_entity_in_content (a_entity: XP_EXTERNAL_ENTITY)
+			-- Resolve original bytes using the declaration origin, then include balanced content.
+		require
+			entity_attached: a_entity /= Void
+			general_entity: not a_entity.is_parameter
+		local
+			l_previous_base: detachable STRING_8
+			l_previous_floor, l_depth: INTEGER
+		do
+			l_previous_base := current_external_entity_base
+			l_previous_floor := entity_element_floor
+			if a_entity.is_unparsed then
+				set_error ("unparsed entity reference")
+			elseif not allows_general_entities (external_entity_policy) then
+				if skip_unread_external_entities then
+					handler.on_skipped_entity (a_entity.name, False)
+					check_handler_stop
+				else
+					set_error ("external entity not loaded")
+				end
+			elseif external_entity_resolver = Void then
+				set_error ("external entity resolver missing")
+			elseif attached external_entity_resolver as l_resolver then
+				push_entity (a_entity.name)
+				if attached resolved_external_replacement (a_entity.name, a_entity.public_id, a_entity.system_id, False, a_entity.declaration_base) as l_value then
+					note_entity_expansion (l_value.count)
+					if not has_error then
+						if attached l_resolver.last_resolved_resource as l_resource then current_external_entity_base := l_resource.twin end
+						l_depth := element_stack.count
+						entity_element_floor := l_depth
+						parse_entity_content (l_value)
+						if not has_error and then element_stack.count /= l_depth then set_error ("asynchronous entity") end
+					end
+				else
+					set_error ("external entity not resolved")
+				end
+				pop_entity
+			end
+			current_external_entity_base := l_previous_base
+			entity_element_floor := l_previous_floor
+		rescue
+			current_external_entity_base := l_previous_base
+			entity_element_floor := l_previous_floor
+		end
+
 	include_external_entity_in_literal (a_entity: XP_EXTERNAL_ENTITY; a_text: STRING_8)
-			-- Resolve and include external parsed entity as literal text.
+			-- WFC No External Entity References applies even when loading is enabled.
 		require
 			entity_attached: a_entity /= Void
 			general_entity: not a_entity.is_parameter
 			text_attached: a_text /= Void
 		do
-			if a_entity.is_unparsed then
-				set_error ("unparsed entity reference")
-			elseif not allows_general_entities (external_entity_policy) then
-				set_error ("external entity not loaded")
-			elseif external_entity_resolver = Void then
-				set_error ("external entity resolver missing")
-			elseif attached external_entity_resolver as l_resolver then
-				if attached l_resolver.resolve_external_entity (a_entity.name, a_entity.public_id, a_entity.system_id, False) as l_value then
-					note_entity_expansion (l_value.count)
-					if not has_error then
-						push_entity (a_entity.name)
-						expand_literal_text (l_value, a_text)
-						pop_entity
-					end
-				else
-					set_error ("external entity not resolved")
-				end
-			end
+			set_error ("reference to external entity in attribute")
 		end
 
 	include_external_parameter_entity_in_subset (a_entity: XP_EXTERNAL_ENTITY)
@@ -2772,19 +2865,32 @@ feature {NONE} -- Character data and references
 		require
 			entity_attached: a_entity /= Void
 			parameter_entity: a_entity.is_parameter
+		local
+			l_previous_base: detachable STRING_8
+			l_previous_depth: INTEGER
 		do
+			l_previous_base := current_external_entity_base
+			l_previous_depth := external_dtd_depth
 			if not parameter_entity_loading_allowed then
-				set_error ("external entity not loaded")
+				if skip_unread_external_entities then
+					dtd_has_parameter_entity_references := True
+					dtd_declarations_disabled := not dtd_is_standalone
+					handler.on_skipped_entity (a_entity.name, True)
+					check_handler_stop
+				else
+					set_error ("external entity not loaded")
+				end
 			elseif external_entity_resolver = Void then
 				set_error ("external entity resolver missing")
 			elseif external_entity_resolver /= Void and then attached external_entity_resolver as l_resolver then
 				check_not_standalone
 				if not has_error then
-					if attached l_resolver.resolve_external_entity (a_entity.name, a_entity.public_id, a_entity.system_id, True) as l_value then
+					if attached resolved_external_replacement (a_entity.name, a_entity.public_id, a_entity.system_id, True, a_entity.declaration_base) as l_value then
 						if not l_resolver.last_resolution_is_external_child_parse then
 							note_entity_expansion (l_value.count)
 						end
 						if not has_error then
+							if attached l_resolver.last_resolved_resource as l_resource then current_external_entity_base := l_resource.twin end
 							external_dtd_depth := external_dtd_depth + 1
 							process_internal_subset (l_value)
 							external_dtd_depth := external_dtd_depth - 1
@@ -2794,6 +2900,11 @@ feature {NONE} -- Character data and references
 					end
 				end
 			end
+			current_external_entity_base := l_previous_base
+		rescue
+			current_external_entity_base := l_previous_base
+			external_dtd_depth := l_previous_depth
+
 		end
 
 	append_external_parameter_entity_in_literal (a_entity: XP_EXTERNAL_ENTITY; a_text: STRING_8)
@@ -2802,7 +2913,12 @@ feature {NONE} -- Character data and references
 			entity_attached: a_entity /= Void
 			parameter_entity: a_entity.is_parameter
 			text_attached: a_text /= Void
+		local
+			l_previous_base: detachable STRING_8
+			l_previous_depth: INTEGER
 		do
+			l_previous_base := current_external_entity_base
+			l_previous_depth := external_dtd_depth
 			if not parameter_entity_loading_allowed then
 				set_error ("external entity not loaded")
 			elseif external_entity_resolver = Void then
@@ -2811,7 +2927,7 @@ feature {NONE} -- Character data and references
 				check_not_standalone
 				if not has_error then
 					l_resolver.set_next_resolution_is_parameter_literal (True)
-					if attached l_resolver.resolve_external_entity (a_entity.name, a_entity.public_id, a_entity.system_id, True) as l_value then
+					if attached resolved_external_replacement (a_entity.name, a_entity.public_id, a_entity.system_id, True, a_entity.declaration_base) as l_value then
 						l_resolver.set_next_resolution_is_parameter_literal (False)
 						if not l_resolver.last_resolution_is_external_child_parse then
 							note_entity_expansion (l_value.count)
@@ -2827,6 +2943,14 @@ feature {NONE} -- Character data and references
 					end
 				end
 			end
+			current_external_entity_base := l_previous_base
+		rescue
+			if attached external_entity_resolver as l_resolver then
+				l_resolver.set_next_resolution_is_parameter_literal (False)
+			end
+			current_external_entity_base := l_previous_base
+			external_dtd_depth := l_previous_depth
+
 		end
 
 	include_external_subset (a_public_id, a_system_id: READABLE_STRING_8)
@@ -2834,16 +2958,22 @@ feature {NONE} -- Character data and references
 		require
 			public_id_attached: a_public_id /= Void
 			system_id_attached: a_system_id /= Void
+		local
+			l_previous_base: detachable STRING_8
+			l_previous_depth: INTEGER
 		do
+			l_previous_base := current_external_entity_base
+			l_previous_depth := external_dtd_depth
 			if parameter_entity_loading_allowed then
 				if external_entity_resolver = Void then
 					set_error ("external entity resolver missing")
 				elseif attached external_entity_resolver as l_resolver then
-					if attached l_resolver.resolve_external_entity (doctype_name, a_public_id, a_system_id, True) as l_value then
+					if attached resolved_external_replacement (doctype_name, a_public_id, a_system_id, True, current_external_entity_base) as l_value then
 						if not l_resolver.last_resolution_is_external_child_parse then
 							note_entity_expansion (l_value.count)
 						end
 						if not has_error then
+							if attached l_resolver.last_resolved_resource as l_resource then current_external_entity_base := l_resource.twin end
 							external_dtd_depth := external_dtd_depth + 1
 							process_internal_subset (l_value)
 							external_dtd_depth := external_dtd_depth - 1
@@ -2853,6 +2983,11 @@ feature {NONE} -- Character data and references
 					end
 				end
 			end
+			current_external_entity_base := l_previous_base
+		rescue
+			current_external_entity_base := l_previous_base
+			external_dtd_depth := l_previous_depth
+
 		end
 
 	include_foreign_dtd_if_needed (a_root_name: READABLE_STRING_8)
@@ -2860,12 +2995,17 @@ feature {NONE} -- Character data and references
 		require
 			root_name_attached: a_root_name /= Void
 			root_name_not_empty: not a_root_name.is_empty
+		local
+			l_previous_base: detachable STRING_8
+			l_previous_depth: INTEGER
 		do
+			l_previous_base := current_external_entity_base
+			l_previous_depth := external_dtd_depth
 			if use_foreign_dtd and then not foreign_dtd_loaded and then not document_has_external_subset then
 				foreign_dtd_loaded := True
 				check_not_standalone
 				if not has_error and then parameter_entity_loading_allowed and then attached external_entity_resolver as l_resolver then
-					if attached l_resolver.resolve_external_entity (a_root_name, "", "foreign.dtd", True) as l_value then
+					if attached resolved_external_replacement (a_root_name, "", "foreign.dtd", True, current_external_entity_base) as l_value then
 						if not l_resolver.last_resolution_is_external_child_parse then
 							note_entity_expansion (l_value.count)
 						end
@@ -2873,6 +3013,7 @@ feature {NONE} -- Character data and references
 							if not l_value.is_empty or else l_resolver.last_resolution_is_external_child_parse then
 								document_has_external_subset := True
 							end
+							if attached l_resolver.last_resolved_resource as l_resource then current_external_entity_base := l_resource.twin end
 							external_dtd_depth := external_dtd_depth + 1
 							process_internal_subset (l_value)
 							external_dtd_depth := external_dtd_depth - 1
@@ -2882,6 +3023,11 @@ feature {NONE} -- Character data and references
 					end
 				end
 			end
+			current_external_entity_base := l_previous_base
+		rescue
+			current_external_entity_base := l_previous_base
+			external_dtd_depth := l_previous_depth
+
 		end
 
 	check_not_standalone
@@ -2918,7 +3064,12 @@ feature {NONE} -- Character data and references
 			until
 				i > a_content.count or has_error or is_suspended
 			loop
-				if a_content.item (i) = '<' then
+				if starts_xml_declaration_at (a_content, i) then
+					-- Text declarations are removed at the external resource boundary.
+					-- An internal entity cannot introduce an XML declaration.
+					set_error ("misplaced xml declaration")
+					i := a_content.count + 1
+				elseif a_content.item (i) = '<' then
 					i := parse_markup (a_content, i)
 				else
 					i := parse_character_data (a_content, i)
@@ -3024,80 +3175,109 @@ feature {NONE} -- DTD entity declarations
 		end
 
 	process_internal_subset (a_subset: READABLE_STRING_8)
-			-- Process entity declarations and parameter entity references in an internal subset.
+			-- Internal subsets, internal parameter replacements and INCLUDE bodies cannot have text declarations.
+		require
+			subset_attached: a_subset /= Void
+		do
+			process_dtd_subset (a_subset, False)
+		end
+
+	process_dtd_subset (a_subset: READABLE_STRING_8; a_allow_text_declaration: BOOLEAN)
+			-- Process declarations; only an external resource entry may begin with a text declaration.
 		require
 			subset_attached: a_subset /= Void
 		local
 			i: INTEGER
 			l_end: INTEGER
 			l_text: STRING_8
-			l_seen_xml_declaration: BOOLEAN
 			l_target_end, l_data_start: INTEGER
 			l_target, l_data: STRING_8
+			l_subset: READABLE_STRING_8
+			l_expanded: detachable STRING_8
+			l_reference, l_reference_end, l_old_count: INTEGER
+			l_edits: ARRAYED_LIST [TUPLE [reference_index, old_count, new_count: INTEGER]]
 		do
+			l_subset := a_subset
+			create l_edits.make (0)
 			from
 				i := 1
 			invariant
-				index_in_bounds: i >= 1 and i <= a_subset.count + 1
+				index_in_bounds: i >= 1 and i <= l_subset.count + 1
 			until
-				i > a_subset.count or has_error or is_suspended
+				i > l_subset.count or has_error or is_suspended
 			loop
 				if dtd_entity_reference_position > 0 then
 					note_position (dtd_entity_reference_position)
 				else
-					note_position (dtd_subset_position_offset + i)
+					note_position (dtd_subset_position_offset + original_dtd_subset_index (i, l_edits))
 				end
-				if has_at (a_subset, i, "<!ENTITY") then
-					i := parse_entity_declaration (a_subset, i)
-				elseif has_at (a_subset, i, "<!ATTLIST") then
-					i := parse_attlist_declaration (a_subset, i)
-				elseif has_at (a_subset, i, "<!ELEMENT") then
-					i := parse_element_declaration (a_subset, i)
-				elseif has_at (a_subset, i, "<!NOTATION") then
-					i := parse_notation_declaration (a_subset, i)
-				elseif has_at (a_subset, i, "<![") then
-					i := parse_conditional_section (a_subset, i)
-				elseif has_at (a_subset, i, "<!--") then
-					l_end := find_sequence (a_subset, "-->", i + 4)
+				l_expanded := Void
+				if has_at (l_subset, i, "<!ENTITY") or else has_at (l_subset, i, "<!ATTLIST") or else has_at (l_subset, i, "<!ELEMENT") or else has_at (l_subset, i, "<!NOTATION") or else has_at (l_subset, i, "<![") then
+					l_reference := next_dtd_declaration_parameter_reference (l_subset, i)
+					if l_reference > 0 then
+						if dtd_entity_reference_position = 0 then
+							note_position (dtd_subset_position_offset + original_dtd_subset_index (l_reference, l_edits))
+						end
+						l_expanded := dtd_subset_with_parameter_reference (l_subset, l_reference)
+					end
+				end
+				if has_error or is_suspended then
+					i := l_subset.count + 1
+				elseif attached l_expanded as l_replacement then
+					l_reference_end := find_character (l_subset, ';', l_reference + 1)
+					l_old_count := l_reference_end - l_reference + 1
+					l_edits.extend ([l_reference, l_old_count, l_replacement.count - l_subset.count + l_old_count])
+					l_subset := l_replacement
+				elseif has_at (l_subset, i, "<!ENTITY") then
+					i := parse_entity_declaration (l_subset, i)
+				elseif has_at (l_subset, i, "<!ATTLIST") then
+					i := parse_attlist_declaration (l_subset, i)
+				elseif has_at (l_subset, i, "<!ELEMENT") then
+					i := parse_element_declaration (l_subset, i)
+				elseif has_at (l_subset, i, "<!NOTATION") then
+					i := parse_notation_declaration (l_subset, i)
+				elseif has_at (l_subset, i, "<![") then
+					i := parse_conditional_section (l_subset, i)
+				elseif has_at (l_subset, i, "<!--") then
+					l_end := find_sequence (l_subset, "-->", i + 4)
 					if l_end = 0 then
 						set_error ("unterminated comment")
-						i := a_subset.count + 1
-					elseif find_sequence (a_subset, "--", i + 4) < l_end then
+						i := l_subset.count + 1
+					elseif find_sequence (l_subset, "--", i + 4) < l_end then
 						set_error ("double hyphen in comment")
-						i := a_subset.count + 1
+						i := l_subset.count + 1
 					else
 						if handler.wants_comment_default then
-							emit_default (a_subset.substring (i, l_end + 2))
+							emit_default (l_subset.substring (i, l_end + 2))
 						end
-						create l_text.make_from_string (a_subset.substring (i + 4, l_end - 1))
+						create l_text.make_from_string (l_subset.substring (i + 4, l_end - 1))
 						if not has_error and not is_suspended then
 							handler.on_comment (l_text)
 							check_handler_stop
 						end
 						i := l_end + 3
 					end
-				elseif has_at (a_subset, i, "<?") then
-					if starts_xml_declaration_at (a_subset, i) then
-						i := parse_processing_instruction (a_subset, i)
-						l_seen_xml_declaration := not has_error
+				elseif has_at (l_subset, i, "<?") then
+					if a_allow_text_declaration and then i = 1 and then starts_xml_declaration_at (l_subset, i) then
+						i := parse_processing_instruction (l_subset, i)
 					else
-						l_end := find_sequence (a_subset, "?>", i + 2)
+						l_end := find_sequence (l_subset, "?>", i + 2)
 						if l_end = 0 then
 							set_error ("unterminated processing instruction")
-							i := a_subset.count + 1
+							i := l_subset.count + 1
 						else
-							validate_processing_instruction_target (a_subset, i + 2, l_end)
+							validate_processing_instruction_target (l_subset, i + 2, l_end)
 							if has_error then
-								i := a_subset.count + 1
+								i := l_subset.count + 1
 							else
 								if handler.wants_processing_instruction_default then
-									emit_default (a_subset.substring (i, l_end + 1))
+									emit_default (l_subset.substring (i, l_end + 1))
 								end
 								if not has_error and not is_suspended then
-									l_target_end := scan_name (a_subset, i + 2)
-									l_target := a_subset.substring (i + 2, l_target_end - 1).to_string_8
-									l_data_start := skip_spaces (a_subset, l_target_end).min (l_end)
-									l_data := a_subset.substring (l_data_start, l_end - 1).to_string_8
+									l_target_end := scan_name (l_subset, i + 2)
+									l_target := l_subset.substring (i + 2, l_target_end - 1).to_string_8
+									l_data_start := skip_spaces (l_subset, l_target_end).min (l_end)
+									l_data := l_subset.substring (l_data_start, l_end - 1).to_string_8
 									handler.on_processing_instruction (l_target, l_data)
 									check_handler_stop
 								end
@@ -3105,31 +3285,165 @@ feature {NONE} -- DTD entity declarations
 							end
 						end
 					end
-				elseif a_subset.item (i).code = 37 then
-					i := include_parameter_entity_in_subset (a_subset, i)
+				elseif l_subset.item (i).code = 37 then
+					i := include_parameter_entity_in_subset (l_subset, i)
 				else
-					if is_xml_space (a_subset.item (i)) then
-						emit_default (a_subset.substring (i, i))
+					if is_xml_space (l_subset.item (i)) then
+						emit_default (l_subset.substring (i, i))
 						i := i + 1
-					elseif is_incomplete_utf8_sequence_at (a_subset, i) then
+					elseif is_incomplete_utf8_sequence_at (l_subset, i) then
 						set_error ("partial character")
-						i := a_subset.count + 1
-					elseif is_quote (a_subset.item (i)) then
+						i := l_subset.count + 1
+					elseif is_quote (l_subset.item (i)) then
 						set_error ("unterminated literal")
-						i := a_subset.count + 1
-					elseif a_subset.item (i) = ']' then
+						i := l_subset.count + 1
+					elseif l_subset.item (i) = ']' then
 						set_error ("invalid DTD closing delimiter")
-						i := a_subset.count + 1
-					elseif a_subset.item (i).code = 36 then
+						i := l_subset.count + 1
+					elseif l_subset.item (i).code = 36 then
 						set_error ("invalid DTD content")
-						i := a_subset.count + 1
+						i := l_subset.count + 1
 					else
 						set_error ("unexpected DTD content")
-						i := a_subset.count + 1
+						i := l_subset.count + 1
 					end
 				end
 			variant
+				(Default_max_entity_expansion_bytes - expanded_entity_bytes + l_subset.count - i + 1).max (0)
+			end
+		end
+
+	original_dtd_subset_index (a_index: INTEGER; a_edits: ARRAYED_LIST [TUPLE [reference_index, old_count, new_count: INTEGER]]): INTEGER
+			-- Undo inline replacements in reverse order; inserted token bytes belong to the PE reference.
+		local
+			i: INTEGER
+			l_edit: TUPLE [reference_index, old_count, new_count: INTEGER]
+		do
+			Result := a_index
+			from i := a_edits.count until i = 0 loop
+				l_edit := a_edits.i_th (i)
+				if Result >= l_edit.reference_index + l_edit.new_count then
+					Result := Result - l_edit.new_count + l_edit.old_count
+				elseif Result >= l_edit.reference_index then
+					Result := l_edit.reference_index
+				end
+				i := i - 1
+			variant
+				i
+			end
+		end
+
+	next_dtd_declaration_parameter_reference (a_subset: READABLE_STRING_8; a_start_index: INTEGER): INTEGER
+			-- First PE outside literals in this declaration, or in a conditional header.
+			-- A parameter declaration's percent marker is followed by whitespace, not a name.
+		local
+			i: INTEGER
+			l_quote: CHARACTER_8
+			l_conditional, l_done: BOOLEAN
+		do
+			l_conditional := has_at (a_subset, a_start_index, "<![")
+			from i := a_start_index + 3 until i > a_subset.count or l_done or Result > 0 loop
+				if l_quote /= '%U' then
+					if a_subset.item (i) = l_quote then l_quote := '%U' end
+				elseif is_quote (a_subset.item (i)) then
+					l_quote := a_subset.item (i)
+				elseif a_subset.item (i) = '>' or else (l_conditional and then a_subset.item (i) = '[') then
+					l_done := True
+				elseif a_subset.item (i).code = 37 and then i < a_subset.count and then not is_xml_space (a_subset.item (i + 1)) then
+					Result := i
+				end
+				i := i + 1
+			variant
 				a_subset.count - i + 1
+			end
+		end
+
+	dtd_subset_with_parameter_reference (a_subset: READABLE_STRING_8; a_reference: INTEGER): detachable STRING_8
+			-- Expand one inline PE and keep the unconsumed stream, including any split delimiter.
+			-- Unknown references remain for the nonvalidating declaration-skip rules.
+		local
+			l_end: INTEGER
+			l_name: STRING_8
+		do
+			l_end := find_character (a_subset, ';', a_reference + 1)
+			if l_end = 0 then
+				set_error ("unterminated parameter entity reference")
+			elseif not parsing_external_entity and then external_dtd_depth = 0 and then parameter_subset_expansion_depth = 0 then
+				set_error ("parameter entity reference in internal subset declaration")
+			else
+				l_name := a_subset.substring (a_reference + 1, l_end - 1).to_string_8
+				if not is_valid_name (l_name) then
+					set_error ("invalid parameter entity name")
+				elseif attached expanded_dtd_parameter_value (l_name) as l_value and then not has_error and then not is_suspended then
+					create Result.make (a_subset.count + l_value.count + 2)
+					Result.append (a_subset.substring (1, a_reference - 1))
+					Result.append_character (' ')
+					Result.append (l_value)
+					Result.append_character (' ')
+					Result.append (a_subset.substring (l_end + 1, a_subset.count))
+				end
+			end
+		end
+
+	expanded_dtd_parameter_value (a_name: READABLE_STRING_8): detachable STRING_8
+			-- Token replacement for an inline PE. Quoted spans are left for their own grammar.
+		local
+			l_value: detachable READABLE_STRING_8
+			l_external_value: STRING_8
+			l_end, i: INTEGER
+			l_name: STRING_8
+			l_quote: CHARACTER_8
+		do
+			if is_entity_active (a_name) then
+				set_error ("recursive entity reference")
+			elseif entity_stack.count >= Default_max_entity_depth then
+				set_error ("entity expansion depth exceeded")
+			elseif attached parameter_entity_value (a_name) as l_internal_value then
+				note_entity_expansion (parameter_entity_accounting_value (a_name))
+				l_value := l_internal_value
+			elseif attached external_parameter_entity (a_name) as l_external then
+				create l_external_value.make_empty
+				append_external_parameter_entity_in_literal (l_external, l_external_value)
+				l_value := l_external_value
+			end
+			if attached l_value as l_text and then not has_error and then not is_suspended then
+				push_entity (a_name)
+				create Result.make (l_text.count)
+				from i := 1 until i > l_text.count or has_error or is_suspended loop
+					if l_quote /= '%U' then
+						Result.append_character (l_text.item (i))
+						if l_text.item (i) = l_quote then l_quote := '%U' end
+						i := i + 1
+					elseif is_quote (l_text.item (i)) then
+						l_quote := l_text.item (i)
+						Result.append_character (l_quote)
+						i := i + 1
+					elseif l_text.item (i).code = 37 and then i < l_text.count and then not is_xml_space (l_text.item (i + 1)) then
+						l_end := find_character (l_text, ';', i + 1)
+						if l_end = 0 then
+							set_error ("unterminated parameter entity reference")
+							i := l_text.count + 1
+						else
+							l_name := l_text.substring (i + 1, l_end - 1).to_string_8
+							if not is_valid_name (l_name) then
+								set_error ("invalid parameter entity name")
+							elseif attached expanded_dtd_parameter_value (l_name) as l_nested then
+								Result.append_character (' ')
+								Result.append (l_nested)
+								Result.append_character (' ')
+							else
+								Result.append (l_text.substring (i, l_end))
+							end
+							i := l_end + 1
+						end
+					else
+						Result.append_character (l_text.item (i))
+						i := i + 1
+					end
+				variant
+					l_text.count - i + 1
+				end
+				pop_entity
 			end
 		end
 
@@ -3160,7 +3474,7 @@ feature {NONE} -- DTD entity declarations
 			end
 		end
 
-	process_internal_subset_prefix (a_subset: READABLE_STRING_8)
+	process_internal_subset_prefix (a_subset: READABLE_STRING_8; a_allow_text_declaration: BOOLEAN)
 			-- Process only complete declaration tokens in a non-final subset.
 		require
 			subset_attached: a_subset /= Void
@@ -3169,7 +3483,7 @@ feature {NONE} -- DTD entity declarations
 		do
 			l_end := complete_dtd_prefix_end (a_subset)
 			if l_end > 0 then
-				process_internal_subset (a_subset.substring (1, l_end))
+				process_dtd_subset (a_subset.substring (1, l_end), a_allow_text_declaration)
 			end
 		end
 
@@ -3184,6 +3498,7 @@ feature {NONE} -- DTD entity declarations
 			l_end: INTEGER
 			l_inner: STRING_8
 			l_status: STRING_8
+			l_bracket_in_entity: BOOLEAN
 		do
 			l_end := find_conditional_section_end (a_subset, a_start_index)
 			if l_end = 0 then
@@ -3200,7 +3515,7 @@ feature {NONE} -- DTD entity declarations
 				invariant
 					index_in_bounds: i >= a_start_index + 3 and i <= a_subset.count + 1
 				until
-					i > l_end - 1 or has_error or else a_subset.item (i) = '['
+					i > l_end - 1 or has_error or else a_subset.item (i) = '[' or else l_status.has ('[')
 				loop
 					if a_subset.item (i).code = 37 then
 						i := append_parameter_reference_in_entity_value (a_subset, i, l_status)
@@ -3211,9 +3526,17 @@ feature {NONE} -- DTD entity declarations
 				variant
 					a_subset.count - i + 1
 				end
+				create l_inner.make_empty
+				if not has_error and then l_status.has ('[') then
+						-- The keyword's parameter entity also held the opening bracket.
+					l_bracket_in_entity := True
+					l_inner.append (l_status.substring (l_status.index_of ('[', 1) + 1, l_status.count))
+					l_status.keep_head (l_status.index_of ('[', 1) - 1)
+					i := i - 1
+				end
 				if has_error then
 					Result := a_subset.count + 1
-				elseif i > l_end - 1 or else a_subset.item (i) /= '[' then
+				elseif not l_bracket_in_entity and then (i > l_end - 1 or else a_subset.item (i) /= '[') then
 					set_error ("invalid conditional section")
 					Result := a_subset.count + 1
 				else
@@ -3225,7 +3548,9 @@ feature {NONE} -- DTD entity declarations
 					elseif l_status.same_string ("INCLUDE") then
 						l_content_start := i + 1
 						if l_content_start <= l_end - 1 then
-							create l_inner.make_from_string (a_subset.substring (l_content_start, l_end - 1))
+							l_inner.append (a_subset.substring (l_content_start, l_end - 1))
+						end
+						if not l_inner.is_empty then
 							process_internal_subset (l_inner)
 						end
 						if has_error then
@@ -5287,8 +5612,9 @@ feature {NONE} -- Event dispatch
 				-- A root element whose name differs from the DOCTYPE name violates only the
 				-- "Root Element Type" validity constraint, so a non-validating parser accepts it.
 			else
-				if element_stack.count = 0 then
-					document_element_count := document_element_count + 1
+				if element_stack.count = 0 and then document_element_count = 0 then
+						-- An external parsed entity may hold several top-level elements; count the first only.
+					document_element_count := 1
 				end
 				apply_default_attributes (a_name, a_attributes)
 				if not has_error then
@@ -5364,8 +5690,9 @@ feature {NONE} -- Event dispatch
 			elseif element_stack.count = 0 and then document_element_count > 0 and then not parsing_external_entity then
 				set_error ("multiple document elements")
 			else
-				if element_stack.count = 0 then
-					document_element_count := document_element_count + 1
+				if element_stack.count = 0 and then document_element_count = 0 then
+						-- An external parsed entity may hold several top-level elements; count the first only.
+					document_element_count := 1
 				end
 				create l_name.make (a_input, a_name_start, a_name_end - a_name_start + 1)
 				element_slice_stack.extend (l_name)
@@ -6007,6 +6334,56 @@ feature {NONE} -- Namespace handling
 			-- Reserved xmlns namespace URI.
 
 feature {NONE} -- Scanning
+
+	normalized_external_replacement (a_raw: READABLE_STRING_8): STRING_8
+			-- Decode one complete external resource and remove its optional text declaration.
+			-- Document declaration state is restored even if a declaration callback raises.
+		local
+			l_previous_external, l_previous_utf8, l_saved: BOOLEAN
+			l_previous_standalone, l_start, l_unit: INTEGER
+		do
+			l_previous_external := parsing_external_entity
+			l_previous_utf8 := input_is_utf8
+			l_previous_standalone := xml_standalone
+			l_saved := True
+			parsing_external_entity := True
+			input_is_utf8 := False
+			if a_raw.count > max_input_bytes then
+				set_error ("external entity exceeds input limit")
+			end
+			if not has_error and then a_raw.count >= 2 and then
+				((a_raw.item (1).code = 255 and a_raw.item (2).code = 254)
+				or else (a_raw.item (1).code = 254 and a_raw.item (2).code = 255)) then
+				if a_raw.count \\ 2 /= 0 then
+					set_error ("partial character")
+				elseif a_raw.count >= 4 then
+					l_unit := utf_16_unit_at (a_raw, a_raw.count - 1, a_raw.item (1).code = 254)
+					if l_unit >= 0xD800 and l_unit <= 0xDBFF then
+						set_error ("partial character")
+					end
+				end
+			end
+			if has_error then
+				create Result.make_empty
+			else
+				Result := normalized_input (a_raw, False)
+			end
+			if not has_error and then not Result.is_empty and then starts_xml_declaration_at (Result, 1) then
+				l_start := parse_processing_instruction (Result, 1)
+				if not has_error then
+					Result := Result.substring (l_start, Result.count)
+				end
+			end
+			parsing_external_entity := l_previous_external
+			input_is_utf8 := l_previous_utf8
+			xml_standalone := l_previous_standalone
+		rescue
+			if l_saved then
+				parsing_external_entity := l_previous_external
+				input_is_utf8 := l_previous_utf8
+				xml_standalone := l_previous_standalone
+			end
+		end
 
 	normalized_input (a_input: READABLE_STRING_8; a_allow_alias: BOOLEAN): STRING_8
 			-- XML line-end normalized UTF-8 form of `a_input'; every character must be an XML Char.
@@ -7156,6 +7533,9 @@ feature {NONE} -- Entity tables
 			if attached inherited_parameter_entity_table as l_entities then
 				copy_string_table_into (l_entities, parameter_entity_table)
 			end
+			if attached inherited_general_entity_external_origin_table as l_origins then
+				copy_integer_table_into (l_origins, general_entity_external_origin_table)
+			end
 			if attached inherited_parameter_entity_accounting_table as l_counts then
 				copy_integer_table_into (l_counts, parameter_entity_accounting_table)
 			end
@@ -7199,6 +7579,7 @@ feature {NONE} -- Entity tables
 			across a_source as c loop
 				if a_inherited = Void or else not a_inherited.has (c.key) then
 					create l_value.make (c.item.name, c.item.public_id, c.item.system_id, c.item.notation_name, c.item.is_parameter, c.item.is_unparsed)
+					l_value.set_declaration_base (c.item.declaration_base)
 					a_target.put (l_value, c.key.twin)
 				end
 			end
@@ -7315,9 +7696,10 @@ feature {NONE} -- Entity tables
 			l_value: STRING_8
 		do
 			create l_name.make_from_string (a_name)
-			if not entity_table.has (l_name) then
+			if not entity_table.has (l_name) and then not external_entity_table.has (l_name) then
 				create l_value.make_from_string (a_value)
 				entity_table.put (l_value, l_name)
+				general_entity_external_origin_table.put ((parsing_external_entity or external_dtd_depth > 0 or parameter_subset_expansion_depth > 0).to_integer, l_name)
 			end
 		end
 
@@ -7355,11 +7737,14 @@ feature {NONE} -- Entity tables
 			if a_is_parameter then
 				if not parameter_entity_table.has (l_name) and then not external_parameter_entity_table.has (l_name) then
 					create l_entity.make (a_name, a_public_id, a_system_id, a_notation_name, True, False)
+					l_entity.set_declaration_base (current_external_entity_base)
 					external_parameter_entity_table.put (l_entity, l_name)
 				end
 			elseif not entity_table.has (l_name) and then not external_entity_table.has (l_name) then
 				create l_entity.make (a_name, a_public_id, a_system_id, a_notation_name, False, a_is_unparsed)
+				l_entity.set_declaration_base (current_external_entity_base)
 				external_entity_table.put (l_entity, l_name)
+				general_entity_external_origin_table.put ((parsing_external_entity or external_dtd_depth > 0 or parameter_subset_expansion_depth > 0).to_integer, l_name)
 			end
 		end
 
@@ -7513,6 +7898,20 @@ feature {NONE} -- Entity tables
 			variant
 				entity_stack.count - i + 1
 			end
+			if not Result and then attached inherited_active_entities as l_inherited then
+				from
+					i := 1
+				invariant
+					inherited_index_in_bounds: i >= 1 and i <= l_inherited.count + 1
+				until
+					i > l_inherited.count or Result
+				loop
+					Result := l_inherited.i_th (i).same_string (a_name)
+					i := i + 1
+				variant
+					l_inherited.count - i + 1
+				end
+			end
 		end
 
 	push_entity_reference_position (a_start_index, a_byte_count: INTEGER)
@@ -7581,7 +7980,9 @@ feature {NONE} -- State
 			last_attribute_name_start := 0
 			last_attribute_name_end := 0
 			external_dtd_depth := 0
+			current_external_entity_base := external_entity_base
 			entity_element_floor := 0
+			internal_entity_expansion_depth := 0
 			element_stack.wipe_out
 			element_slice_stack.wipe_out
 			entity_stack.wipe_out
@@ -7616,7 +8017,9 @@ feature {NONE} -- State
 			last_attribute_name_start := 0
 			last_attribute_name_end := 0
 			external_dtd_depth := 0
+			current_external_entity_base := external_entity_base
 			entity_element_floor := 0
+			internal_entity_expansion_depth := 0
 			dtd_has_parameter_entity_references := False
 			dtd_declarations_disabled := False
 			entity_literal_ended_by_undefined_parameter := False
@@ -7633,6 +8036,7 @@ feature {NONE} -- State
 			entity_reference_count_stack.wipe_out
 			entity_table.wipe_out
 			parameter_entity_table.wipe_out
+			general_entity_external_origin_table.wipe_out
 			parameter_entity_accounting_table.wipe_out
 			external_entity_table.wipe_out
 			external_parameter_entity_table.wipe_out
@@ -7673,11 +8077,17 @@ feature {NONE} -- State
 
 	note_position (a_index: INTEGER)
 			-- Record the current parser position as a 1-based input index.
+			-- While internal entity replacement text is parsed, `a_index' indexes that text,
+			-- not the document: the position of the entity reference is kept instead.
 		local
 			l_index: INTEGER
 		do
 			if not position_input.is_empty or else a_index > 0 then
-				l_index := bounded_position_index (a_index)
+				if internal_entity_expansion_depth > 0 and then entity_reference_start_stack.count > 0 then
+					l_index := bounded_position_index (entity_reference_start_stack.i_th (entity_reference_start_stack.count))
+				else
+					l_index := bounded_position_index (a_index)
+				end
 				if lazy_position_accounting then
 					current_position_index := l_index
 				else
@@ -7956,6 +8366,12 @@ feature {NONE} -- State
 	parameter_entity_table: HASH_TABLE [STRING_8, STRING_8]
 			-- Internal parameter entities.
 
+	general_entity_external_origin_table: HASH_TABLE [INTEGER, STRING_8]
+			-- Zero/one flags for every first-bound general entity.
+
+	current_external_entity_base: detachable STRING_8
+			-- Dynamically scoped resource currently supplying markup.
+
 	parameter_entity_accounting_table: HASH_TABLE [INTEGER, STRING_8]
 			-- Logical replacement byte counts for internal parameter entities.
 
@@ -8001,6 +8417,9 @@ feature {NONE} -- State
 	inherited_parameter_entity_table: detachable HASH_TABLE [STRING_8, STRING_8]
 			-- Parent parameter entity bindings for external entity child parsers.
 
+	inherited_general_entity_external_origin_table: detachable HASH_TABLE [INTEGER, STRING_8]
+			-- Detached parent general-entity external-origin flags.
+
 	inherited_parameter_entity_accounting_table: detachable HASH_TABLE [INTEGER, STRING_8]
 			-- Parent parameter entity accounting bindings for external entity child parsers.
 
@@ -8010,8 +8429,11 @@ feature {NONE} -- State
 	inherited_external_parameter_entity_table: detachable HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8]
 			-- Parent external parameter entity bindings for external entity child parsers.
 
+	inherited_active_entities: detachable ARRAYED_LIST [STRING_8]
+			-- General entities a parent parser was expanding when this external entity child parser was created.
+
 	document_element_count: INTEGER
-			-- Number of root-level document elements seen.
+			-- Number of root-level document elements seen (0 or 1).
 
 	expanded_entity_bytes: INTEGER
 			-- Total entity replacement bytes processed in current parse.
@@ -8079,6 +8501,9 @@ feature {NONE} -- State
 	entity_element_floor: INTEGER
 			-- Element depth at the start of the general entity whose content is being parsed;
 			-- end tags may not close elements at or below it.
+
+	internal_entity_expansion_depth: INTEGER
+			-- Number of internal general entities whose replacement text is being parsed as content.
 
 	dtd_has_parameter_entity_references: BOOLEAN
 			-- Has the DTD referenced a parameter entity? Undeclared general entities

@@ -1,0 +1,333 @@
+LATEST W3C RESULTS - NOTHING SKIPPED, F1-F7 FIXED (27 October 2026)
+=====================================================================
+Local only. Nothing committed, pushed or sent to GitHub. main untouched.
+The code changes are uncommitted, on a local branch:
+    C:\Users\masou\Desktop\Lia\xpact\w7-smoke   branch local/w3c-no-skips
+    (based on student-Mass @ ec1705d)
+
+Legend:  [x] done and checked   [ ] still to do   (OK) passed   (!!) problem
+
+
+1. IN ONE MINUTE
+----------------
+[x] Nothing is skipped any more: all 2,585 W3C test cases run.
+[x] Result after the fixes (2013 W3C suite, both builds):
+        assertions OFF : 2,585 / 2,585 passed (OK)
+        assertions ON  : 2,585 / 2,585 passed (OK)  with 30 s per case
+                         (with Jenkins' 10 s: 3 cases are too SLOW, not wrong)
+[x] Fixed in the parser: F1, F2, F3, F4, F5, F6, F7 (one problem each,
+    see section 5). All found by the cases that used to be skipped.
+[x] Nothing else broke: smoke tests, Eiffel test matrix (4/4), Python
+    (178), CRC corpus, ABI, shim audit, and the 4,308 Expat comparisons
+    (same verdicts as Expat, difference table byte-identical to before).
+[x] Your 2003 xmlconf was run too (section 9).
+
+
+2. WHERE WE STARTED -> WHERE WE ARE
+-----------------------------------
+                         | Cases | Passed | Failed | Crash/error | Skipped
+ Start (Jenkins #70,     | 2,585 | 1,727  |   0    |     0       |  858
+  and locally, per build)|       |        |        |             |
+ Step 1: run everything, | 2,585 | 2,533  |  51    |     1       |    0   (assertions OFF)
+  before fixes           | 2,585 | 2,527  |  51    |     7       |    0   (assertions ON)
+ Step 2: after fixes     | 2,585 | 2,585  |   0    |     0       |    0   (assertions OFF)
+  (10 s per case)        | 2,585 | 2,582  |   0    |     3 slow  |    0   (assertions ON)
+ Step 3: after fixes     | 2,585 | 2,585  |   0    |     0       |    0   (both builds)
+  (30 s per case)        |       |        |        |             |
+
+In plain words: we used to test 1,727 cases and hide 858. Now we test all
+2,585. The hidden ones showed 7 real bugs. They are fixed, and every case
+gets the right answer.
+
+
+3. WHAT I DID, STEP BY STEP
+---------------------------
+ 1. Gave every skipped case a fair way to be judged (the "lanes", section 4).
+ 2. Wrote a small C program (tests\native\xpact_w3c_case.c) that runs one
+    test through xpact.dll the way a normal Expat program does, including
+    loading extra files (external entities) from the test folder only.
+ 3. Ran everything -> found F1-F7.
+ 4. Fixed each one separately, in the parser source (src\), rebuilt, and
+    checked each fix with a tiny example first, then with the full run.
+ 5. Ran all the other tests again to make sure nothing else broke.
+ 6. Ran your 2003 xmlconf.
+
+
+4. THE --all-cases FLAG, EXPLAINED
+----------------------------------
+What it is: a new switch for the W3C test runner
+(scripts\run_w3c_conformance.py). Without it, the runner does exactly what
+it did before (1,727 run, 858 skipped), so Jenkins is not changed. With it,
+the 858 "skipped" cases run in 4 extra "lanes", each judged fairly:
+
+ Lane              | Cases | How it runs                        | What counts as a pass
+ core (as before)  | 1,727 | Eiffel test program                | the W3C answer
+ legacy-names      |   309 | Eiffel test program with the old   | the W3C answer (these tests
+ (old editions)    |       | 4th-edition name rules ON          |  were written for those rules)
+ external-entities |   247 | the new DLL program; loads the     | the W3C answer
+                   |       | extra files like Expat programs do |
+ optional-error    |    28 | normal program                     | ACCEPT or REJECT (the spec
+                   |       |                                    |  allows both); crash = fail
+ xml-1.1           |   274 | normal program                     | ACCEPT or REJECT (there is no
+                   |       |                                    |  XML 1.0 answer); crash = fail
+
+How to run it (PowerShell, from the w7-smoke folder):
+
+  # 1. build the two DLLs (smoke test on)
+  $env:ISE_C_COMPILER = "msc_vc140"
+  .\scripts\build_native_eiffel.ps1
+  .\scripts\build_native_eiffel.ps1 -BuildTier Assertions
+
+  # 2. build the DLL test program, once per DLL (in a VS x64 prompt)
+  cl /nologo /Iinclude tests\native\xpact_w3c_case.c build\native-eiffel\xpact.lib /Fe:build\w3c-dll\xpact_w3c_case.exe
+  cl /nologo /Iinclude tests\native\xpact_w3c_case.c build\native-eiffel\xpact_assertions.lib /Fe:build\w3c-dll\xpact_w3c_case_assertions.exe
+  copy build\native-eiffel\xpact.dll, build\native-eiffel\xpact_assertions.dll build\w3c-dll\
+
+  # 3. build the two Eiffel test programs (as run_benchmarks.ps1 does)
+  ec -batch -clean -finalize -config benchmarks\xpact_benchmarks.ecf -target xpact_benchmarks
+  ec -batch -clean -finalize -keep -config benchmarks\xpact_benchmarks.ecf -target xpact_benchmarks_assertions
+  (then finish_freezing in EIFGENs\<target>\F_code)
+
+  # 4. run everything
+  python scripts\run_w3c_conformance.py --all-cases --timeout 30 `
+    --engine Finalized=EIFGENs\xpact_benchmarks\F_code\xpact_benchmarks.exe `
+    --engine FinalizedAssertions=EIFGENs\xpact_benchmarks_assertions\F_code\xpact_benchmarks.exe `
+    --entity-engine Finalized=build\w3c-dll\xpact_w3c_case.exe `
+    --entity-engine FinalizedAssertions=build\w3c-dll\xpact_w3c_case_assertions.exe
+
+  Shortcut: test-runs\2026-10-27-w3c-after-fixes\run-timeout-30s.ps1
+  Reports: summary.md (has a table per lane), results.tsv (column "lane"),
+  junit.xml (lane in the test class name).
+  The same text is in docs\w3c-xml-conformance.md, section "All cases".
+
+
+5. THE FIXES (one problem each; CLAUDE.md format, short)
+--------------------------------------------------------
+All: student PC, Windows 11, EiffelStudio 25.12.9.8922, MSVC 19.51,
+msc_vc140, finalized builds with and without assertions.
+Each one was checked with a tiny example first, then with the full run
+(section 2) and the regression tests (section 6).
+
+[x] F1  An entity that includes itself CRASHED the DLL
+        Test: not-wf-ext-sa-001 (file 001.ent contains &e; itself)
+        Expected: REJECT "recursive entity reference" (as Expat)
+        Before: crash, stack overflow 0xC00000FD (assertions build: 0xC0000005)
+        Cause (confirmed): the parent marked the entity "open" only AFTER
+          the external file was read, and the child parser did not know
+          which entities were open, so it never noticed the loop.
+        Fix: src\xp_parser.e - mark the entity open BEFORE reading it; the
+          child parser inherits the list of open entities and checks it.
+        After: REJECT "recursive entity reference", both builds.
+
+[x] F2  "%name;" INSIDE a declaration in an external DTD was rejected
+        Example: an external DTD with  <!ENTITY % a "b|c">  <!ELEMENT h (%a;)*>
+        Tests: 44 (+4 found after the first fix), among them the XML
+          specification itself (pr-xml-*, spec.dtd line 318)
+        Expected: ACCEPT (allowed in external DTDs, XML 1.0 section 2.8)
+        Before: REJECT "invalid token" / "syntax error" / "unclosed token"
+        Cause (confirmed): the parser never replaced %name; inside
+          ELEMENT / ATTLIST / NOTATION declarations.
+        Fix: src\xp_parser.e - in an external DTD, replace each %name;
+          (outside quotes) by its text with one space before and after
+          (spec 4.4.8). Also: the declaration may end inside the entity
+          (tests invalid--005, -006, rmt-e2e-14), an entity may hold
+          "INCLUDE[" of a conditional section (invalid-not-sa-022), and an
+          external %name; inside a declaration is read like Expat does
+          (valid-not-sa-003). In the INTERNAL DTD it stays an error, as
+          the spec requires (checked).
+        After: all 48 pass, both builds.
+
+[x] F3  The ASSERTIONS DLL ended silently with 2 elements in an entity
+        Example: entity file with  <e/><e/>  -> exit 0xC00000FF, no output
+        Tests: valid-ext-sa-005, -006, ext01, ibm77n16, ibm77v04, ibm77v10
+        Cause (confirmed): a class rule (invariant) says "at most 1 root
+          element", but inside an external entity every top-level element
+          was counted. With 2 the rule broke; only the assertions build
+          checks it, and the error could not get back out through the DLL.
+        Fix: src\xp_parser.e - count only the first top-level element.
+        After: ACCEPT, both builds.
+
+[x] F4  standalone="yes" + an entity declared only outside was ACCEPTED
+        Tests: not-wf-sa03, ibm-not-wf-P32-ibm32n09, ibm-not-wf-P68-ibm68n06
+        Expected: REJECT (rule "Entity Declared")
+        Cause (confirmed): xpact did not remember WHERE an entity was declared.
+        Fix: src\xp_parser.e - remember entities declared in the external
+          DTD or in a parameter entity; in a standalone="yes" document a
+          reference to one is an error. src\xp_native_parser.e - Expat code
+          XML_ERROR_ENTITY_DECLARED_IN_PE (24).
+        After: REJECT "entity declared in parameter entity", like Expat.
+
+[x] F5  A text declaration without encoding="..." was ACCEPTED
+        Tests: dtd07, encoding07 (file starts with <?xml version="1.0"?>)
+        Expected: REJECT (at the top of an external file, encoding is required)
+        Cause (confirmed): the check only required version OR encoding.
+        Fix: src\xp_parser.e - in an external entity, encoding is required.
+          Expat code XML_ERROR_TEXT_DECL (31).
+        After: REJECT "text declaration not well-formed".
+
+[x] F6a "<?xml ...?>" in the wrong place was ACCEPTED
+        Test: not-wf-not-sa-002 (it comes from an internal %entity;)
+        Expected: REJECT (only allowed at the very start of an external file)
+        Fix: src\xp_parser.e - allowed only there; elsewhere the error
+          "XML or text declaration not at start of entity" (Expat code 17).
+
+[x] F6b An XML 1.0 document using an XML 1.1 entity was ACCEPTED
+        Test: rmt-e2e-38 (the entity file says version="1.1")
+        Expected: REJECT (W3C erratum E38)
+        Fix: src\xp_parser.e - in an external entity only version 1.0.
+
+[x] F7  The DLL gave the entity handler base = NULL
+        Expat gives the base (folder) so programs can find relative files.
+        Fix: src\xp_native_callback_handler.e - pass the parser's base
+          (from XML_SetBase). The workaround in the test program now
+          fires 0 times.
+        Limitation: Expat passes the base where the entity was DECLARED;
+          xpact now passes the base of the parser that reads the
+          reference. Same in all W3C tests; not identical in every case.
+
+[x] Error messages: new Expat error codes 24 and 31 added, so programs
+    get the same error numbers as from Expat.
+
+
+6. NOTHING ELSE BROKE (regression checks after all fixes)
+---------------------------------------------------------
+ Check                                              | Result
+ Production + assertions DLL, smoke test ON         | ok, ok (OK)
+ Eiffel test matrix (workbench, ALL assertions incl.| 4/4 ok (OK)
+   loop invariants: also checks my new loops)       |
+ Python tests                                       | 178 OK (OK)
+ Native runtime smoke                               | ok (OK)
+ Windows ABI smoke                                  | ok (OK)
+ Chunked CRC corpus                                 | 7/7 documents ok (OK)
+ Incremental shim audit                             | all pass (OK)
+ C# DLL tests vs Expat 2.8.1 (4,308 inputs)         | same verdict on all;
+                                                    | difference table
+                                                    | IDENTICAL to before (OK)
+ W3C runner WITHOUT --all-cases (what Jenkins runs) | 1,727 passed,
+                                                    | 858 skipped, exit 0,
+                                                    | unchanged (OK)
+
+ Problem met (kept separate, NOT xpact): the CRC corpus and the shim audit
+ first stopped with "'vswhere.exe' is not recognized". Cause (confirmed):
+ my shell did not have the Visual Studio Installer folder on PATH, which
+ vcvars64.bat needs. With it on PATH both passed. Environment, not parser.
+
+
+7. THE 28 "OPTIONAL ERROR" TESTS (you asked: what should they report?)
+----------------------------------------------------------------------
+What the suite says: TYPE="error". In the XML spec an "error" is a
+mistake the parser MAY report or MAY ignore. So the official answer is
+neither "not-wf" nor "invalid": it is "either answer is correct".
+ - not-wf  = broken document -> MUST reject
+ - invalid = breaks its own DTD rules -> only validating parsers check;
+             xpact does not validate, so it accepts
+ - error   = may reject, may accept   <- these 28
+
+(27 earlier + x-rmt-008, which is also TYPE="error" but marked for
+editions 1-4, so it was counted with the old-edition group before.)
+
+What xpact answers (same in both builds; no crash, no timeout):
+
+ Test                          | xpact  | Why (xpact's message or reason)
+ not-wf-not-sa-005             | ACCEPT | undefined %entity in external DTD: not checked
+ pr-xml-euc-jp                 | REJECT | unknown encoding (EUC-JP not supported)
+ pr-xml-iso-2022-jp            | REJECT | unknown encoding
+ pr-xml-shift_jis              | REJECT | unknown encoding
+ weekly-euc-jp                 | REJECT | unknown encoding
+ weekly-iso-2022-jp            | REJECT | unknown encoding
+ weekly-shift_jis              | REJECT | unknown encoding
+ uri01                         | ACCEPT | "#" in a SYSTEM id: not checked
+ o-p11pass1                    | ACCEPT | "#" in a system literal: not checked
+ ibm-invalid-P68-ibm68i01..04  | REJECT | undefined general entity in the external DTD (4 tests)
+ ibm-invalid-P69-ibm69i01..04  | ACCEPT | undefined %entity: not checked (4 tests)
+ ibm-not-wf-P69-ibm69n05       | REJECT | undefined entity
+ rmt-e2e-34                    | ACCEPT | ambiguous content model: not checked (validity)
+ rmt-e2e-55                    | ACCEPT | unparsed entity in entity value: not checked
+ rmt-e2e-57                    | ACCEPT | bad xml:space value: not checked (validity)
+ rmt-ns10-004, -005, -006      | ACCEPT | relative / non-URI namespace name: not checked
+ invalid-bo-7, -8, -9          | REJECT | second byte-order mark inside an entity
+ x-rmt-008                     | ACCEPT | version="1.7": allowed in the 5th edition
+
+ Total: 14 ACCEPT, 14 REJECT. All 28 count as passed, because the spec
+ allows both. Full table: test-runs\2026-10-27-w3c-after-fixes\optional-error-cases.tsv
+ Note: the 6 Japanese ones are rejected only because xpact does not
+ support those encodings (an optional feature).
+
+
+8. THE OLD-EDITION TESTS (309) - now ACCEPT/REJECT, never skipped
+-----------------------------------------------------------------
+(The earlier "311" was 310 of these + 1 XML 1.1 case; 1 of the 310 is the
+optional error x-rmt-008 above, so 309 are left.)
+
+These tests check the OLD name rules (editions 1-4). xpact has those old
+rules built in: the DLL uses them for Expat compatibility. So each test
+now runs with them switched on and is judged by the W3C answer.
+
+ What the parser thinks          | ACCEPT | REJECT | Matches W3C
+ with old rules (4th edition)    |    0   |  309   | 309 / 309 (OK)  "invalid name character"
+ with new rules (5th edition)    |  302   |    7   | (not judged: the W3C answer
+                                 |        |        |  is for the old rules)
+ The 7 rejected with new rules have a second root element: an error in
+ every edition. Per test, both answers: old-edition-cases.tsv (same folder).
+
+
+9. YOUR xmlconf FOLDER (the one in the project root)
+----------------------------------------------------
+What it is: a W3C CVS checkout; its xmlconf.xml is revision 1.6 of
+13 November 2003. It is OLDER than the suite we use (xmlts20130923,
+September 2013), not newer: 2,635 XML files against 3,078; no
+errata-3e / errata-4e / misc folders; no EDITION marks (the 5th
+edition only came in 2008).
+
+Result (fixed code, --all-cases, 30 s, both builds the same):
+ 2,162 cases: 1,570 passed, 302 failed, 290 errors, 0 skipped
+ - 290 errors = the file is MISSING from that copy ("Catalog input file
+   is missing"). 143 are Edinburgh tests whose catalog has no xml:base in
+   that old version (the files are in another folder); the rest are
+   mostly XML 1.1 files not in the checkout. Not a parser problem.
+ - 302 failed = exactly the old name-rule tests from section 8. The 2003
+   catalog has no EDITION mark, so they are judged with the 5th-edition
+   rules. With the old rules all 302 pass (section 8).
+ - Everything else: passed.
+ => With the edition taken into account, every case that has a file gets
+    the right answer. For future runs I recommend the 2013 suite: it is
+    the newer, fixed version of the same tests.
+ Folder: test-runs\2026-10-27-w3c-xmlconf-2003\
+
+
+10. WHAT IS LEFT / LIMITATIONS (honest list)
+--------------------------------------------
+[ ] Nothing is on GitHub yet (your rule). When you agree: one issue per
+    fix (F1-F7) and per tool change, PRs into student-Mass, test evidence.
+    Then Jenkins must confirm.
+[ ] Jenkins uses 10 s per case: with assertions ON the 3 pr-xml-* tests
+    take ~16 s (they pass at 30 s). If Jenkins runs --all-cases, it needs
+    --timeout 30, or the parser must get faster (performance, not a bug).
+[ ] The Eiffel API's own resolver (XP_EXTERNAL_ENTITY_RESOLVER) is not
+    tested by the W3C run; external entities are tested through the DLL.
+[ ] xml-1.1 (274) and optional-error (28) only prove "no crash, a clean
+    answer", not a "correct" answer (there is none in the suite).
+[ ] Only accept/reject is compared; the suite's expected output files
+    (OUTPUT) are not compared yet.
+[ ] F4: the "declared outside" marks are not kept when a parser reuses a
+    cached DOCTYPE; not checked.
+[ ] F7: base = the reading parser's base, not the declaring one (see F7).
+[ ] The libexpat source test suite was not run (no Expat source tree on
+    this PC); the C# comparison with Expat (section 6) was run instead.
+
+
+11. WHERE EVERYTHING IS
+-----------------------
+ Code (uncommitted):  C:\Users\masou\Desktop\Lia\xpact\w7-smoke  (local/w3c-no-skips)
+   src\xp_parser.e, src\xp_native_parser.e, src\xp_native_callback_handler.e  (fixes)
+   benchmarks\xp_benchmark_root.e        (--legacy-names)
+   tests\native\xpact_w3c_case.c         (new DLL test program)
+   scripts\run_w3c_conformance.py        (--all-cases)
+   docs\w3c-xml-conformance.md           (how to use it)
+ Full diff:   test-runs\2026-10-27-w3c-after-fixes\local-changes.diff
+ Results:     test-runs\2026-10-27-w3c-after-fixes\   (w3c\, w3c-timeout-30s\,
+              w3c-default-mode\, logs\, optional-error-cases.tsv,
+              old-edition-cases.tsv)
+ Before fixes: test-runs\2026-10-27-w3c-all-cases\README.md
+ 2003 suite:   test-runs\2026-10-27-w3c-xmlconf-2003\
+ Background:   versionisseu.txt, skipped-analysis-2026-10-27\

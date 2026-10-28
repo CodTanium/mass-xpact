@@ -1,0 +1,9 @@
+tiny.xml                    4 bytes  ACCEPT     84 ms
+plain8.xml            1640011 bytes  ACCEPT    134 ms
+r500_100k.xml          105083 bytes  ACCEPT    455 ms
+r500_400k.xml          403738 bytes  ACCEPT   1636 ms
+r2000_100k.xml         121583 bytes  ACCEPT   1740 ms
+r2000_400k.xml         420238 bytes  ACCEPT   5923 ms
+r2000_400k_amp.xml     424206 bytes  ACCEPT     86 ms
+pr-xml-utf-8.xml       207172 bytes  ACCEPT   1100 ms
+pr-xml-utf-16.xml      313074 bytes  ACCEPT   1145 ms
