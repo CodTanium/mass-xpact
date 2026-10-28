@@ -30,7 +30,7 @@
 |---|---|---|---:|---|
 | F01-1 | [#154](https://github.com/andersoxie/xpact/issues/154) | default attribute values from a separate DTD file were lost | 30 | ✅ fixed (PR #160) |
 | F01-2 | [#155](https://github.com/andersoxie/xpact/issues/155) | default attribute values lost inside an external entity | 1 | ✅ fixed (PR #160) |
-| F01-3 | [#156](https://github.com/andersoxie/xpact/issues/156) | extra spaces not cleaned up in some attribute types | 4 | ✅ 4 / 4: 3 by PR #160, the last one (`valid-sa-096`) by [PR #161](https://github.com/andersoxie/xpact/pull/161) 🟡 PR not merged yet |
+| F01-3 | [#156](https://github.com/andersoxie/xpact/issues/156) | extra spaces not cleaned up in some attribute types | 4 | ✅ 4 / 4: 3 by PR #160, the last one (`valid-sa-096`) by [PR #161](https://github.com/andersoxie/xpact/pull/161), merged `d0a4e21` |
 | F01-4 | [#157](https://github.com/andersoxie/xpact/issues/157) | spaces not cleaned up in a notation's public ID | 1 | ⬜ not started |
 | F01-5 | [#158](https://github.com/andersoxie/xpact/issues/158) | a second BOM character dropped | 3 | ⬜ not started |
 | F01-6 | [#159](https://github.com/andersoxie/xpact/issues/159) | an entity inside an entity value read as declarations | 1 | ⬜ not started |
@@ -98,7 +98,7 @@ When xpact reads a separate file (external DTD or entity), it uses a helper **ch
 | ✅ Dual regression lane | 910 / 910 |
 | ✅ Eiffel test matrix | 4 / 4 |
 | ✅ GitHub check on PR #161 | pass |
-| ⬜ Merge | blocked by the permission system, needs your OK |
+| ✅ Merge | `d0a4e21` on `student-Mass`, after your OK |
 
 ## 🔁 Jenkins
 
@@ -110,6 +110,6 @@ No answer from the supervisor yet on PR #152 or #160 (checked 2026-10-28 evening
 - [x] Refresh the local folder (`sync-latest.ps1`)
 - [x] Refresh your own repo (mass-xpact): `portfolio` @ `93d8d2b`
 - [x] #156: the last case (`valid-sa-096`): PR #161, checks pass
-- [ ] Merge PR #161, then sync the local folder and mass-xpact again
+- [x] Merge PR #161 (`d0a4e21`), local folder synced, mass-xpact refreshed (`portfolio` after `3d45c7b`)
 - [ ] Jenkins run, then close #154, #155 and #156
 - [ ] #157, #158, #159, one at a time
