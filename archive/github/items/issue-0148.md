@@ -1,6 +1,6 @@
 # Issue #148: Finding: each internal entity reference costs time proportional to the document (pr-xml 1.1 s, 16 s with assertions)
 
-Archived from <https://github.com/andersoxie/xpact/issues/148> on 2026-10-28 01:33 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/148> on 2026-10-28 19:58 UTC.
 
 | | |
 |---|---|

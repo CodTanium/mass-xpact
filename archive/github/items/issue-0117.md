@@ -1,6 +1,6 @@
 # Issue #117: Task: xmlconf verdict rules - re-score the 2026-10-14 baseline with the runner's rules (draft 12)
 
-Archived from <https://github.com/andersoxie/xpact/issues/117> on 2026-10-28 01:33 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/117> on 2026-10-28 19:58 UTC.
 
 | | |
 |---|---|

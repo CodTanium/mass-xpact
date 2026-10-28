@@ -1,6 +1,6 @@
 # Issue #153: Dual regression lane: small functional cases on xpact and Xpact-core, whole and chunked, with event traces
 
-Archived from <https://github.com/andersoxie/xpact/issues/153> on 2026-10-28 01:33 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/153> on 2026-10-28 19:58 UTC.
 
 | | |
 |---|---|

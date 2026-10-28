@@ -1,6 +1,6 @@
 # Issue #124: Finding: <root/>junk gives error 4, not 9 (junk after document element); position depends on callbacks and chunks
 
-Archived from <https://github.com/andersoxie/xpact/issues/124> on 2026-10-28 01:33 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/124> on 2026-10-28 19:58 UTC.
 
 | | |
 |---|---|

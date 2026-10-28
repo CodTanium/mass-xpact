@@ -1,0 +1,139 @@
+XPACT - TEST LIST (step 1: "tests we have not done yet")
+=======================================================
+Saved 2026-10-28. Local only, nothing committed, nothing run.
+Results of the earlier run of these 11 tests are still in AlotOfTests\ (see AlotOfTests\README.md).
+
+
+1. TESTS WE ALREADY HAD AT THAT POINT  [x] = done
+-------------------------------------------------
+[x] W3C XML Conformance Suite 2013 (incl. Namespaces 1.0)  2,585 cases   0 failed. Only accept/reject checked, not the parsed output
+[x] DLL tests against Expat 2.8.1 (C# program)              4,308 inputs  same accept/reject answers
+[x] Dual regression lane (whole, every byte split, byte by byte)  61 inputs, 910 runs
+[x] Chunked CRC, shim audit, ABI smoke, Eiffel matrix, Python   various
+[~] Expat's own unit tests (runtests) via adapters/libexpat  155 rows in parity.tsv - exists, latest result not checked
+
+
+2. THE 11 TESTS NOT DONE YET
+----------------------------
+
+HIGH VALUE - likely to find real bugs
+
+[ ] #1  W3C output comparison                                 Effort: small-medium
+    Checks:    does xpact report the right text, attributes and events, not just accept/reject?
+    Procedure: many valid W3C tests have an OUTPUT file with the expected result. Parse each one
+               through xpact.dll, write the events in the same format, compare with that file.
+               Files are already in our xmlconf folder.
+
+[ ] #2  W3C suite fed in pieces                               Effort: medium
+    Checks:    same result for whole file, split at every byte, and byte by byte?
+    Procedure: run all 2,585 cases each of the three ways; compare answer and events with the
+               whole-file run. Uses our runner plus the dual-lane code.
+
+[ ] #3  Fuzzing                                               Effort: medium
+    Checks:    do millions of random/changed inputs cause crashes or hangs?
+    Procedure: libexpat's fuzzer (expat/fuzz/, OSS-Fuzz) or xml-fuzz against xpact.dll;
+               record every crash or timeout.
+
+[ ] #4  Differential test against Expat                       Effort: medium
+    Checks:    same answer and events as Expat on the same random input?
+    Procedure: generate documents, run each through both parsers, compare. Every difference
+               is a bug or a known difference.
+
+[ ] #5  Security and limits                                   Effort: small-medium
+    Checks:    billion laughs, quadratic blow-up, very deep nesting, huge names/attributes,
+               external entities (XXE).
+    Procedure: Expat's security-bug regression tests and billion-laughs settings, plus C-API
+               misuse checks.
+
+[ ] #6  Expat's own C tests (runtests)                        Effort: depends on the row
+    Checks:    finish the parity work: the red rows plus the allocator tests.
+    Procedure: build runtests against xpact.dll (like Jenkins's native stage), compare with
+               parity.tsv and expected-failures.tsv.
+
+MEDIUM VALUE - broader coverage
+
+[ ] #7  libxml2's test files                                  Effort: medium
+    Checks:    hundreds of extra, tricky real-world XML files.
+    Procedure: download libxml2's test/ folder; check accept/reject and compare with Expat.
+
+[ ] #8  Encodings                                             Effort: small
+    Checks:    UTF-16 LE/BE with and without BOM, ISO-8859-1, US-ASCII, unknown-encoding
+               handler, broken UTF-8.
+    Procedure: inputs from Expat's tests, W3C and our own; each parsed whole and split.
+
+[ ] #9  Memory checks                                         Effort: medium
+    Checks:    leaks and bad memory access in the C bridge.
+    Procedure: create and free parsers thousands of times, watch memory (Dr. Memory or ASan
+               if available).
+
+[ ] #10 Python's own XML tests                                Effort: large
+    Checks:    can xpact really replace Expat?
+    Procedure: build CPython's pyexpat against xpact.dll; run test_pyexpat, test_xml_etree,
+               test_sax, test_minidom.
+
+[ ] #11 Large real files                                      Effort: small
+    Checks:    speed and stability on big files.
+    Procedure: bigger inputs (Wikipedia, OpenStreetMap or XMark style) through
+               run_large_xml_benchmarks.ps1.
+
+SKIPPED ON PURPOSE
+
+    2003 xmlconf ............ already compared; the 2013 version replaces it
+    xml:id suite ............ xpact doesn't implement xml:id
+    XML Schema / DOM suites . xpact doesn't validate and has no DOM
+    XML Base ................ W3C has no separate suite for it
+    Linux/WSL C tests ....... can't run on this PC; Jenkins runs them
+    XML 1.1 mode ............ only relevant if xpact gets 1.1 support
+
+Suggested order: #1, then #5, then #3 and #4.
+
+
+3. WHAT WENT WRONG LAST TIME
+----------------------------
+These came from the session, not from xpact.
+
+1) Session blocked at the end (main problem)
+   - After all 11 tests finished, the request "wrap up, commit, push, update plan.md and
+     issues, make a txt file" was refused 3 times with an API error
+     ("safeguards flagged this message", reasoning_extraction). The shorter request
+     "save the text in 6000Tests.txt" was refused too.
+   - Cause: UNKNOWN. An automatic filter, not a tool or code error.
+   - Nothing was committed or pushed; no files were damaged.
+
+2) Bug in my own test generator (test 11)
+   - The "text" files were broken XML: the generator cut a paragraph in the middle of &amp;.
+     Both parsers rightly rejected them.
+   - Cause: CONFIRMED. Fix: generator fixed, those files rerun.
+
+3) Wrong expectation in one probe (test 5)
+   - Expected a different error code for XML_GetBuffer(-1). Expat's own source returns
+     XML_ERROR_NO_MEMORY, the same as xpact.
+   - Cause: CONFIRMED (my expectation was wrong). Fix: probe corrected; 14/14 pass.
+
+4) Busy PC (test 6)
+   - 4 tests timed out while other tests were running. On an idle PC (assertions build),
+     1 of them passed and 3 still timed out; those 3 are logged as F06-1.
+   - Cause of the 3: SUSPECTED to be the streaming slowdown (F05-1), NOT confirmed.
+
+
+
+The links I found online are missing. These are the W3C test suite pages, libexpat's runtests.c and tests folder, the Chromium Expat and libxml2 fuzzing pages, libxml2's test-suite script, xml-fuzz and Magma.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,79 @@
+XPACT - W3C PARSED OUTPUT CHECK (test #1, rerun)
+================================================
+Saved 2026-10-28. Local only, nothing committed, nothing in xpact changed.
+Follows on from latest600Test.txt.
+
+SHORT ANSWER
+------------
+The W3C suite was checked on the parsed OUTPUT, not just accept/reject.
+xpact's output is correct in 359 of the 432 cases that can be checked,
+and wrong in 40 cases, which come from 6 separate problems.
+
+Only 432 of the 2,585 W3C cases come with an expected-output file. The other
+cases only say "should accept" or "should reject", so their output can't be
+compared.
+
+The check was run on both builds, assertions build first. The result was
+identical, case by case, to the run in the last session, so these problems
+are real and repeatable.
+
+
+RESULT
+------
+  Result                     Cases  Meaning
+  [OK] Output exactly right    359  text, attributes and declarations all match
+  [X]  Wrong, xpact only        40  Expat gets these right -> problem is in xpact
+  [~]  Optional error            4  xpact rejects, Expat accepts; W3C allows either answer
+  [ ]  Expat is also wrong      29  XML 1.1 files read with 1.0 rules -> not an xpact problem
+                              ----
+                               432
+
+
+THE 6 PROBLEMS BEHIND THE 40 WRONG OUTPUTS
+------------------------------------------
+Cause: SUSPECTED = likely but not proven, UNKNOWN = not investigated yet.
+
+F01-1  Default attribute values declared in an EXTERNAL DTD file aren't applied,
+       or the wrong declaration wins.                                   30 cases  SUSPECTED
+       Example valid-sa-097:  expected <doc a1="v1">
+                              xpact    <doc a1="v1" a2="v2">
+
+F01-2  Default attribute values aren't applied INSIDE AN EXTERNAL ENTITY file.
+                                                                         1 case   SUSPECTED
+
+F01-3  Extra spaces in some attribute types aren't cleaned up.           4 cases  UNKNOWN
+       Example valid-sa-096:  expected a1="1 2"
+                              xpact    a1=" 1   2  "
+
+F01-4  Spaces and line breaks in a notation's public ID aren't cleaned up.
+                                                                         1 case   UNKNOWN
+
+F01-5  A second byte order mark (BOM) character at the start of an external
+       entity is dropped.                                                3 cases  UNKNOWN
+
+F01-6  A parameter entity used inside an entity value is read as declarations
+       instead of as text.                                               1 case   UNKNOWN
+
+None of these causes has been confirmed in the Eiffel code yet.
+
+
+HOW IT WAS RUN
+--------------
+Revision : student-Mass @ 293918f (worktree w9-latest)
+DLLs     : C:\Users\masou\Desktop\Lia\xpact\w9-latest\build\native-eiffel\xpact_assertions.dll
+           C:\Users\masou\Desktop\Lia\xpact\w9-latest\build\native-eiffel\xpact.dll
+Folder   : AlotOfTests\01-w3c-output-comparison
+Commands :
+  python run.py --dll <w9-latest>\build\native-eiffel\xpact_assertions.dll --out logs-rerun-2026-10-28/assertions
+  python run.py --dll <w9-latest>\build\native-eiffel\xpact.dll            --out logs-rerun-2026-10-28/normal
+
+Logs     : AlotOfTests\01-w3c-output-comparison\logs-rerun-2026-10-28\
+Baseline : AlotOfTests\01-w3c-output-comparison\logs\  (first run, kept)
+Report   : AlotOfTests\01-w3c-output-comparison\README.md
+           (lists every case per problem; has small example files for F01-1 and F01-2)
+
+
+NEXT STEP (if you want)
+-----------------------
+[ ] Open one issue per problem, or
+[ ] Look for the cause of F01-1 first, since it covers 30 of the 40 wrong outputs.

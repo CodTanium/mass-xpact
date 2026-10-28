@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-28 01:33 UTC with [`export_github.py`](export_github.py): 71 issues and 82 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-28 19:58 UTC with [`export_github.py`](export_github.py): 77 issues and 83 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -159,3 +159,10 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#151](items/issue-0151.md) | Issue | Integrate the #146 and #148 fixes with main (#150): DLL crashes and pr-xml timeouts on main | open | type:task, group:C-correctness, test, regression | 2026-10-27 |
 | [#152](items/pr-0152.md) | PR | Integrate the #146 and #148 fixes with main (#150) (#151) | merged | type:task, group:C-correctness, test, regression | 2026-10-27 |
 | [#153](items/issue-0153.md) | Issue | Dual regression lane: small functional cases on xpact and Xpact-core, whole and chunked, with event traces | open | type:task, group:B-reliable-results, test | 2026-10-28 |
+| [#154](items/issue-0154.md) | Issue | Finding: attribute defaults from an external DTD or external parameter entity are not applied (F01-1) | open | bug, type:finding, group:C-correctness, test | 2026-10-28 |
+| [#155](items/issue-0155.md) | Issue | Finding: Attribute defaults are not applied to elements inside an external general entity (F01-2) | open | bug, type:finding, group:C-correctness, test | 2026-10-28 |
+| [#156](items/issue-0156.md) | Issue | Finding: Tokenized attribute values (NMTOKENS, ID, IDREFS, ENTITIES, ...) are not normalized (F01-3) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#157](items/issue-0157.md) | Issue | Finding: Public identifier of a NOTATION declaration is not normalized (F01-4) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#158](items/issue-0158.md) | Issue | Finding: A second byte order mark at the start of an external entity is dropped (F01-5) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#159](items/issue-0159.md) | Issue | Finding: External parameter entity inside an entity value is parsed as declarations instead of included as text (F01-6) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#160](items/pr-0160.md) | PR | Apply attribute defaults declared in external DTDs and entities | merged | - | 2026-10-28 |

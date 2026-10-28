@@ -23,6 +23,9 @@ unchanged so the record is complete. They are snapshots: the reports in
 | [`versionisseu.txt`](versionisseu.txt) | 2026-10-27 | Why W3C cases were skipped: old XML editions, XML 1.1, optional errors, in plain words |
 | [`latest_w3c.txt`](latest_w3c.txt) | 2026-10-27 | Option A step by step (#146, F1-F7), the `--all-cases` flag, the speed finding. **Out of date:** written before the supervisor's #150; F6b in it was wrong (dropped in #151) |
 | [`status-2026-10-28.txt`](status-2026-10-28.txt) | 2026-10-28 | "Where am I?": timeline of 24-28 October, the supervisor's #150, the #151/#152 integration, and what was left |
+| [`latest600Test.txt`](latest600Test.txt) | 2026-10-28 | The 11 extra test types found online (W3C output, chunking, fuzzing, Expat differential, security, Expat's own tests, libxml2, encodings, memory, Python, large files), how each works, and what went wrong in that session |
+| [`latest600Test2.txt`](latest600Test2.txt) | 2026-10-28 | Test 1 rerun: the W3C **output** check, 359 of 432 right, the 6 problems F01-1 to F01-6 |
+| [`latest600Test3.md`](latest600Test3.md) | 2026-10-28 | Result of the fix for #154/#155 (PR #160): 359 -> 393 of 432, every check, the issues #154-#159 |
 | [`w3c-report-2026-10-28.txt`](w3c-report-2026-10-28.txt) | 2026-10-28 | The W3C result of the integrated version in plain words: 2,585 cases, 0 failed, 0 errors, 0 skipped (full report: [`reports/latest-2026-10-28`](../../reports/latest-2026-10-28/README.md)) |
 
 The Jenkins log of `main` at `cf12dee` (`jenkinReport.txt`) is already in the
