@@ -37,6 +37,41 @@ Found by comparing canonical output with the catalog's `OUTPUT` files (DLL path)
 
 **Result:** 399 / 432 exact output (was 359). After each fix: 0 cases worse, normal build = assertions build, dual regression lane 910 / 910.
 
-## 3. Waiting for
+## 3. Test results on `e5d59e2` (run locally, both builds)
+
+**W3C suite, Jenkins Benchmarks stage run locally** (only deviation: `-SkipWslC`, no WSL on my PC):
+
+| Lane | Judged by | Cases | Passed | Failed | Errors | Skipped | Accepted | Rejected |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| core (XML 1.0 5th ed.) | W3C verdict | 1,974 | 1,974 | 0 | 0 | 0 | 958 | 1,016 |
+| legacy-names (editions 1–4) | W3C verdict | 309 | 309 | 0 | 0 | 0 | 0 | 309 |
+| optional-error | no crash only | 28 | 28 | 0 | 0 | 0 | 14 | 14 |
+| xml-1.1 | no crash only | 274 | 274 | 0 | 0 | 0 | 137 | 137 |
+| **Total** | | **2,585** | **2,585** | **0** | **0** | **0** | | |
+
+The same in both builds: 2,283 verdict-checked + 302 no-crash-only. Start of last week (Jenkins #70): 1,727 passed, 858 skipped per build.
+
+**W3C output comparison** (432 cases with an `OUTPUT` file):
+
+| Result | Cases |
+|---|---:|
+| ✅ exact match | **399** (was 359) |
+| ⚪ XML 1.1 documents, Expat differs too | 29 |
+| 🟡 optional errors, either verdict allowed | 4 |
+| 🔴 wrong, xpact only | **0** (was 40) |
+
+**Other checks:**
+
+| Check | Result |
+|---|---|
+| External entities through the DLL | 247 / 247, both builds |
+| Expat's own C tests (`runtests`, 399) | 361 pass; the same 38 allocator tests fail as before |
+| C# DLL tests vs Expat 2.8.1 (4,308 inputs) | difference table identical, both builds |
+| Dual regression lane (xpact) | 910 / 910, both builds |
+| Python suite / Eiffel test matrix | 206 OK / 4 of 4 |
+
+Source: [`reports/issue-0159/report.md`](https://github.com/andersoxie/xpact/blob/student-Mass/reports/issue-0159/report.md), section 4.
+
+## 4. Waiting for
 
 - ⬜ Jenkins all-tests on `e5d59e2`; the issues stay open until it passes.
