@@ -39,6 +39,7 @@ feature {NONE} -- Initialization
 			create external_entity_table.make (4)
 			create external_parameter_entity_table.make (4)
 			create attribute_decl_table.make (4)
+			create last_parameter_literal_text.make_empty
 			create namespace_context_stack.make (8)
 			create namespace_declaration_stack.make (8)
 			create last_error.make_empty
@@ -82,6 +83,7 @@ feature {NONE} -- Initialization
 			create external_entity_table.make (4)
 			create external_parameter_entity_table.make (4)
 			create attribute_decl_table.make (4)
+			create last_parameter_literal_text.make_empty
 			create namespace_context_stack.make (8)
 			create namespace_declaration_stack.make (8)
 			create last_error.make_empty
@@ -310,6 +312,8 @@ feature -- Configuration
 			inherited_parameter_entity_accounting_table := cloned_integer_table (a_parent.parameter_entity_accounting_context_table)
 			inherited_external_entity_table := cloned_external_entity_table (a_parent.external_general_entity_context_table)
 			inherited_external_parameter_entity_table := cloned_external_entity_table (a_parent.external_parameter_entity_context_table)
+			inherited_attribute_decl_table := cloned_attribute_decl_table (a_parent.attribute_decl_context_table)
+			inherited_active_entities := a_parent.active_entity_names
 			install_inherited_entity_context
 		ensure
 			internal_general_entities_imported: attached inherited_entity_table
@@ -334,6 +338,7 @@ feature -- Configuration
 			copy_integer_entity_delta (parameter_entity_accounting_table, inherited_parameter_entity_accounting_table, Result.parameter_entity_accounting_context_table)
 			copy_external_entity_delta (external_entity_table, inherited_external_entity_table, Result.external_general_entity_context_table)
 			copy_external_entity_delta (external_parameter_entity_table, inherited_external_parameter_entity_table, Result.external_parameter_entity_context_table)
+			copy_attribute_decl_table_into (attribute_decl_table, Result.attribute_decl_context_table)
 			Result.set_entity_snapshot_state (dtd_declarations_disabled, dtd_is_standalone)
 			Result.import_entity_context (Result)
 		ensure
@@ -361,6 +366,7 @@ feature -- Configuration
 			copy_integer_table_into (a_child.parameter_entity_accounting_context_table, parameter_entity_accounting_table)
 			copy_external_entity_table_into (a_child.external_general_entity_context_table, external_entity_table)
 			copy_external_entity_table_into (a_child.external_parameter_entity_context_table, external_parameter_entity_table)
+			copy_attribute_decl_table_into (a_child.attribute_decl_context_table, attribute_decl_table)
 		end
 
 	set_parameter_entities_unless_standalone (a_enabled: BOOLEAN)
@@ -395,7 +401,22 @@ feature -- Configuration
 			value_set: input_is_utf8 = a_enabled
 		end
 
+	set_input_byte_order_mark_removed (a_removed: BOOLEAN)
+			-- Declare whether the caller already removed the input's byte-order mark while converting it,
+			-- so that a U+FEFF at the start of the converted text is character data.
+		do
+			if a_removed /= input_byte_order_mark_removed then
+				clear_cached_doctype
+			end
+			input_byte_order_mark_removed := a_removed
+		ensure
+			value_set: input_byte_order_mark_removed = a_removed
+		end
+
 feature {XP_NATIVE_PARSER} -- State
+
+	last_parameter_literal_text: STRING_8
+			-- Replacement text read by the last `parse_external_parameter_literal_with_context'.
 
 	has_document_type: BOOLEAN
 			-- Has the current parse established a DOCTYPE and its declaration context?
@@ -462,6 +483,19 @@ feature {XP_PARSER} -- Entity context import
 			result_attached: Result /= Void
 		end
 
+	active_entity_names: ARRAYED_LIST [STRING_8]
+			-- General entities being expanded here or in a parent parser, for
+			-- recursion checks in external entity child parsers.
+		do
+			create Result.make (entity_stack.count)
+			if attached inherited_active_entities as l_inherited then
+				Result.append (l_inherited)
+			end
+			Result.append (entity_stack)
+		ensure
+			result_attached: Result /= Void
+		end
+
 	external_general_entity_context_table: HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8]
 			-- Current external general entity table for child parser import.
 		do
@@ -474,6 +508,14 @@ feature {XP_PARSER} -- Entity context import
 			-- Current external parameter entity table for child parser import.
 		do
 			Result := external_parameter_entity_table
+		ensure
+			result_attached: Result /= Void
+		end
+
+	attribute_decl_context_table: HASH_TABLE [ARRAYED_LIST [XP_ATTRIBUTE_DECL], STRING_8]
+			-- Current attribute declaration table for child parser import and merge.
+		do
+			Result := attribute_decl_table
 		ensure
 			result_attached: Result /= Void
 		end
@@ -989,12 +1031,18 @@ feature -- Parsing
 		end
 
 	parse_external_parameter_literal_with_context (a_input: READABLE_STRING_8; a_context: detachable READABLE_STRING_8): BOOLEAN
-			-- Parse an external parameter entity used inside an entity literal.
+			-- Read an external parameter entity used inside an entity literal: its replacement text,
+			-- after the text declaration, is "included in literal" (XML 1.0 section 4.4.5) and is kept
+			-- in `last_parameter_literal_text'; it is checked, but not used as declarations or content.
 		require
 			input_attached: a_input /= Void
 			input_within_limit: a_input.count <= max_input_bytes
 		local
 			i: INTEGER
+			l_text_start: INTEGER
+			l_text_declaration_end: INTEGER
+			l_handler: XP_EVENT_HANDLER
+			l_silent_handler: XP_LITERAL_CHECK_HANDLER
 			l_content_start: INTEGER
 			l_input: STRING_8
 			l_has_active_context: BOOLEAN
@@ -1008,34 +1056,76 @@ feature -- Parsing
 				push_entity (l_context)
 				l_has_active_context := True
 			end
+			last_parameter_literal_text.wipe_out
 			if not has_error then
-				if looks_like_external_subset (l_input) then
-					process_dtd_subset (l_input, True)
+				l_content_start := external_parameter_literal_content_start (l_input)
+				if l_content_start <= l_input.count and then is_quote (l_input.item (l_content_start)) then
+					note_position (l_content_start)
+					set_error ("unterminated literal")
+				elseif l_content_start <= l_input.count and then l_input.item (l_content_start) = '$' then
+					note_position (l_content_start)
+					set_error ("invalid token")
 				else
-					l_content_start := external_parameter_literal_content_start (l_input)
-					if l_content_start <= l_input.count and then is_quote (l_input.item (l_content_start)) then
-						note_position (l_content_start)
-						set_error ("unterminated literal")
-					elseif l_content_start <= l_input.count and then l_input.item (l_content_start) = '$' then
-						note_position (l_content_start)
-						set_error ("invalid token")
-					else
-						from
-							i := 1
-						invariant
-							index_in_bounds: i >= 1 and i <= l_input.count + 1
-							depth_within_limit: element_stack.count <= max_element_depth
-						until
-							i > l_input.count or has_error or is_suspended
-						loop
-							note_position (i)
-							if l_input.item (i) = '<' then
-								i := parse_markup (l_input, i)
-							else
-								i := parse_character_data (l_input, i)
-							end
-							if not has_error then
+					l_text_start := 1
+					if not l_input.is_empty and then starts_xml_declaration_at (l_input, 1) then
+						l_text_declaration_end := find_sequence (l_input, "?>", 3)
+						if l_text_declaration_end > 0 then
+							l_text_start := l_text_declaration_end + 2
+						else
+							l_text_start := l_input.count + 1
+						end
+					end
+					if l_input.index_of ('%%', l_text_start) = 0 then
+							-- Like Expat, check the text as DTD text (bad tokens, a start tag, a cut-off character),
+							-- but silently: its declarations are neither reported nor kept (the native parser does
+							-- not merge them), and the whole text goes into the entity value. Only the text
+							-- declaration still reaches the application.
+						l_handler := handler
+						create l_silent_handler.make (l_handler)
+						handler := l_silent_handler
+						if looks_like_external_subset (l_input) then
+							process_dtd_subset (l_input, True)
+						else
+							from
+								i := 1
+							invariant
+								index_in_bounds: i >= 1 and i <= l_input.count + 1
+								depth_within_limit: element_stack.count <= max_element_depth
+							until
+								i > l_input.count or has_error or is_suspended
+							loop
 								note_position (i)
+								if l_input.item (i) = '<' then
+									i := parse_markup (l_input, i)
+								else
+									i := parse_character_data (l_input, i)
+								end
+								if not has_error then
+									note_position (i)
+								end
+							variant
+								l_input.count - i + 1
+							end
+						end
+						handler := l_handler
+						if not has_error and then l_text_start <= l_input.count then
+							last_parameter_literal_text.append (l_input.substring (l_text_start, l_input.count))
+						end
+					else
+							-- Parameter entity references in the included text are expanded as in any entity value
+							-- (this also finds a recursive reference); each external one is then read only once.
+						from
+							i := l_text_start
+						invariant
+							index_in_bounds: i >= l_text_start and i <= l_input.count + 1
+						until
+							i > l_input.count or has_error or entity_literal_ended_by_undefined_parameter
+						loop
+							if l_input.item (i) = '%%' then
+								i := append_parameter_reference_in_entity_value (l_input, i, last_parameter_literal_text)
+							else
+								last_parameter_literal_text.append_character (l_input.item (i))
+								i := i + 1
 							end
 						variant
 							l_input.count - i + 1
@@ -1961,6 +2051,9 @@ feature {NONE} -- Markup parsing
 				if (parsing_external_entity and then l_encoding.is_empty)
 					or else (not parsing_external_entity and then l_version.is_empty) then
 					set_error ("invalid xml declaration")
+				elseif parsing_external_entity and then l_encoding.is_empty then
+						-- A text declaration requires EncodingDecl (XML 1.0, production [77]).
+					set_error ("invalid text declaration")
 				else
 					xml_standalone := l_standalone
 					handler.on_xml_declaration (l_version, l_encoding, l_standalone)
@@ -2720,7 +2813,9 @@ feature {NONE} -- Character data and references
 					l_previous_floor := entity_element_floor
 					entity_element_floor := l_element_depth
 					push_entity (l_name)
+					internal_entity_expansion_depth := internal_entity_expansion_depth + 1
 					parse_entity_content (l_value)
+					internal_entity_expansion_depth := internal_entity_expansion_depth - 1
 					pop_entity
 					entity_element_floor := l_previous_floor
 					if not has_error and then element_stack.count /= l_element_depth then
@@ -2809,20 +2904,20 @@ feature {NONE} -- Character data and references
 			elseif external_entity_resolver = Void then
 				set_error ("external entity resolver missing")
 			elseif attached external_entity_resolver as l_resolver then
+				push_entity (a_entity.name)
 				if attached resolved_external_replacement (a_entity.name, a_entity.public_id, a_entity.system_id, False, a_entity.declaration_base) as l_value then
 					note_entity_expansion (l_value.count)
 					if not has_error then
 						if attached l_resolver.last_resolved_resource as l_resource then current_external_entity_base := l_resource.twin end
 						l_depth := element_stack.count
 						entity_element_floor := l_depth
-						push_entity (a_entity.name)
 						parse_entity_content (l_value)
-						pop_entity
 						if not has_error and then element_stack.count /= l_depth then set_error ("asynchronous entity") end
 					end
 				else
 					set_error ("external entity not resolved")
 				end
+				pop_entity
 			end
 			current_external_entity_base := l_previous_base
 			entity_element_floor := l_previous_floor
@@ -3479,6 +3574,7 @@ feature {NONE} -- DTD entity declarations
 			l_end: INTEGER
 			l_inner: STRING_8
 			l_status: STRING_8
+			l_bracket_in_entity: BOOLEAN
 		do
 			l_end := find_conditional_section_end (a_subset, a_start_index)
 			if l_end = 0 then
@@ -3495,7 +3591,7 @@ feature {NONE} -- DTD entity declarations
 				invariant
 					index_in_bounds: i >= a_start_index + 3 and i <= a_subset.count + 1
 				until
-					i > l_end - 1 or has_error or else a_subset.item (i) = '['
+					i > l_end - 1 or has_error or else a_subset.item (i) = '[' or else l_status.has ('[')
 				loop
 					if a_subset.item (i).code = 37 then
 						i := append_parameter_reference_in_entity_value (a_subset, i, l_status)
@@ -3506,9 +3602,17 @@ feature {NONE} -- DTD entity declarations
 				variant
 					a_subset.count - i + 1
 				end
+				create l_inner.make_empty
+				if not has_error and then l_status.has ('[') then
+						-- The keyword's parameter entity also held the opening bracket.
+					l_bracket_in_entity := True
+					l_inner.append (l_status.substring (l_status.index_of ('[', 1) + 1, l_status.count))
+					l_status.keep_head (l_status.index_of ('[', 1) - 1)
+					i := i - 1
+				end
 				if has_error then
 					Result := a_subset.count + 1
-				elseif i > l_end - 1 or else a_subset.item (i) /= '[' then
+				elseif not l_bracket_in_entity and then (i > l_end - 1 or else a_subset.item (i) /= '[') then
 					set_error ("invalid conditional section")
 					Result := a_subset.count + 1
 				else
@@ -3520,7 +3624,9 @@ feature {NONE} -- DTD entity declarations
 					elseif l_status.same_string ("INCLUDE") then
 						l_content_start := i + 1
 						if l_content_start <= l_end - 1 then
-							create l_inner.make_from_string (a_subset.substring (l_content_start, l_end - 1))
+							l_inner.append (a_subset.substring (l_content_start, l_end - 1))
+						end
+						if not l_inner.is_empty then
 							process_internal_subset (l_inner)
 						end
 						if has_error then
@@ -4627,6 +4733,10 @@ feature {NONE} -- DTD entity declarations
 									set_error ("missing attlist default declaration")
 								end
 							end
+							if not has_error and then attached l_default_value as l_value and then not l_attribute_type.same_string ("CDATA") then
+									-- A declared default is normalized like a specified value of its type (XML 1.0 section 3.3.3).
+								collapse_spaces (l_value)
+							end
 							if not has_error and then not dtd_declarations_disabled then
 								record_attribute_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
 								handler.on_attlist_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
@@ -5582,8 +5692,9 @@ feature {NONE} -- Event dispatch
 				-- A root element whose name differs from the DOCTYPE name violates only the
 				-- "Root Element Type" validity constraint, so a non-validating parser accepts it.
 			else
-				if element_stack.count = 0 then
-					document_element_count := document_element_count + 1
+				if element_stack.count = 0 and then document_element_count = 0 then
+						-- An external parsed entity may hold several top-level elements; count the first only.
+					document_element_count := 1
 				end
 				apply_default_attributes (a_name, a_attributes)
 				if not has_error then
@@ -5659,8 +5770,9 @@ feature {NONE} -- Event dispatch
 			elseif element_stack.count = 0 and then document_element_count > 0 and then not parsing_external_entity then
 				set_error ("multiple document elements")
 			else
-				if element_stack.count = 0 then
-					document_element_count := document_element_count + 1
+				if element_stack.count = 0 and then document_element_count = 0 then
+						-- An external parsed entity may hold several top-level elements; count the first only.
+					document_element_count := 1
 				end
 				create l_name.make (a_input, a_name_start, a_name_end - a_name_start + 1)
 				element_slice_stack.extend (l_name)
@@ -6368,7 +6480,8 @@ feature {NONE} -- Scanning
 			l_source := decoded_input (a_input)
 			if a_allow_alias and then l_source = a_input then
 				if
-					l_source.count >= 3
+					not input_byte_order_mark_removed
+					and then l_source.count >= 3
 					and then l_source.item (1).code = 239
 					and then l_source.item (2).code = 187
 					and then l_source.item (3).code = 191
@@ -6414,8 +6527,12 @@ feature {NONE} -- Scanning
 				Result := l_string
 			else
 				create Result.make (l_source.count)
+					-- Only unconverted UTF-8 input can still start with its own byte-order mark; after a
+					-- UTF-16 conversion the mark is gone and a U+FEFF here is a character.
 				if
-					l_source.count >= 3
+					not input_byte_order_mark_removed
+					and then l_source = a_input
+					and then l_source.count >= 3
 					and then l_source.item (1).code = 239
 					and then l_source.item (2).code = 187
 					and then l_source.item (3).code = 191
@@ -7101,6 +7218,12 @@ feature {NONE} -- Scanning
 				set_error ("invalid public identifier")
 				Result := a_input.count + 1
 			end
+			if not has_error then
+					-- Line ends become spaces, then space runs collapse and the ends are trimmed (XML 1.0 section 4.2.2).
+				a_value.replace_substring_all ("%R", " ")
+				a_value.replace_substring_all ("%N", " ")
+				collapse_spaces (a_value)
+			end
 		ensure
 			progress_or_error: Result > a_start_index or has_error
 			result_in_bounds: Result <= a_input.count + 1
@@ -7513,6 +7636,9 @@ feature {NONE} -- Entity tables
 			if attached inherited_external_parameter_entity_table as l_entities then
 				copy_external_entity_table_into (l_entities, external_parameter_entity_table)
 			end
+			if attached inherited_attribute_decl_table as l_decls then
+				copy_attribute_decl_table_into (l_decls, attribute_decl_table)
+			end
 		end
 
 
@@ -7651,6 +7777,41 @@ feature {NONE} -- Entity tables
 					a_target.put (a_source.item_for_iteration, l_key)
 				end
 				a_source.forth
+			end
+		end
+
+	cloned_attribute_decl_table (a_source: HASH_TABLE [ARRAYED_LIST [XP_ATTRIBUTE_DECL], STRING_8]): HASH_TABLE [ARRAYED_LIST [XP_ATTRIBUTE_DECL], STRING_8]
+			-- Copy of attribute declaration table `a_source'; declarations are immutable and shared.
+		require
+			source_attached: a_source /= Void
+		do
+			create Result.make (a_source.count + 1)
+			copy_attribute_decl_table_into (a_source, Result)
+		ensure
+			result_attached: Result /= Void
+			count_preserved: Result.count = a_source.count
+		end
+
+	copy_attribute_decl_table_into (a_source, a_target: HASH_TABLE [ARRAYED_LIST [XP_ATTRIBUTE_DECL], STRING_8])
+			-- Copy attribute declarations from `a_source' into `a_target', keeping the first binding of each attribute.
+		require
+			source_attached: a_source /= Void
+			target_attached: a_target /= Void
+		local
+			l_decls: ARRAYED_LIST [XP_ATTRIBUTE_DECL]
+		do
+			across a_source as c loop
+				if attached a_target.item (c.key) as l_existing then
+					l_decls := l_existing
+				else
+					create l_decls.make (c.item.count.max (1))
+					a_target.put (l_decls, c.key.twin)
+				end
+				across c.item as d loop
+					if not has_attribute_decl (l_decls, d.item.name) then
+						l_decls.extend (d.item)
+					end
+				end
 			end
 		end
 
@@ -7866,6 +8027,20 @@ feature {NONE} -- Entity tables
 			variant
 				entity_stack.count - i + 1
 			end
+			if not Result and then attached inherited_active_entities as l_inherited then
+				from
+					i := 1
+				invariant
+					inherited_index_in_bounds: i >= 1 and i <= l_inherited.count + 1
+				until
+					i > l_inherited.count or Result
+				loop
+					Result := l_inherited.i_th (i).same_string (a_name)
+					i := i + 1
+				variant
+					l_inherited.count - i + 1
+				end
+			end
 		end
 
 	push_entity_reference_position (a_start_index, a_byte_count: INTEGER)
@@ -7936,6 +8111,7 @@ feature {NONE} -- State
 			external_dtd_depth := 0
 			current_external_entity_base := external_entity_base
 			entity_element_floor := 0
+			internal_entity_expansion_depth := 0
 			element_stack.wipe_out
 			element_slice_stack.wipe_out
 			entity_stack.wipe_out
@@ -7972,6 +8148,7 @@ feature {NONE} -- State
 			external_dtd_depth := 0
 			current_external_entity_base := external_entity_base
 			entity_element_floor := 0
+			internal_entity_expansion_depth := 0
 			dtd_has_parameter_entity_references := False
 			dtd_declarations_disabled := False
 			entity_literal_ended_by_undefined_parameter := False
@@ -8029,11 +8206,17 @@ feature {NONE} -- State
 
 	note_position (a_index: INTEGER)
 			-- Record the current parser position as a 1-based input index.
+			-- While internal entity replacement text is parsed, `a_index' indexes that text,
+			-- not the document: the position of the entity reference is kept instead.
 		local
 			l_index: INTEGER
 		do
 			if not position_input.is_empty or else a_index > 0 then
-				l_index := bounded_position_index (a_index)
+				if internal_entity_expansion_depth > 0 and then entity_reference_start_stack.count > 0 then
+					l_index := bounded_position_index (entity_reference_start_stack.i_th (entity_reference_start_stack.count))
+				else
+					l_index := bounded_position_index (a_index)
+				end
 				if lazy_position_accounting then
 					current_position_index := l_index
 				else
@@ -8372,11 +8555,17 @@ feature {NONE} -- State
 	inherited_external_entity_table: detachable HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8]
 			-- Parent external general entity bindings for external entity child parsers.
 
+	inherited_attribute_decl_table: detachable HASH_TABLE [ARRAYED_LIST [XP_ATTRIBUTE_DECL], STRING_8]
+			-- Parent attribute declarations for external entity child parsers.
+
 	inherited_external_parameter_entity_table: detachable HASH_TABLE [XP_EXTERNAL_ENTITY, STRING_8]
 			-- Parent external parameter entity bindings for external entity child parsers.
 
+	inherited_active_entities: detachable ARRAYED_LIST [STRING_8]
+			-- General entities a parent parser was expanding when this external entity child parser was created.
+
 	document_element_count: INTEGER
-			-- Number of root-level document elements seen.
+			-- Number of root-level document elements seen (0 or 1).
 
 	expanded_entity_bytes: INTEGER
 			-- Total entity replacement bytes processed in current parse.
@@ -8411,6 +8600,9 @@ feature {NONE} -- State
 	input_is_utf8: BOOLEAN
 			-- Do callers convert input to UTF-8 before parsing (see `set_input_is_utf8')?
 
+	input_byte_order_mark_removed: BOOLEAN
+			-- Did the caller remove the byte-order mark while converting the input (see `set_input_byte_order_mark_removed')?
+
 	foreign_dtd_loaded: BOOLEAN
 			-- Has the configured foreign DTD already been requested?
 
@@ -8444,6 +8636,9 @@ feature {NONE} -- State
 	entity_element_floor: INTEGER
 			-- Element depth at the start of the general entity whose content is being parsed;
 			-- end tags may not close elements at or below it.
+
+	internal_entity_expansion_depth: INTEGER
+			-- Number of internal general entities whose replacement text is being parsed as content.
 
 	dtd_has_parameter_entity_references: BOOLEAN
 			-- Has the DTD referenced a parameter entity? Undeclared general entities

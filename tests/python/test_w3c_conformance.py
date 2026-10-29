@@ -209,6 +209,19 @@ class ExpectationTests(unittest.TestCase):
         self.assertEqual(runner.expectation({"TYPE": "not-wf", "RECOMMENDATION": "NS1.0"}),
                          ("REJECT", ""))
 
+    def test_out_of_profile_lanes_and_their_expectations(self):
+        for attributes, lane in (
+            ({"TYPE": "valid", "RECOMMENDATION": "XML1.1"}, ("xml-1.1", "ANY")),
+            ({"TYPE": "not-wf", "VERSION": "1.1"}, ("xml-1.1", "ANY")),
+            ({"TYPE": "error"}, ("optional-error", "ANY")),
+            ({"TYPE": "error", "EDITION": "1 2 3 4"}, ("optional-error", "ANY")),
+            ({"TYPE": "not-wf", "EDITION": "1 2 3 4"}, ("legacy-names", "REJECT")),
+            ({"TYPE": "invalid", "ENTITIES": "parameter"}, ("external-entities", "ACCEPT")),
+            ({"TYPE": "not-wf", "ENTITIES": "both"}, ("external-entities", "REJECT")),
+        ):
+            with self.subTest(attributes=attributes):
+                self.assertEqual(runner.out_of_profile_lane(attributes), lane)
+
     def test_unknown_metadata_does_not_become_a_pass(self):
         for attributes in ({"TYPE": "unknown"}, {"RECOMMENDATION": "XML2.0"}, {"ENTITIES": "unknown"}):
             with self.subTest(attributes=attributes), self.assertRaises(ValueError):
@@ -307,6 +320,15 @@ class ExecutionTests(TemporarySuite):
                 result, _ = self.invoke(case, error=error)
                 self.assertEqual((result.status, result.actual), ("error", actual))
 
+    def test_either_verdict_expectation_passes_a_verdict_but_not_a_crash(self):
+        case = replace(self.case(), expected="ANY")
+        for code, stdout, status in ((0, b"XPACT_CONFORMANCE\tACCEPT\n", "passed"),
+                                     (1, b"XPACT_CONFORMANCE\tREJECT\n", "passed"),
+                                     (-1073741571, b"", "error")):
+            with self.subTest(code=code):
+                result, _ = self.invoke(case, subprocess.CompletedProcess([], code, stdout, b""))
+                self.assertEqual(result.status, status)
+
     def test_skipped_and_missing_inputs_do_not_launch_parser(self):
         case = self.case()
         for changed, status in ((replace(case, skip_reason="Unsupported XML 1.1"), "skipped"),
@@ -330,7 +352,7 @@ class ReportAndCliTests(TemporarySuite):
         ]
         runner.write_reports(rows, self.output, {"catalog_cases": 5})
         report = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
-        self.assertEqual(report["engines"][0], {"engine": "xpact", "total": 5, "passed": 2, "failed": 1,
+        self.assertEqual(report["engines"][0], {"engine": "xpact", "total": 5, "passed": 2, "no_crash_only": 0, "failed": 1,
                          "errors": 1, "skipped": 1, "accepted": 2, "rejected": 1, "known": 0,
                          "unexpected": 2, "elapsed_ms": 48})
         suites = ET.parse(self.output / "junit.xml").getroot().findall("testsuite")
@@ -345,6 +367,70 @@ class ReportAndCliTests(TemporarySuite):
             tsv_rows = list(csv.DictReader(source, delimiter="\t"))
         self.assertEqual(len(tsv_rows), 6)
         self.assertEqual(tsv_rows[2]["message"], "wrong?verdict")
+
+    def test_either_verdict_passes_are_reported_apart_from_checked_verdicts(self):
+        rows = [
+            runner.Result("xpact", "checked", "a.xml", "valid", "ACCEPT", "ACCEPT", "passed", 1),
+            runner.Result("xpact", "any", "b.xml", "error", "ANY", "REJECT", "passed", 1, lane="optional-error"),
+            runner.Result("xpact", "crash", "c.xml", "valid", "ANY", "process-error", "error", 1, lane="xml-1.1"),
+        ]
+        runner.write_reports(rows, self.output, {})
+        report = json.loads((self.output / "summary.json").read_text(encoding="utf-8"))
+        self.assertEqual((report["engines"][0]["passed"], report["engines"][0]["no_crash_only"],
+                          report["engines"][0]["errors"]), (1, 1, 1))
+        suites = {suite.get("name"): suite for suite in ET.parse(self.output / "junit.xml").getroot().findall("testsuite")}
+        self.assertEqual(set(suites), {"w3c-xml-xpact", "w3c-xml-xpact-no-crash-only"})
+        self.assertEqual(suites["w3c-xml-xpact"].get("tests"), "1")
+        self.assertEqual({key: suites["w3c-xml-xpact-no-crash-only"].get(key) for key in ("tests", "errors")},
+                         {"tests": "2", "errors": "1"})
+        self.assertEqual(suites["w3c-xml-xpact-no-crash-only"].find("testcase").get("classname"),
+                         "w3c.xml.xpact.optional-error")
+        summary = (self.output / "summary.md").read_text(encoding="utf-8")
+        self.assertIn("No crash only", summary)
+        self.assertIn("| xpact | optional-error | no crash only |", summary)
+
+    def test_all_cases_runs_out_of_profile_cases_in_their_lanes(self):
+        self.catalog('<TEST ID="core" TYPE="valid" URI="a.xml"/>'
+                     '<TEST ID="old" TYPE="not-wf" EDITION="1 2 3 4" URI="a.xml"/>'
+                     '<TEST ID="ext" TYPE="error" ENTITIES="general" URI="a.xml"/>'
+                     '<TEST ID="opt" TYPE="error" URI="a.xml"/>'
+                     '<TEST ID="coreext" TYPE="valid" ENTITIES="general" URI="a.xml"/>')
+        self.write("a.xml", "<r/>")
+        engine = self.root / "parser.exe"
+        checker = self.root / "checker.exe"
+        engine.touch()
+        checker.touch()
+        arguments = ["--suite-dir", str(self.suite), "--output-dir", str(self.output), "--all-cases",
+                     "--engine", f"xpact={engine}", "--entity-engine", f"xpact={checker}"]
+        verdicts = [subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b""),
+                    subprocess.CompletedProcess([], 1, b"XPACT_CONFORMANCE\tREJECT\n", b""),
+                    subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b""),
+                    subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b""),
+                    subprocess.CompletedProcess([], 0, b"XPACT_CONFORMANCE\tACCEPT\n", b"")]
+        with mock.patch.object(runner.subprocess, "run", side_effect=verdicts) as process, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(runner.main(arguments), 0)
+        commands = [call.args[0] for call in process.call_args_list]
+        # In-profile entity cases run in the core lane with the suite root (#150); only
+        # out-of-profile entity cases go to the DLL checker.
+        self.assertEqual([Path(command[0]).name for command in commands],
+                         ["parser.exe", "parser.exe", "checker.exe", "parser.exe", "parser.exe"])
+        self.assertIn("--legacy-names", commands[1])
+        self.assertEqual(commands[2][-2:], ["--entity-root", str(self.suite.resolve())])
+        self.assertIn("--suite-root", commands[4])
+        report = json.loads((self.output / "summary.json").read_text())
+        self.assertEqual({key: report["engines"][0][key] for key in ("passed", "no_crash_only", "skipped")},
+                         {"passed": 3, "no_crash_only": 2, "skipped": 0})
+
+    def test_all_cases_requires_an_entity_engine_for_every_engine(self):
+        self.catalog('<TEST ID="core" TYPE="valid" URI="a.xml"/>')
+        self.write("a.xml", "<r/>")
+        engine = self.root / "parser.exe"
+        engine.touch()
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(runner.main(["--suite-dir", str(self.suite), "--output-dir", str(self.output),
+                                          "--all-cases", "--engine", f"xpact={engine}"]), 1)
+        report = json.loads((self.output / "summary.json").read_text())
+        self.assertEqual(report["engines"][0]["engine"], "harness")
 
     def test_cli_runs_each_engine_and_fails_on_conformance_mismatch(self):
         self.catalog('<TEST ID="valid" TYPE="valid" URI="a.xml"/>')

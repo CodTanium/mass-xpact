@@ -14,7 +14,7 @@ feature {NONE} -- Initialization
 
 	make
 		do
-			if has_argument ("--conformance-file") or has_argument ("--namespaces") or has_argument ("--suite-root") then
+			if has_argument ("--conformance-file") or has_argument ("--namespaces") or has_argument ("--suite-root") or has_argument ("--legacy-names") then
 				run_conformance
 			else
 				run_benchmark
@@ -26,7 +26,7 @@ feature {NONE} -- Initialization
 		local
 			l_arguments: ARGUMENTS_32
 			l_path, l_suite_root: detachable PATH
-			l_namespaces, l_invalid, l_accepted: BOOLEAN
+			l_namespaces, l_legacy_names, l_invalid, l_accepted: BOOLEAN
 			l_handler: XP_NULL_EVENT_HANDLER
 			l_parser: XP_PARSER
 			l_resolver: detachable XP_LOCAL_EXTERNAL_ENTITY_RESOLVER
@@ -43,12 +43,16 @@ feature {NONE} -- Initialization
 				elseif l_arguments.argument (i).same_string ("--namespaces") and not l_namespaces then
 					l_namespaces := True
 					i := i + 1
+				elseif l_arguments.argument (i).same_string ("--legacy-names") and then not l_legacy_names then
+						-- Fourth-edition name tables, as the native Expat-compatible parser uses.
+					l_legacy_names := True
+					i := i + 1
 				else
 					l_invalid := True
 				end
 			end
 			if l_invalid or l_path = Void then
-				io.error.put_string ("usage: --conformance-file PATH [--suite-root ROOT] [--namespaces]%N")
+				io.error.put_string ("usage: --conformance-file PATH [--suite-root ROOT] [--namespaces] [--legacy-names]%N")
 				exit_with_code (2)
 			elseif attached l_path as l_file_path then
 				if attached l_suite_root as l_root then
@@ -67,6 +71,9 @@ feature {NONE} -- Initialization
 						l_parser.set_external_entity_policy (l_parser.All_external_entities)
 					else
 						l_parser.set_skip_unread_external_entities (True)
+					end
+					if l_legacy_names then
+						l_parser.set_legacy_name_character_ranges (True)
 					end
 					if l_namespaces then l_parser.set_namespace_mode ('|') end
 					l_accepted := l_parser.parse (l_input)

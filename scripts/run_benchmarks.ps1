@@ -13,6 +13,8 @@ param(
 	[int] $W3cTimeoutSeconds = 10,
 	# Recorded parser gaps that do not fail the run; pass "" to fail on every W3C failure.
 	[string] $W3cKnownFailures = "benchmarks\w3c-known-failures.tsv",
+	# Also run the cases outside the W3C profile, in lanes (run_w3c_conformance.py --all-cases).
+	[switch] $W3cAllCases,
 	[switch] $SkipW3cConformance
 )
 
@@ -185,6 +187,36 @@ function Invoke-VcCommand {
 	}
 }
 
+# DLL tiers built during this run, so that -W3cAllCases does not build one twice.
+$BuiltNativeTiers = @{}
+
+function Get-W3cEntityChecker {
+	# Build the Expat-API W3C checker against the DLL tier that matches an Eiffel build.
+	param([object] $BuildSpec)
+	$Tier = if ($BuildSpec.Name -eq "Finalized") { "Production" } else { "Assertions" }
+	$Library = if ($Tier -eq "Production") { "xpact" } else { "xpact_assertions" }
+	$NativeRoot = Join-Path $RepoRoot "build\native-eiffel"
+	$Dll = Join-Path $NativeRoot "$Library.dll"
+	if (-not $SkipBuild -and -not $BuiltNativeTiers.ContainsKey($Tier)) {
+		# Build and compiler output goes to the host; the function returns only the checker path.
+		& powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "build_native_eiffel.ps1") -BuildTier $Tier | Out-Host
+		if ($LASTEXITCODE -ne 0) {
+			throw "Eiffel-backed $Tier DLL build failed."
+		}
+		$BuiltNativeTiers[$Tier] = $true
+	}
+	if (-not (Test-Path -LiteralPath $Dll -PathType Leaf)) {
+		throw "Windows xpact DLL not found: $Dll"
+	}
+	$CheckerRoot = Join-Path $OutputRoot "w3c-dll\$($BuildSpec.Name)"
+	New-Item -ItemType Directory -Force -Path $CheckerRoot | Out-Null
+	$Checker = Join-Path $CheckerRoot "xpact_w3c_case.exe"
+	$Source = Join-Path $RepoRoot "tests\native\xpact_w3c_case.c"
+	Invoke-VcCommand "cl /nologo /O2 /I`"$RepoRoot\include`" `"$Source`" `"$NativeRoot\$Library.lib`" /Fo`"$CheckerRoot\xpact_w3c_case.obj`" /Fe:`"$Checker`" /link /NOLOGO" | Out-Host
+	Copy-Item -LiteralPath $Dll -Destination $CheckerRoot -Force
+	$Checker
+}
+
 function Get-EiffelBuildSpec {
 	param([string] $Build)
 	switch ($Build) {
@@ -339,6 +371,7 @@ if (-not $SkipNativeXpactC) {
 			if ($LASTEXITCODE -ne 0) {
 				throw "Eiffel-backed Windows DLL build failed."
 			}
+			$BuiltNativeTiers["Production"] = $true
 		}
 		if (-not (Test-Path -LiteralPath $WindowsNativeLib -PathType Leaf)) {
 			throw "Windows xpact import library not found: $WindowsNativeLib"
@@ -571,6 +604,8 @@ $Markdown.Add("")
 $Markdown.Add("W3C XML binary conformance tests run by default for each selected Eiffel build. Per-case verdicts and timings, JUnit XML, and a summary are written under ``$W3cOutputRoot``. See ``docs/w3c-xml-conformance.md`` for the profile, exclusions, and offline setup.")
 if ($SkipW3cConformance) {
 	$Markdown.Add("W3C XML conformance was explicitly skipped for this run (``-SkipW3cConformance``).")
+} elseif ($W3cAllCases) {
+	$Markdown.Add("This run used ``-W3cAllCases``: the cases outside the profile ran in lanes instead of being skipped (``run_w3c_conformance.py --all-cases``).")
 }
 if (-not [string]::IsNullOrWhiteSpace($ExistingHistory)) {
 	$Markdown.Add("")
@@ -598,6 +633,12 @@ if (-not $SkipW3cConformance) {
 	foreach ($BuildSpec in $SelectedEiffelBuilds) {
 		$XpactExe = Join-Path $RepoRoot "EIFGENs\$($BuildSpec.Target)\$($BuildSpec.CodeDirectory)\xpact_benchmarks.exe"
 		$W3cArguments += @("--engine", "$($BuildSpec.Name)=$XpactExe")
+	}
+	if ($W3cAllCases) {
+		$W3cArguments += "--all-cases"
+		foreach ($BuildSpec in $SelectedEiffelBuilds) {
+			$W3cArguments += @("--entity-engine", "$($BuildSpec.Name)=$(Get-W3cEntityChecker $BuildSpec)")
+		}
 	}
 	& $Python @W3cArguments
 	if ($LASTEXITCODE -ne 0) {

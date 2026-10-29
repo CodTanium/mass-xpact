@@ -1,6 +1,6 @@
 # 10-week plan
 
-> **Last updated:** 2026-10-22 (week 3) · describes `student-Mass` after #36, #41, #42 and #44 were merged
+> **Last updated:** 2026-10-28 (week 6) · describes `student-Mass` after PR [#152](https://github.com/andersoxie/xpact/pull/152) (includes `main` @ `1714f31` with the supervisor's [#150](https://github.com/andersoxie/xpact/pull/150)); full W3C report: [latest-2026-10-28](../reports/latest-2026-10-28/README.md); W3C output test and its fixes: [issue-0154](../reports/issue-0154/report.md), [issue-0156](../reports/issue-0156/report.md), [issue-0157](../reports/issue-0157/report.md), [issue-0158](../reports/issue-0158/report.md), [issue-0159](../reports/issue-0159/report.md)
 > · ✅ done · 🟡 in progress / waiting · ⬜ not started · 🔴 open problem
 
 The plan comes from [`docs/xpact-student-introduction.md`](../docs/xpact-student-introduction.md)
@@ -18,11 +18,81 @@ record of weeks 1-2. Day-to-day status of every issue: the
 | 1 Setup | ✅ | Build working, A01 | [week-01](notes/weekly/week-01.md), [#18](https://github.com/andersoxie/xpact/issues/18) |
 | 2 Baseline | ✅ | Assertions baseline (2026-10-14) and its rerun in git, A02 | [BASELINE.md](baseline/BASELINE.md), [A02-baseline](results/A02-baseline/README.md) |
 | 3 Failure reporting | ✅ | Build fixes in git ✅, W3C run ✅, #28 test and repair ✅, repair and GitHub setup ✅ · **B01 ✅, B02 ✅, runner continues after a failure (#60) ✅** (2026-10-22); Jenkins check of B02 dropped (2026-10-22, not pursued) | [week-03](notes/weekly/week-03.md) |
-| 4 Input matrix | ⬜ | G01: 50-100 reviewed W3C cases | |
-| 5 Regressions | 🟡 | C02, C03, C10 (part) **run early** through the DLL: 3,360 cases, 3 new findings | [dll-tests-2026-10-22](results/dll-tests-2026-10-22/README.md) |
-| 6-10 | ⬜ | One improvement, Expat comparison, consolidate, report, handover | |
+| 4 Input matrix | 🟡 | Started 2026-10-26: full check of the merged code ✅, `main` synced (#110) ✅, PC set up like the supervisor's (#113) ✅, weeks 2-3 closed out ✅ · **G01 ✅** 93 reviewed W3C cases ([#118](https://github.com/andersoxie/xpact/issues/118)) · xmlconf verdicts ✅ ([#117](https://github.com/andersoxie/xpact/issues/117)) | [week-04](notes/weekly/week-04.md) |
+| 5 Regressions | ✅ | C02, C03, C10 (part) run through the DLL (3 findings #38-#40, fixed in #80) · **C03 ✅, C10 ✅ compared with Expat 2.8.1** ([#121](https://github.com/andersoxie/xpact/issues/121)): 4,308/4,308 same verdicts, 5 findings (#122-#126) · **C02 ✅ regressions in the smoke test and the Eiffel suite** ([#128](https://github.com/andersoxie/xpact/issues/128)) · review with the supervisor skipped by the student | [expat-2.8.1](results/expat-2.8.1/README.md), [C02-final-input](results/C02-final-input/README.md), [week-05](notes/weekly/week-05.md) |
+| 6 One improvement | 🟡 | Option A all W3C cases (#146), entity speed (#148), **integrated with `main` (#150)** ([#151](https://github.com/andersoxie/xpact/issues/151), PR #152), dual regression lane ([#153](https://github.com/andersoxie/xpact/issues/153)): **2,585 W3C cases, 0 failed, 0 errors, 0 skipped** (2026-10-28) · XML version recommendation: XML 1.0 5th edition · 🟡 Jenkins run | [latest-2026-10-28](../reports/latest-2026-10-28/README.md), [issue-0151](../reports/issue-0151/summary.md) |
+| 7-10 | ⬜ | Expat comparison, consolidate, report, handover | |
 
-## ✅ Merged on 2026-10-22
+## 🧪 Latest W3C result (2026-10-28)
+
+Jenkins Benchmarks stage run locally on the integrated code (PR #152), default 10 s per case, both builds
+(assertions off and on). Details: [reports/latest-2026-10-28](../reports/latest-2026-10-28/README.md).
+
+| Group | Tests | How judged | Result |
+|---|---:|---|---|
+| Normal XML 1.0 tests (5th edition, including external files) | 1,974 | W3C answer | ✅ all pass |
+| Old-edition name tests, with the old rules the DLL uses | 309 | W3C answer | ✅ all pass |
+| Optional errors | 28 | either answer is allowed | ✅ no crash |
+| XML 1.1 | 274 | no XML 1.0 answer exists | ✅ no crash |
+| **Total** | **2,585** | | **0 failed, 0 errors, 0 skipped** |
+
+Jenkins would show **2,283 checked plus 302 "no crash only"**. We started at **1,727 passed and 858 skipped per build** (Jenkins #70).
+
+**External files through the DLL** (the way Expat programs load them): **247 of 247** in both builds.
+The supervisor's `main` alone still has crashes and timeouts there (1 crash off; 4 crashes + 3 timeouts on).
+
+**Nothing else broke:**
+- [x] DLL smoke tests: ok in both builds
+- [x] Eiffel test matrix: 4 of 4
+- [x] Python: 206 tests OK
+- [x] Native tests (runtime smoke, Windows ABI, chunked CRC 7/7, shim audit): all ok
+- [x] Same answers as Expat on 4,308 inputs (difference table unchanged)
+- [x] Dual regression lane: 910 of 910 (xpact, both builds), lifecycle 10/10
+- [ ] Jenkins run on `student-Mass` (requested from the supervisor 2026-10-28)
+
+## ✅ Merged since 2026-10-22
+
+| What | Pull request | Issue |
+|---|---|---|
+| A01 evidence: tests linked, change-and-predict | [#69](https://github.com/andersoxie/xpact/pull/69) | [#68](https://github.com/andersoxie/xpact/issues/68) ✅ closed 2026-10-26 |
+| Checklist audit, doc gaps | [#71](https://github.com/andersoxie/xpact/pull/71) | [#70](https://github.com/andersoxie/xpact/issues/70) ✅ closed 2026-10-26 |
+| Jenkins Eiffel include fallback `C:\El2502E` restored | [#75](https://github.com/andersoxie/xpact/pull/75) | [#73](https://github.com/andersoxie/xpact/issues/73) ✅ verified on Jenkins |
+| Week 3 report | [#77](https://github.com/andersoxie/xpact/pull/77) | - |
+| Parser conformance: strict UTF-8, UTF-16, names, DTD declarations; DLL start-tag shortcut and UTF-16 loops | [#80](https://github.com/andersoxie/xpact/pull/80) | [#79](https://github.com/andersoxie/xpact/issues/79) 🟡 Jenkins rerun; fixes [#38](https://github.com/andersoxie/xpact/issues/38), [#39](https://github.com/andersoxie/xpact/issues/39), [#40](https://github.com/andersoxie/xpact/issues/40), K3 |
+| `main` brought into `student-Mass` (the supervisor's #82-#100: libexpat lanes, parser handles and chunking #85, faster tag dispatch #87, WSL GCC benchmarks, Jenkins email, Xpact-core next to xpact #94-#98) | [#81](https://github.com/andersoxie/xpact/pull/81), [#103](https://github.com/andersoxie/xpact/pull/103) | [#102](https://github.com/andersoxie/xpact/issues/102) ✅ |
+| The supervisor merged `student-Mass` into `main` | #72, #78 (by the supervisor) | - |
+| Full check of `student-Mass` after the sync: every build and test passes with assertions on | [#105](https://github.com/andersoxie/xpact/pull/105) | [#104](https://github.com/andersoxie/xpact/issues/104) ✅ |
+| Weeks 2-3: K3 and the W3C crashes ticked as fixed, #46 as dropped | [#107](https://github.com/andersoxie/xpact/pull/107) | [#106](https://github.com/andersoxie/xpact/issues/106) ✅ |
+| The 6 missing labels created (#35); project board brought up to date | [#109](https://github.com/andersoxie/xpact/pull/109) | [#108](https://github.com/andersoxie/xpact/issues/108) ✅ |
+| `main` brought into `student-Mass` again (the supervisor's #101, parser performance); tests on the merged code | [#111](https://github.com/andersoxie/xpact/pull/111) (merge commit), [#112](https://github.com/andersoxie/xpact/pull/112) | [#110](https://github.com/andersoxie/xpact/issues/110) ✅ |
+| Student PC: MSVC backend, Python 3.14, git and Windows long paths; all 178 Python tests pass | [#114](https://github.com/andersoxie/xpact/pull/114) | [#113](https://github.com/andersoxie/xpact/issues/113) ✅ |
+| Student docs up to date (2026-10-26) | [#116](https://github.com/andersoxie/xpact/pull/116) | [#115](https://github.com/andersoxie/xpact/issues/115) ✅ |
+| xmlconf verdict rules: 2026-10-14 results re-scored | [#119](https://github.com/andersoxie/xpact/pull/119) | [#117](https://github.com/andersoxie/xpact/issues/117) ✅ |
+| G01: corpus manifest, 93 reviewed W3C cases | [#120](https://github.com/andersoxie/xpact/pull/120) | [#118](https://github.com/andersoxie/xpact/issues/118) ✅ |
+| C03/C10 compared with Expat 2.8.1; findings #122-#126 | [#127](https://github.com/andersoxie/xpact/pull/127) | [#121](https://github.com/andersoxie/xpact/issues/121) ✅ |
+| C02 regression tests for #38, #39, #40 | [#129](https://github.com/andersoxie/xpact/pull/129) | [#128](https://github.com/andersoxie/xpact/issues/128) ✅ |
+| Old runner copy `tests/python/run_w3c_conformance.py` removed | [#133](https://github.com/andersoxie/xpact/pull/133) | [#132](https://github.com/andersoxie/xpact/issues/132) ✅ |
+| Student docs after week 5 | [#135](https://github.com/andersoxie/xpact/pull/135) | [#134](https://github.com/andersoxie/xpact/issues/134) ✅ |
+| #73 verified on Jenkins (log of `cf12dee`), closed | [#136](https://github.com/andersoxie/xpact/pull/136) | [#73](https://github.com/andersoxie/xpact/issues/73) ✅ |
+| `-SkipSmoke` removed: assertions DLL smoke back on in both Jenkinsfiles and the release script | [#144](https://github.com/andersoxie/xpact/pull/144) | [#142](https://github.com/andersoxie/xpact/issues/142) 🟡 Jenkins run |
+| 7 skipped native Python tests now run (CMake bundled with Visual Studio found); 178 run, 0 skipped | the pull request | [#143](https://github.com/andersoxie/xpact/issues/143) |
+| **Option A**: all 2,585 W3C cases run (`--all-cases`, 0 skipped); parser fixes F1-F7 | [#147](https://github.com/andersoxie/xpact/pull/147) closed, superseded by #152 | [#146](https://github.com/andersoxie/xpact/issues/146) 🟡 Jenkins run |
+| Internal entity references fast again (position bookkeeping); the XML spec 16 s -> 0.2 s with assertions | [#149](https://github.com/andersoxie/xpact/pull/149) closed, superseded by #152 | [#148](https://github.com/andersoxie/xpact/issues/148) 🟡 Jenkins run |
+| Dual regression lane: 61 inputs whole and chunked on xpact and Xpact-core, lifecycle; 910/910 | [#152](https://github.com/andersoxie/xpact/pull/152) | [#153](https://github.com/andersoxie/xpact/issues/153) 🟡 Jenkins run |
+| **#146 + #148 integrated with `main` (#150)**: answers the supervisor's 2026-10-27 requests (reproduce and fix failures, more XML 1.0 cases, XML version); all 2,585 W3C cases pass, DLL 247/247 ([summary](../reports/issue-0151/summary.md)) | the pull request | [#151](https://github.com/andersoxie/xpact/issues/151) 🟡 Jenkins run |
+| **W3C output test** (432 cases with an expected output file) and the fix it led to: attribute defaults across external files; 359 -> 393 right, 0 worse, all old lanes unchanged ([report](../reports/issue-0154/report.md)) | [#160](https://github.com/andersoxie/xpact/pull/160) (`7028e68`) | [#154](https://github.com/andersoxie/xpact/issues/154), [#155](https://github.com/andersoxie/xpact/issues/155) 🟡 Jenkins run |
+| Declared defaults of tokenized attributes normalized (`valid-sa-096`); W3C output 393 -> 394, 0 worse ([report](../reports/issue-0156/report.md)) | [#161](https://github.com/andersoxie/xpact/pull/161) (`d0a4e21`) | [#156](https://github.com/andersoxie/xpact/issues/156) 🟡 Jenkins run |
+| Public identifiers normalized everywhere (DOCTYPE, NOTATION, ENTITY), as Expat; W3C output 394 -> 395, 0 worse ([report](../reports/issue-0157/report.md)) | [#162](https://github.com/andersoxie/xpact/pull/162) (`133ae01`) | [#157](https://github.com/andersoxie/xpact/issues/157) 🟡 Jenkins run |
+| A second byte order mark after UTF-16 decoding is kept (it was removed twice; two-BOM UTF-16 documents were also accepted); W3C output 395 -> 398, 0 worse ([report](../reports/issue-0158/report.md)) | [#163](https://github.com/andersoxie/xpact/pull/163) (`82c82b5`) | [#158](https://github.com/andersoxie/xpact/issues/158) 🟡 Jenkins run |
+| An external parameter entity included in an entity literal: its text goes into the value, its declarations are no longer used; W3C output 398 -> 399, 0 worse, Expat's C tests unchanged ([report](../reports/issue-0159/report.md)) | the pull request | [#159](https://github.com/andersoxie/xpact/issues/159) 🟡 Jenkins run |
+| Keep the machine's MSVC backend in the native build scripts; retested 2026-10-26 | [#76](https://github.com/andersoxie/xpact/pull/76) (`7cf5a94`) | [#74](https://github.com/andersoxie/xpact/issues/74) 🟡 Jenkins run |
+| Merged branches deleted (11 on GitHub, 20 local), PR #76 finished | [#138](https://github.com/andersoxie/xpact/pull/138) | [#137](https://github.com/andersoxie/xpact/issues/137) ✅ |
+| Script for the supervisor: collects the information for the open dual-implementation steps and #74/#79 | (the pull request) | [#140](https://github.com/andersoxie/xpact/issues/140) |
+
+No pull request of ours is open. Branches left on andersoxie/xpact: `main`, `student-Mass` and the supervisor's `codex/*`.
+
+<details>
+<summary>Merged on 2026-10-22</summary>
 
 Four stacked pull requests, merged in order at the student's request:
 
@@ -33,7 +103,9 @@ Four stacked pull requests, merged in order at the student's request:
 | 3 | [#42](https://github.com/andersoxie/xpact/pull/42) Record the GitHub labels and week milestones | `c01f743` | [#35](https://github.com/andersoxie/xpact/issues/35) ✅ closed |
 | 4 | [#44](https://github.com/andersoxie/xpact/pull/44) These doc updates | this one | [#43](https://github.com/andersoxie/xpact/issues/43) ✅ closed |
 
-Next time a pull request is merged: check the result, then close its issue
+</details>
+
+After a pull request is merged: check the result, then close its issue
 by hand with "Fixed in `<sha>` (PR #N)" (merging into `student-Mass` does not close it).
 
 ## 🔴 Known problems (living list)
@@ -43,17 +115,19 @@ Update a row when its status changes; move it to "Solved" below, never delete it
 
 | Problem | Seen in | Cause | Issue | Next step |
 |---|---|---|---|---|
-| **Jenkins** DLL build: `Cannot find Eiffel runtime include directory`; all later stages skipped | Jenkins on `main` @ `9e1747d`, 2026-10-23 ([log](../reports/issue-0073/jenkins-log-2026-10-23.txt)) | ✔ our #2/#10 fixes replaced the Jenkins fallback `C:\El2502E` | [#73](https://github.com/andersoxie/xpact/issues/73) | fixed on `student-Mass` (both paths searched); **Jenkins rerun by the supervisor** |
-| B03: `direct_start_tag_attributes` loop variant at `/>` | test matrix (K1); **every `/>` input through the DLL** | ✔ fix in draft [#12](https://github.com/andersoxie/xpact/pull/12), confirmed with a DLL build | [#3](https://github.com/andersoxie/xpact/issues/3) | ⏸ **on hold** (student, 2026-10-22); review #12 |
+| Native build scripts always force `ISE_C_COMPILER=msc_vc140`, overriding a machine's own MSVC backend | check of all student build changes against Jenkins, 2026-10-23 | ✔ in the code · not seen on Jenkins: `cf12dee` built fine with the forced `msc_vc140` | [#74](https://github.com/andersoxie/xpact/issues/74) | fixed on `student-Mass` in [#76](https://github.com/andersoxie/xpact/pull/76) (`7cf5a94`, 2026-10-26); a Jenkins run with it |
 | GC-suspended parses swallow exceptions | B03 analysis; crashes without a trace | ✔ (swallowing) · ❓ (lost traces) | [#13](https://github.com/andersoxie/xpact/issues/13) | ⏸ **on hold** (student, 2026-10-22); parser developer |
-| Start handler: rest of the document not parsed, `<root>` accepted, end events lost (C01) | DLL tests, all DLLs | ❓ C01 shortcut | [#38](https://github.com/andersoxie/xpact/issues/38) | ⏸ **on hold** (student, 2026-10-22); parser developer |
-| Invalid UTF-8 accepted in all six places (K4) | DLL tests: 2,106 of 2,148 | ❓ no strict decoder (C08) | [#39](https://github.com/andersoxie/xpact/issues/39) | ⏸ **on hold** (student, 2026-10-22); parser developer |
-| Non-final chunk ending with `<` crashes the assertions DLL | DLL tests: 644 crashes | ✔ trigger · ❓ in the code | [#40](https://github.com/andersoxie/xpact/issues/40) | ⏸ **on hold** (student, 2026-10-22); parser developer |
-| Assertions DLL smoke test crashes `0xC0000028` (K3) | baseline; A02; still with the B03 fix | ❔ (B03 is not the only cause) | [draft 07](github/issues/07-finding-dll-crash.md) | after #28 and #40 are repaired, rerun |
-| W3C, assertions on: 47 cases crash in DTD declaration parsing (`parse_attlist_declaration`, `parse_content_particle`, `parse_attlist_default_value`, `put_external_entity`) | W3C after the #28 repair, 2026-10-22 ([list](../reports/issue-0028/w3c-after-fix/crashes-assertions-on.tsv)) | ✔ trigger · ❓ in the code | [draft 21](github/issues/21-finding-xmlconf-crashes.md) | ⏸ **on hold** (student, 2026-10-22); was hidden behind #28 (week 2: 53); file as findings |
-| W3C, assertions off: 220 malformed documents accepted, 16 well-formed rejected | [W3C 2026-10-21](results/w3c-conformance-2026-10-21/README.md) | ❔ (partly #39?) | [#29](https://github.com/andersoxie/xpact/issues/29) | sort them in G01 |
-| Error codes differ from libexpat (`<root>` 5 not 3, junk 4 not 9) | DLL tests | ❔ reference values not checked | (G03) | check against Expat 2.8.1 |
-| Build fixes are on `student-Mass`, not `main` | | (decision) | [draft 22](github/issues/22-blocker-build-fixes.md) | **supervisor decides; never merge into `main` ourselves** |
+| Jenkins "Eiffel Tests" turns green without printing a test result | [#73 log](../reports/issue-0073/jenkins-log-2026-10-23.txt); stage unchanged on 2026-10-26 | ✔ on the student PC (stale exe) · ❔ on Jenkins | [#130](https://github.com/andersoxie/xpact/issues/130) | supervisor's pipeline |
+| SonarQube `HTTP 401` on Jenkins | [#73 log](../reports/issue-0073/jenkins-log-2026-10-23.txt) | ❓ suspected: server token | [#131](https://github.com/andersoxie/xpact/issues/131) | supervisor renews the token |
+| Malformed UTF-8: error position 1:0, not the bad byte | Expat comparison, 2026-10-26 | ❓ suspected: whole input checked before tokenizing | [#122](https://github.com/andersoxie/xpact/issues/122) | parser developer (C08) |
+| Malformed UTF-8: no events before the error | Expat comparison | ❓ suspected: same place as #122 | [#123](https://github.com/andersoxie/xpact/issues/123) | parser developer |
+| `<root/>junk`: error 4, not 9; position moves with callbacks and chunks | Expat comparison | ❔ unknown | [#124](https://github.com/andersoxie/xpact/issues/124) | investigate |
+| Default handler gets the mismatched end tag before the error | Expat comparison | ❔ unknown | [#125](https://github.com/andersoxie/xpact/issues/125) | investigate |
+| Default handler gets LF instead of the raw CR | Expat comparison | ❓ suspected: fed from the normalized input | [#126](https://github.com/andersoxie/xpact/issues/126) | investigate |
+| W3C output: the declared default of a tokenized attribute (`NMTOKENS` …) is not normalized (`valid-sa-096`); 3 other cases fixed with #154 | W3C output test, 2026-10-28 | ✔ the default skipped `collapse_spaces` | [#156](https://github.com/andersoxie/xpact/issues/156) | fixed on `student-Mass` ([report](../reports/issue-0156/report.md)), all 4 cases pass; a Jenkins run |
+| W3C output: a notation's public ID is not normalized (`notation01`); in fact no public ID was | W3C output test | ✔ `read_public_id_literal` did not normalize | [#157](https://github.com/andersoxie/xpact/issues/157) | fixed on `student-Mass` ([report](../reports/issue-0157/report.md)); a Jenkins run |
+| W3C output: a second byte order mark at the start of an external entity is dropped (3 cases); two-BOM UTF-16 documents were also accepted | W3C output test | ✔ removed twice: by the UTF-16 decoder and again in `normalized_input` | [#158](https://github.com/andersoxie/xpact/issues/158) | fixed on `student-Mass` ([report](../reports/issue-0158/report.md)); a Jenkins run |
+| W3C output: an external parameter entity inside an entity value is parsed as declarations (`valid-not-sa-031`) | W3C output test | ✔ the literal-mode child parsed the text as DTD and gave no text back | [#159](https://github.com/andersoxie/xpact/issues/159) | fixed on `student-Mass` ([report](../reports/issue-0159/report.md)); a Jenkins run |
 
 **Workarounds in use (not fixes):** `fix.ps1` stops in Windows PowerShell 5.1,
 so its steps are done by hand ([VERSIONING.md](VERSIONING.md#fixps1-in-windows-powershell-51)).
@@ -79,16 +153,33 @@ so its steps are done by hand ([VERSIONING.md](VERSIONING.md#fixps1-in-windows-p
 | No way to check that a failure still reaches the exit status (B02) | PR [#63](https://github.com/andersoxie/xpact/pull/63) | [#46](https://github.com/andersoxie/xpact/issues/46) |
 | Test matrix started outside the repository root ran a stale `xpact_tests.exe` and reported ok | PR [#58](https://github.com/andersoxie/xpact/pull/58) | [#55](https://github.com/andersoxie/xpact/issues/55) |
 | Jenkins precompile prompt: **dropped** 2026-10-22, the student decided not to pursue it | - | [draft 23](github/issues/23-finding-jenkins-precompile.md), [#56](https://github.com/andersoxie/xpact/issues/56) |
+| B03: `direct_start_tag_attributes` loop variant at `/>` | PR [#12](https://github.com/andersoxie/xpact/pull/12); verified 2026-10-26 ([check](../reports/issue-0104/report.md)) | [#3](https://github.com/andersoxie/xpact/issues/3) |
+| Start handler: rest of the document not parsed (C01) | PR [#80](https://github.com/andersoxie/xpact/pull/80) | [#38](https://github.com/andersoxie/xpact/issues/38) |
+| Invalid UTF-8 accepted in all six places (K4) | PR [#80](https://github.com/andersoxie/xpact/pull/80); verified 2026-10-26: 2,658 UTF-8 DLL cases pass ([check](../reports/issue-0104/report.md)) | [#39](https://github.com/andersoxie/xpact/issues/39) |
+| Non-final chunk ending with `<` crashed the assertions DLL | PR [#80](https://github.com/andersoxie/xpact/pull/80); verified 2026-10-26: 0 crashes (was 644) ([check](../reports/issue-0104/report.md)) | [#40](https://github.com/andersoxie/xpact/issues/40) |
+| Assertions DLL smoke test crashed `0xC0000028` (K3) | PR [#80](https://github.com/andersoxie/xpact/pull/80); smoke ok 2026-10-26; `-SkipSmoke` removed from CI and the release script in [#142](https://github.com/andersoxie/xpact/issues/142) (Jenkins run pending) | [#79](https://github.com/andersoxie/xpact/issues/79), draft 07 |
+| W3C, assertions on: 47 cases crashed in DTD declaration parsing | PR [#80](https://github.com/andersoxie/xpact/pull/80); W3C 1,727/1,727 on 2026-10-26 | [#79](https://github.com/andersoxie/xpact/issues/79), draft 21 |
+| W3C, assertions off: 220 malformed accepted, 16 well-formed rejected | PR [#80](https://github.com/andersoxie/xpact/pull/80); W3C 1,727/1,727 on 2026-10-26 | [#79](https://github.com/andersoxie/xpact/issues/79), [#29](https://github.com/andersoxie/xpact/issues/29) |
+| Build fixes were on `student-Mass`, not `main` | the supervisor merged `student-Mass` into `main` (#72, #78) | draft 22 |
+| Python tests failed with Python 3.10 (`hashlib.file_digest` is 3.11+) | Python 3.14.0 installed and made the default; setup guide says 3.11+ ([report](../reports/issue-0113/report.md)) | [#113](https://github.com/andersoxie/xpact/issues/113) |
+| `test_implementation_builds.py`: 15 problems from paths over 260 characters | Windows `LongPathsEnabled = 1` and git `core.longpaths true`; all 178 Python tests pass ([report](../reports/issue-0113/report.md)) | [#113](https://github.com/andersoxie/xpact/issues/113) |
+| Test matrix and W3C built with MinGW gcc because `ISE_C_COMPILER` had disappeared | `ISE_C_COMPILER=msc_vc140` set again; matrix 4/4 and W3C 1,727/1,727 with MSVC ([report](../reports/issue-0113/report.md)) | [#113](https://github.com/andersoxie/xpact/issues/113) |
+| `tests/python/run_w3c_conformance.py`: an old copy of the runner (361 vs 459 lines), used by nothing | Removed; Python tests 178 OK before and after ([report](../reports/issue-0132/report.md)) | [#132](https://github.com/andersoxie/xpact/issues/132) |
+| **Jenkins** DLL build: `Cannot find Eiffel runtime include directory` (2026-10-23) | Fixed in #75 (`63f67f3`), in `main` since `cf12dee` (#78). **Verified on Jenkins**: the run on `main` @ `cf12dee` found `C:\El2502E` and built both DLLs, `xpact Eiffel DLL smoke: ok` ([log](../reports/issue-0079/jenkins-log-cf12dee-before.txt), lines 135-292); found 2026-10-26 | [#73](https://github.com/andersoxie/xpact/issues/73) |
 
 </details>
 
 ## ➡️ Next
 
-1. ✅ **B01** ([#45](https://github.com/andersoxie/xpact/issues/45)), **B02** ([#46](https://github.com/andersoxie/xpact/issues/46)) and draft 06 ([#60](https://github.com/andersoxie/xpact/issues/60)) done 2026-10-22. The Jenkins check (`XPACT_META_FAIL=assert` on one Jenkins run) was dropped on 2026-10-22, not pursued; B02 is verified on the student PC only.
-2. ⏸ **On hold** (student, 2026-10-22): B03 ([#3](https://github.com/andersoxie/xpact/issues/3), draft PR [#12](https://github.com/andersoxie/xpact/pull/12)), A04, the 47 W3C crashes in DTD parsing, [#13](https://github.com/andersoxie/xpact/issues/13), [#38](https://github.com/andersoxie/xpact/issues/38), [#39](https://github.com/andersoxie/xpact/issues/39), [#40](https://github.com/andersoxie/xpact/issues/40) ([#66](https://github.com/andersoxie/xpact/issues/66)). B03 is the only failure left in the assertions-on test lanes; PR #12 is based on `20e6bc3` and needs updating to `student-Mass` before review.
-3. **Ask the supervisor** the questions in [`for superviser.txt`](for%20superviser.txt).
-4. **Week 4, G01:** choose 50-100 W3C cases from `results.tsv` (passes and failures, both builds).
-5. **C02/C03/C10, remaining:** compare with Expat 2.8.1 (needs an Expat build); turn the findings into regression tests once the parser is repaired.
+1. ✅ **Done 2026-10-26:** full check ([#104](https://github.com/andersoxie/xpact/issues/104)), weeks 2-3 closed out ([#106](https://github.com/andersoxie/xpact/issues/106), [#108](https://github.com/andersoxie/xpact/issues/108)), `main` synced ([#110](https://github.com/andersoxie/xpact/issues/110)), PC set up like the supervisor's ([#113](https://github.com/andersoxie/xpact/issues/113)). Every build and test passes with assertions on, with MSVC.
+2. 🟡 **Waiting for the supervisor:** a Jenkins run for [#74](https://github.com/andersoxie/xpact/issues/74) (PR #76 merged 2026-10-26) and [#79](https://github.com/andersoxie/xpact/issues/79); the week 2 decision (main improvement and input set); the questions in [`for superviser.txt`](for%20superviser.txt).
+3. ✅ **Week 4, G01** ([#118](https://github.com/andersoxie/xpact/issues/118)): 93 W3C cases in [`results/G01-corpus/`](results/G01-corpus/README.md); the xmlconf verdict rules done too ([#117](https://github.com/andersoxie/xpact/issues/117)).
+4. ✅ **W3C skips (2026-10-28):** none left. All 2,585 cases run: 2,283 checked + 302 "no crash only", 0 failed, 0 errors ([#151](https://github.com/andersoxie/xpact/issues/151), PR #152). 🟡 Waiting for the supervisor's Jenkins run on `student-Mass`; then close #146, #148, #151, #153 and #142.
+5. ✅ **Week 5 done 2026-10-26:** C03/C10 compared with Expat 2.8.1 ([#121](https://github.com/andersoxie/xpact/issues/121)); C02 regressions ([#128](https://github.com/andersoxie/xpact/issues/128)). Open from it: findings [#122](https://github.com/andersoxie/xpact/issues/122)-[#126](https://github.com/andersoxie/xpact/issues/126) (parser work).
+6. ✅ Every known problem has an issue now (2026-10-26): Jenkins "Eiffel Tests" without output [#130](https://github.com/andersoxie/xpact/issues/130), SonarQube 401 [#131](https://github.com/andersoxie/xpact/issues/131) (both need the supervisor); the old runner copy removed ([#132](https://github.com/andersoxie/xpact/issues/132)).
+7. 🟡 **Supervisor's dual-implementation plan** (`newUpdates.txt`): steps 1-2 and the catalog and W3C lanes are done on `main`. For steps 3-9, Jenkins, #74 and #79, the supervisor can run `student\tools\collect-supervisor-info.ps1` ([#140](https://github.com/andersoxie/xpact/issues/140)) and send back the `.txt`.
+8. ✅ **W3C output test (2026-10-28):** the content, not only the verdict, of the 432 W3C cases that have an expected output file. 359 right at first; the fix for [#154](https://github.com/andersoxie/xpact/issues/154)/[#155](https://github.com/andersoxie/xpact/issues/155) brings it to **393** (PR #160), [#156](https://github.com/andersoxie/xpact/issues/156) to **394** (PR #161) [#157](https://github.com/andersoxie/xpact/issues/157) to **395** (PR #162) [#158](https://github.com/andersoxie/xpact/issues/158) to **398** (PR #163) and [#159](https://github.com/andersoxie/xpact/issues/159) to **399**, 0 worse ([#154](../reports/issue-0154/report.md), [#156](../reports/issue-0156/report.md), [#157](../reports/issue-0157/report.md), [#158](../reports/issue-0158/report.md), [#159](../reports/issue-0159/report.md) reports). **Every xpact-only difference of this test is fixed**; left: 29 XML 1.1 files and 4 optional errors. 🟡 Jenkins run, then close #154-#159.
+9. ⏸ Still on hold: [#13](https://github.com/andersoxie/xpact/issues/13) (GC wrapper swallows exceptions), A04.
 
 <details>
 <summary>The five tests chosen on 2026-10-21 and where they stand</summary>
@@ -100,7 +191,7 @@ From [`notes/next-tests-2026-10-21.txt`](notes/next-tests-2026-10-21.txt):
 | ✅ | 1. CR regression (#28) | Test in `1ea242e`; parser repaired in PR [#59](https://github.com/andersoxie/xpact/pull/59), the test passes |
 | ✅ | 2. B02 deliberately failing meta-test | [#46](https://github.com/andersoxie/xpact/issues/46), `XPACT_META_FAIL` |
 | ✅ | 3. C02 through the DLL | [#37](https://github.com/andersoxie/xpact/issues/37), found #38 |
-| 🟡 | 4. C03 every split position | run in #37 (found #40); the Expat comparison is still to do |
+| ✅ | 4. C03 every split position | run in #37 (found #40); compared with Expat 2.8.1 in [#121](https://github.com/andersoxie/xpact/issues/121) |
 | ✅ | 5. C10 (part) malformed UTF-8 | run in #37, found #39 |
 
 </details>
@@ -118,17 +209,17 @@ From [`notes/next-tests-2026-10-21.txt`](notes/next-tests-2026-10-21.txt):
 **Bring to review:** A baseline log with revision, configuration, commands and known failures.
 - [x] Assertions-enabled baseline with every lane logged: [baseline/BASELINE.md](baseline/BASELINE.md)
 - [x] [A02](github/issues/02-A02.md) Reproduce assertions-enabled workbench and finalized builds: rerun in the git clone on 2026-10-22 at `1799b35`, every step as expected ([#33](https://github.com/andersoxie/xpact/issues/33), [A02-baseline](results/A02-baseline/README.md), [setup guide](report/setup-guide.md))
-- [ ] Report the baseline findings (each one's state is in [Known problems](#-known-problems-living-list)):
+- [x] Report the baseline findings (each one's state is in [Known problems](#-known-problems-living-list)); all resolved or filed, last two closed 2026-10-26 ([#106](https://github.com/andersoxie/xpact/issues/106)):
   - [x] [Finalized lane drops assertions (missing `-keep`)](github/issues/04-finding-finalized-keep.md): filed as [#48](https://github.com/andersoxie/xpact/issues/48), fixed in [reports/issue-0048](../reports/issue-0048/report.md)
-  - [x] Postcondition `final_finished_or_suspended` fails (B03): [#3](https://github.com/andersoxie/xpact/issues/3). Fix in draft [#12](https://github.com/andersoxie/xpact/pull/12), on hold. *2026-10-22:* also the cause of every `/>` crash through the DLL (confirmed with a B03-fixed build, #37)
+  - [x] Postcondition `final_finished_or_suspended` fails (B03): [#3](https://github.com/andersoxie/xpact/issues/3). Fixed in [#12](https://github.com/andersoxie/xpact/pull/12) (merged by the supervisor); verified 2026-10-26 in [#104](https://github.com/andersoxie/xpact/issues/104). *2026-10-22:* also the cause of every `/>` crash through the DLL (confirmed with a B03-fixed build, #37)
   - [x] New, found while analysing B03: `XP_GC_CRITICAL_SECTION.execute` swallows exceptions: [#13](https://github.com/andersoxie/xpact/issues/13)
   - [x] [Test runner stops at the first failure](github/issues/06-finding-runner-stops.md): filed as [#60](https://github.com/andersoxie/xpact/issues/60), fixed in [reports/issue-0060](../reports/issue-0060/report.md)
-  - [ ] [Assertions DLL smoke test crashes](github/issues/07-finding-dll-crash.md): still a draft; *2026-10-22:* still crashes with the B03 fix
+  - [x] [Assertions DLL smoke test crashes](github/issues/07-finding-dll-crash.md) (K3): fixed in PR [#80](https://github.com/andersoxie/xpact/pull/80) ([#79](https://github.com/andersoxie/xpact/issues/79)); verified 2026-10-26: `build_native_eiffel.ps1 -BuildTier Assertions` → `xpact Eiffel DLL smoke: ok` ([#104 check](../reports/issue-0104/report.md))
   - [x] Python harness fails on Python 3.10: fixed in `492c6eb` ([#32](https://github.com/andersoxie/xpact/issues/32))
-  - [ ] [53 W3C cases crash xpact](github/issues/21-finding-xmlconf-crashes.md): rechecked after the #28 repair: 47 crashes left, all in DTD declaration parsing ([list](../reports/issue-0028/w3c-after-fix/crashes-assertions-on.tsv)); still a draft
+  - [x] [53 W3C cases crash xpact](github/issues/21-finding-xmlconf-crashes.md) (47 after #28): fixed in PR [#80](https://github.com/andersoxie/xpact/pull/80) ([#79](https://github.com/andersoxie/xpact/issues/79)); verified 2026-10-26: W3C `FinalizedAssertions` 1,727 passed, 0 failed, 0 errors, no crash ([#104 check](../reports/issue-0104/report.md)), with the current runner `run_w3c_conformance.py` (the original `run_xmlconf_conformance.ps1` is no longer in the repository)
   - [x] New, found in the W3C run with assertions on: the loop variant in `XP_PARSER.normalized_input` fails on every input with a CR: [#28](https://github.com/andersoxie/xpact/issues/28), regression test `1ea242e`
   - [x] [Jenkins precompile prompt](github/issues/23-finding-jenkins-precompile.md): dropped on 2026-10-22, not pursued ([#56](https://github.com/andersoxie/xpact/issues/56))
-- [ ] **Decision:** choose one main improvement and a small input set with the supervisor
+- [ ] **Decision:** choose one main improvement and a small input set with the supervisor. *Still open 2026-10-26:* no decision recorded (week 2 and week 3 notes); **needs the supervisor**. Done so far without it: B01/B02 (failure reporting) and the #80 parser repair
 
 ## Build fixes and workflow in git (week 3)
 Not a week of the guide's plan: the week 2 blocker ("build fixes not in `main`,
@@ -149,7 +240,7 @@ Each item is one issue, one report and one squashed commit on `student-Mass`.
 | ✅ | [#34](https://github.com/andersoxie/xpact/issues/34) | Repair of the repository state of 2026-10-21 | [#36](https://github.com/andersoxie/xpact/pull/36) | `6e2278e` | [issue-0034](../reports/issue-0034/report.md) |
 | ✅ | [#35](https://github.com/andersoxie/xpact/issues/35) | GitHub labels and week milestones (`CLAUDE.md`) | [#42](https://github.com/andersoxie/xpact/pull/42) | `c01f743` | [issue-0035](../reports/issue-0035/report.md) |
 | ✅ | [#43](https://github.com/andersoxie/xpact/issues/43) | All student docs brought up to date | [#44](https://github.com/andersoxie/xpact/pull/44) | | |
-| 🟡 | [#3](https://github.com/andersoxie/xpact/issues/3) | B03 loop variant | [#12](https://github.com/andersoxie/xpact/pull/12) (draft, on hold) | | |
+| ✅ | [#3](https://github.com/andersoxie/xpact/issues/3) | B03 loop variant | [#12](https://github.com/andersoxie/xpact/pull/12) merged; verified 2026-10-26 ([#104](https://github.com/andersoxie/xpact/issues/104)) | | |
 
 Together, #2, #7 and #10 bring in the week 1 build fixes from
 [patch 01](history/patches/01-week1-build-fixes.patch), except its
@@ -167,37 +258,40 @@ The 2026-10-19 error report is [reports/error-reports/2026-10-19.md](../reports/
 - [x] Regression test for the CR crash: [#28](https://github.com/andersoxie/xpact/issues/28), `1ea242e`; parser repaired 2026-10-22 (PR [#59](https://github.com/andersoxie/xpact/pull/59))
 - [x] Repository repair and GitHub setup per `CLAUDE.md`: [#34](https://github.com/andersoxie/xpact/issues/34), [#35](https://github.com/andersoxie/xpact/issues/35), [#43](https://github.com/andersoxie/xpact/issues/43) (merged 2026-10-22)
 - [x] Checklist audit (2026-10-22, [#70](https://github.com/andersoxie/xpact/issues/70)): every closed issue's "Done when" list compared with the repository at `76ac272`. 12 issues had unticked boxes; the items that are really done are now ticked on GitHub, each marked "verified 2026-10-22" ([report](../reports/issue-0070/report.md)). Still open from the audit:
-  - [ ] [#35](https://github.com/andersoxie/xpact/issues/35): 6 labels in `labels.json` are not on GitHub (`D1-beginner`, `D4-expert`, `group:A-orientation`, `group:F-core`, `group:G-verification`, `type:blocker`). **Ask the supervisor** before creating them
-  - [ ] [#46](https://github.com/andersoxie/xpact/issues/46): Jenkins stage turns red: dropped ([#64](https://github.com/andersoxie/xpact/issues/64)), not checked
-  - [ ] Project board not read: the `gh` login lacks the `read:project` scope (`gh auth refresh -s read:project,project`)
+  - [x] [#35](https://github.com/andersoxie/xpact/issues/35): 6 labels in `labels.json` were not on GitHub: **created 2026-10-26** with the student's authorization ([#108](https://github.com/andersoxie/xpact/issues/108)); all 21 now match `labels.json`
+  - [x] [#46](https://github.com/andersoxie/xpact/issues/46): Jenkins stage turns red: **dropped** 2026-10-22 by the student ([#64](https://github.com/andersoxie/xpact/issues/64)), not checked; B02 is verified on the student PC only
+  - [x] Project board: `gh` has the `project` scope since 2026-10-26; the board was read and brought up to date ([#108](https://github.com/andersoxie/xpact/issues/108)): 16 missing student issues added, 7 closed issues and 2 merged PRs moved to Done
   - [x] A01's last three items had no evidence: done in [#68](https://github.com/andersoxie/xpact/issues/68) (PR [#69](https://github.com/andersoxie/xpact/pull/69))
   - [x] #43 dates on every page and the #35 issue tables: done in [#70](https://github.com/andersoxie/xpact/issues/70)
 
 ## Week 4 – Input matrix
 **Activity:** Design small regressions and select 50–100 applicable W3C XML cases with the supervisor.
 **Bring to review:** An input matrix with reviewed expected outcomes.
-- [ ] [G01](github/issues/11-G01.md) Corpus manifest and 50–100 reviewed W3C cases
-- [ ] [Fix xmlconf verdict rules](github/issues/12-xmlconf-verdicts.md)
+- [x] [G01](github/issues/11-G01.md) Corpus manifest and 50–100 reviewed W3C cases: done 2026-10-26 ([#118](https://github.com/andersoxie/xpact/issues/118)): 93 cases, 83 counted (46 accept, 37 reject), 10 marked; all pass today in both builds; selected by the student, not reviewed by the supervisor ([results](results/G01-corpus/README.md))
+- [x] [Fix xmlconf verdict rules](github/issues/12-xmlconf-verdicts.md): done 2026-10-26 ([#117](https://github.com/andersoxie/xpact/issues/117)): the old PowerShell runner (never in git) is superseded by `run_w3c_conformance.py`; its 2026-10-14 results re-scored: 676 of 854 "failures" were wrong rules, the 233 real problems all pass today ([results](results/xmlconf-verdicts/README.md))
 
 ## Week 5 – Regressions
 **Activity:** Run the selected small inputs with different callbacks and chunk boundaries.
 **Bring to review:** Repeatable regressions and small bug reproductions.
 Run early (2026-10-22) with the C# DLL test program ([#37](https://github.com/andersoxie/xpact/issues/37), [results](results/dll-tests-2026-10-22/README.md)): 3,360 cases on three DLLs.
-- [x] [C02](github/issues/13-C02.md) Malformed final-input cases with all six callback sets: run; found [#38](https://github.com/andersoxie/xpact/issues/38) (C01 shortcut). Regressions in the Eiffel suite still to add once repaired
-- [ ] [C03](github/issues/14-C03.md) Chunk boundaries: every split and byte by byte run, found [#40](https://github.com/andersoxie/xpact/issues/40); **comparison with Expat 2.8.1 still to do**
-- [x] [C10 (part)](github/issues/15-C10.md) Malformed UTF-8 in six places, whole and split: run; found [#39](https://github.com/andersoxie/xpact/issues/39). Expat comparison still to do
-- [ ] **Decision:** review with the supervisor what can realistically be completed
+- [x] [C02](github/issues/13-C02.md) Malformed final-input cases with all six callback sets: run; found [#38](https://github.com/andersoxie/xpact/issues/38) (C01 shortcut). **Regressions added** 2026-10-26 ([#128](https://github.com/andersoxie/xpact/issues/128), [results](results/C02-final-input/README.md)): DLL smoke test + Eiffel suite; with the #38 or #40 fix undone they fail
+- [x] [C03](github/issues/14-C03.md) Chunk boundaries: every split and byte by byte run, found [#40](https://github.com/andersoxie/xpact/issues/40) (fixed in #80, verified 2026-10-26); **compared with Expat 2.8.1** 2026-10-26 ([#121](https://github.com/andersoxie/xpact/issues/121), [results](results/C03-chunks/README.md)): same verdicts and codes at every split; xpact's position moves for `<root/>junk` only ([#124](https://github.com/andersoxie/xpact/issues/124))
+- [x] [C10 (part)](github/issues/15-C10.md) Malformed UTF-8 in six places, whole and split: run; found [#39](https://github.com/andersoxie/xpact/issues/39) (fixed in #80, verified 2026-10-26). **Compared with Expat 2.8.1** 2026-10-26, `80` and `FF` added ([#121](https://github.com/andersoxie/xpact/issues/121), [results](results/C10-utf8/README.md)): all 3,606 verdicts agree; position and events differ ([#122](https://github.com/andersoxie/xpact/issues/122), [#123](https://github.com/andersoxie/xpact/issues/123))
+- [x] **Decision:** review with the supervisor what can realistically be completed: **skipped by the student** (2026-10-26); everything planned for week 5 was completed
 
 ## Week 6 – One improvement
 **Activity:** Pair on one manageable test-framework or verification-script improvement.
 **Bring to review:** Before-and-after results and a reviewed change.
-- [ ] The improvement chosen in week 2 (B01/B02, the xmlconf verdicts or a C-group regression), reviewed and merged
+- [x] Improvement: all W3C cases run without skips, the bugs this exposed fixed, and the entity-reference speed fixed (#146, #148, #151, merged with PR #152 on 2026-10-28)
+- [x] Before-and-after results: [latest-2026-10-28](../reports/latest-2026-10-28/README.md), [#151 report](../reports/issue-0151/report.md)
+- [ ] Reviewed by the supervisor, and a Jenkins run
 
 ## Week 7 – Comparison
 **Activity:** Compare xpact and libexpat; add more applicable W3C cases as time permits.
 **Bring to review:** A table of matches, differences and untested cases.
 - [ ] [A04](github/issues/16-A04.md) Verify which library the tests load: ⏸ on hold (student, 2026-10-22, [#66](https://github.com/andersoxie/xpact/issues/66))
 - [ ] [G03](github/issues/17-G03.md) xpact vs Expat comparison across chunks
+- [x] W3C **output** compared with the expected output files and with Expat (432 cases): done 2026-10-28, 399 right after [#154](https://github.com/andersoxie/xpact/issues/154), [#156](https://github.com/andersoxie/xpact/issues/156), [#157](https://github.com/andersoxie/xpact/issues/157), [#158](https://github.com/andersoxie/xpact/issues/158) and [#159](https://github.com/andersoxie/xpact/issues/159); no xpact-only difference left ([report](../reports/issue-0154/report.md))
 
 ## Week 8 – Consolidate
 **Activity:** Consolidate the results and add selected SVG or libxml2 cases. Core integration stays optional.

@@ -108,6 +108,10 @@ feature -- Expat-compatible constants
 
 	Xml_error_xml_decl: INTEGER = 30
 
+	Xml_error_entity_declared_in_pe: INTEGER = 24
+
+	Xml_error_text_decl: INTEGER = 31
+
 	Xml_error_publicid: INTEGER = 32
 
 	Xml_error_suspended: INTEGER = 33
@@ -172,6 +176,9 @@ feature -- Access
 
 	has_unsupported_explicit_encoding: BOOLEAN
 			-- Should the next parse fail because `explicit_encoding' is unsupported?
+
+	last_input_byte_order_mark_removed: BOOLEAN
+			-- Did the last `decoded_input' remove a UTF-16 byte-order mark?
 
 	explicit_encoding_overrides_declaration: BOOLEAN
 			-- Did `explicit_encoding' come from `XML_SetEncoding' rather than parser creation/reset?
@@ -609,12 +616,17 @@ feature -- Element change
 		end
 
 	merge_external_entity_context_from (a_child: XP_NATIVE_PARSER): BOOLEAN
-			-- Merge DTD entity declarations parsed by external entity child `a_child'.
+			-- Merge DTD entity declarations parsed by external entity child `a_child'; a child included
+			-- in an entity literal gives back its replacement text instead.
 		require
 			child_attached: a_child /= Void
 		do
-			parser.merge_entity_context_from (a_child.parser)
-			handler.record_external_entity_context_from (a_child.parser)
+			if a_child.external_entity_is_parameter_literal then
+				handler.record_external_parameter_literal_text (a_child.parser.last_parameter_literal_text)
+			else
+				parser.merge_entity_context_from (a_child.parser)
+				handler.record_external_entity_context_from (a_child.parser)
+			end
 			Result := True
 		ensure
 			merged: Result
@@ -876,6 +888,7 @@ feature {NONE} -- Parsing implementation
 						parser.set_return_ns_triplet (native_return_ns_triplet (native_parser_handle))
 					end
 					l_input := decoded_input (input_buffer)
+					parser.set_input_byte_order_mark_removed (last_input_byte_order_mark_removed)
 					if l_input = Void then
 						if not a_is_final and then last_error_code = Xml_error_partial_char then
 								-- Unknown encodings can end inside a converter sequence.
@@ -1843,6 +1856,7 @@ feature {NONE} -- Encoding
 			l_complete_count: INTEGER
 			l_declared_encoding: detachable STRING_8
 		do
+			last_input_byte_order_mark_removed := False
 			l_source := a_input
 			if not final_buffer then
 				l_complete_count := complete_encoded_prefix_count (a_input)
@@ -2113,6 +2127,7 @@ feature {NONE} -- Encoding
 				loop
 					l_unit := utf16_unit_at (a_input, i, a_little_endian)
 					if i = 1 and then l_unit = 65279 then
+						last_input_byte_order_mark_removed := True
 						i := i + 2
 					elseif l_unit >= 55296 and then l_unit <= 56319 then
 						if i + 3 > a_input.count then
@@ -2549,6 +2564,10 @@ feature {NONE} -- Error mapping
 				Result := Xml_error_misplaced_xml_pi
 			elseif a_error.same_string ("invalid xml declaration") then
 				Result := Xml_error_xml_decl
+			elseif a_error.same_string ("invalid text declaration") then
+				Result := Xml_error_text_decl
+			elseif a_error.same_string ("standalone reference to externally declared entity") then
+				Result := Xml_error_entity_declared_in_pe
 			elseif a_error.same_string ("invalid public identifier") then
 				Result := Xml_error_publicid
 			elseif a_error.same_string ("incorrect encoding") then

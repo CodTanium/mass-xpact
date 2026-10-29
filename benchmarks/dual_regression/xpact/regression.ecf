@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-20-0" name="xpact_regression" uuid="3F0C2B7E-6A1D-4C8E-9B52-2D7A41E0C915">
+  <target name="regression">
+    <root class="DR_REGRESSION_ROOT" feature="make"/>
+    <option warning="true" is_obsolete_routine_type="true">
+      <assertions precondition="false" postcondition="false" check="false" invariant="false" loop="false" supplier_precondition="false"/>
+    </option>
+    <setting name="console_application" value="true"/>
+    <setting name="dead_code_removal" value="all"/>
+    <capability>
+      <concurrency support="none"/>
+      <void_safety support="all" use="all"/>
+    </capability>
+    <external_include location="$XPACT_SOURCE_ROOT/include"/>
+    <external_include location="$XPACT_SOURCE_ROOT/native"/>
+    <library name="base" location="$ISE_LIBRARY/library/base/base.ecf"/>
+    <cluster name="parser" location="$XPACT_SOURCE_ROOT/src/"/>
+    <cluster name="backend" location="./"/>
+    <cluster name="shared" location="../shared/"/>
+    <cluster name="identity" location="$XPACT_PROBE_METADATA/"/>
+  </target>
+  <target name="regression_assertions" extends="regression">
+    <option>
+      <assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+    </option>
+  </target>
+</system>
