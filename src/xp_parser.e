@@ -434,6 +434,27 @@ feature {XP_NATIVE_PARSER} -- State
 			no_open_elements: element_stack.count = 0
 		end
 
+	invalid_input_character_index: INTEGER
+			-- Index in the input of the last document parse of the character that is not an XML
+			-- Char and stopped it before any markup was parsed, or 0 (#172).
+
+	parse_prefix_before_invalid_character (a_input: READABLE_STRING_8; a_index: INTEGER): BOOLEAN
+			-- Parse `a_input' in front of the character at `a_index', which is not an XML Char, as a
+			-- non-final prefix, then report that character. The callbacks in front of it are delivered,
+			-- as Expat delivers them for a document given whole or in pieces (#172).
+		require
+			input_attached: a_input /= Void
+			valid_index: a_index >= 1 and a_index <= a_input.count
+		do
+			if parse_prefix (a_input.substring (1, a_index - 1)) then
+				set_error ("invalid XML character")
+			end
+			Result := False
+		ensure
+			not_successful: not Result
+			stopped: has_error or is_suspended
+		end
+
 feature {XP_PARSER} -- Entity context import
 
 	set_entity_snapshot_state (a_disabled, a_standalone: BOOLEAN)
@@ -535,6 +556,7 @@ feature -- Parsing
 			reset
 			l_can_defer_positions := can_defer_position_accounting
 			l_input := normalized_input (a_input, l_can_defer_positions)
+			invalid_input_character_index := last_invalid_character_index
 			position_input := l_input
 			lazy_position_accounting := l_can_defer_positions
 			note_position (1)
@@ -610,6 +632,7 @@ feature -- Parsing
 		do
 			reset
 			l_input := normalized_input (a_input, False)
+			invalid_input_character_index := last_invalid_character_index
 			position_input := l_input
 			note_position (1)
 			from
@@ -722,6 +745,11 @@ feature -- Parsing
 					l_prefix_count := l_prefix.count
 					reset_cached_doctype_body (l_prefix_count, l_name)
 					l_body := normalized_input (a_input.substring (l_prefix_count + 1, a_input.count), False)
+					if last_invalid_character_index > 0 then
+						invalid_input_character_index := l_prefix_count + last_invalid_character_index
+					else
+						invalid_input_character_index := 0
+					end
 					l_input := l_prefix.twin
 					l_input.append (l_body)
 					position_input := l_input
@@ -1375,7 +1403,13 @@ feature {NONE} -- Markup parsing
 							else
 								note_position (name_start)
 							end
-							if handler.wants_end_element_default then
+								-- Only an end tag that closes the open element reaches the default handler;
+								-- a mismatched one is an error first, as in Expat (#125).
+							if
+								handler.wants_end_element_default
+								and then element_stack.count > entity_element_floor
+								and then open_element_matches_range (a_input, name_start, name_end)
+							then
 								emit_default_range (a_input, a_start_index, i)
 							end
 							if not namespace_mode and then not handler.wants_end_element_events then
@@ -2177,7 +2211,8 @@ feature {NONE} -- Markup parsing
 							if not l_public_id.is_empty then
 								l_event_public_id := l_public_id
 							end
-							if not l_system_id.is_empty then
+								-- An external ID always has a system literal; an empty one passes "", as Expat (#175).
+							if l_has_external_subset then
 								l_event_system_id := l_system_id
 							end
 							document_has_external_subset := l_has_external_subset
@@ -2194,7 +2229,23 @@ feature {NONE} -- Markup parsing
 							if l_subset_end = 0 then
 								set_error ("unterminated internal subset")
 							elseif skip_spaces (a_input, l_subset_end + 1) /= l_end then
-								set_error ("unexpected content after internal subset")
+									-- A `]' that does not end the DOCTYPE: deliver the complete declarations in
+									-- front of it first, then report it at that `]', as Expat does (#173).
+								create l_subset.make_from_string (a_input.substring (l_subset_start + 1, l_subset_end - 1))
+								l_previous_subset_offset := dtd_subset_position_offset
+								dtd_subset_position_offset := l_subset_start
+								process_internal_subset_prefix (l_subset, False)
+								dtd_subset_position_offset := l_previous_subset_offset
+								if not has_error and not is_suspended then
+									if is_all_xml_space (l_subset.substring (complete_dtd_prefix_end (l_subset) + 1, l_subset.count)) then
+											-- The `]' ends the subset; Expat reports the content after it.
+										note_position (skip_spaces (a_input, l_subset_end + 1))
+									else
+											-- The `]' is inside a declaration; Expat reports the `]'.
+										note_position (l_subset_end)
+									end
+									set_error ("unexpected content after internal subset")
+								end
 							else
 								create l_subset.make_from_string (a_input.substring (l_subset_start + 1, l_subset_end - 1))
 								l_previous_subset_offset := dtd_subset_position_offset
@@ -2315,7 +2366,11 @@ feature {NONE} -- Character data and references
 					end
 					-- The fixed marker is read-only; ordinary bytes need no prefix check.
 					if c = ']' and then has_at (a_input, i, once "]]>") then
-						set_error ("CDATA close marker in character data")
+						if is_after_document_element then
+							set_outside_document_text_error (a_input, a_start_index)
+						else
+							set_error ("CDATA close marker in character data")
+						end
 						i := a_input.count + 1
 					elseif c = '&' then
 						note_position (i)
@@ -2385,7 +2440,7 @@ feature {NONE} -- Character data and references
 							l_all_space := is_all_xml_space (l_attached_text)
 						end
 						if not l_all_space then
-							set_error ("character data outside document element")
+							set_outside_document_text_error (a_input, a_start_index)
 							Result := a_input.count + 1
 						else
 							if attached l_text as l_attached_text then
@@ -2453,15 +2508,18 @@ feature {NONE} -- Character data and references
 					l_fallback := True
 					i := a_input.count + 1
 				elseif c = ']' and then has_at (a_input, i, once "]]>") then
-					note_position (i)
-					set_error ("CDATA close marker in character data")
+					if is_after_document_element then
+						set_outside_document_text_error (a_input, a_start_index)
+					else
+						note_position (i)
+						set_error ("CDATA close marker in character data")
+					end
 					i := a_input.count + 1
 				elseif (l_code >= 32 and l_code < 128) or else l_code = 9 or else l_code = 10 then
 					if l_outside_document and then l_all_space then
 						l_all_space := is_xml_space_ascii (c)
 						if not l_all_space then
-							note_position (i)
-							set_error ("character data outside document element")
+							set_outside_document_text_error (a_input, i)
 							i := a_input.count + 1
 						else
 							i := i + 1
@@ -2485,8 +2543,7 @@ feature {NONE} -- Character data and references
 					if l_outside_document and then l_all_space then
 						l_all_space := is_xml_space (c)
 						if not l_all_space then
-							note_position (i)
-							set_error ("character data outside document element")
+							set_outside_document_text_error (a_input, i)
 							i := a_input.count + 1
 						else
 							i := i + 1
@@ -2548,7 +2605,11 @@ feature {NONE} -- Character data and references
 					l_pending_literal_position := 0
 				end
 				if c = ']' and then has_at (a_input, i, once "]]>") then
-					set_error ("CDATA close marker in character data")
+					if is_after_document_element then
+						set_outside_document_text_error (a_input, a_start_index)
+					else
+						set_error ("CDATA close marker in character data")
+					end
 					i := a_input.count + 1
 				elseif c = '&' then
 					note_position (i)
@@ -2615,7 +2676,7 @@ feature {NONE} -- Character data and references
 						l_all_space := is_all_xml_space (l_attached_text)
 					end
 					if not l_all_space then
-						set_error ("character data outside document element")
+						set_outside_document_text_error (a_input, a_start_index)
 						Result := a_input.count + 1
 					else
 						if attached l_text as l_attached_text then
@@ -4653,6 +4714,7 @@ feature {NONE} -- DTD entity declarations
 			l_default_value: detachable STRING_8
 			l_new_default_value: STRING_8
 			l_is_required: BOOLEAN
+			l_is_fixed: BOOLEAN
 			l_attributes: XP_ATTRIBUTES
 			j: INTEGER
 		do
@@ -4707,6 +4769,7 @@ feature {NONE} -- DTD entity declarations
 							end
 							l_default_value := Void
 							l_is_required := False
+							l_is_fixed := False
 							if has_error then
 							elseif has_keyword_at (a_subset, j, "#REQUIRED") then
 								l_is_required := True
@@ -4714,6 +4777,7 @@ feature {NONE} -- DTD entity declarations
 							elseif has_keyword_at (a_subset, j, "#IMPLIED") then
 								j := j + 8
 							elseif has_keyword_at (a_subset, j, "#FIXED") then
+								l_is_fixed := True
 								j := skip_required_spaces (a_subset, j + 6, "missing space after #FIXED").min (l_end)
 								if not has_error and then j < l_end and then is_quote (a_subset.item (j)) then
 									create l_new_default_value.make_empty
@@ -4739,7 +4803,8 @@ feature {NONE} -- DTD entity declarations
 							end
 							if not has_error and then not dtd_declarations_disabled then
 								record_attribute_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
-								handler.on_attlist_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required)
+									-- As Expat, the event reports `#FIXED' as required too (#174).
+								handler.on_attlist_decl (l_element_name, l_attribute_name, l_attribute_type, l_default_value, l_is_required or l_is_fixed)
 								check_handler_stop
 							end
 							if not has_error and then j > i and then j <= l_end then
@@ -5321,7 +5386,8 @@ feature {NONE} -- DTD entity declarations
 				else
 					if not dtd_declarations_disabled then
 						put_external_entity (a_name, l_public_id, l_system_id, l_notation_name, a_is_parameter, l_is_unparsed)
-						handler.on_entity_decl (a_name, a_is_parameter, Void, optional_string (l_public_id), optional_string (l_system_id), optional_string (l_notation_name))
+							-- The system literal is always present, so an empty one passes "", as Expat (#175).
+						handler.on_entity_decl (a_name, a_is_parameter, Void, optional_string (l_public_id), l_system_id, optional_string (l_notation_name))
 						check_handler_stop
 						if l_is_unparsed then
 							handler.on_unparsed_entity_decl (a_name, l_system_id, optional_string (l_public_id), optional_string (l_notation_name))
@@ -6477,6 +6543,7 @@ feature {NONE} -- Scanning
 			l_length: INTEGER
 			l_source: READABLE_STRING_8
 		do
+			last_invalid_character_index := 0
 			l_source := decoded_input (a_input)
 			if a_allow_alias and then l_source = a_input then
 				if
@@ -6505,6 +6572,9 @@ feature {NONE} -- Scanning
 						if c.code >= 32 or else c = '%T' or else c = '%N' then
 							i := i + 1
 						else
+							if l_source = a_input then
+								last_invalid_character_index := i
+							end
 							set_error ("invalid XML character")
 							i := l_source.count + 1
 						end
@@ -6515,6 +6585,9 @@ feature {NONE} -- Scanning
 						elseif l_length < 0 then
 							i := l_source.count + 1
 						else
+							if l_source = a_input then
+								last_invalid_character_index := i
+							end
 							set_error ("invalid XML character")
 							i := l_source.count + 1
 						end
@@ -6560,6 +6633,9 @@ feature {NONE} -- Scanning
 							Result.append_character (c)
 							i := i + 1
 						else
+							if l_source = a_input then
+								last_invalid_character_index := i
+							end
 							set_error ("invalid XML character")
 							i := l_source.count + 1
 						end
@@ -6572,6 +6648,9 @@ feature {NONE} -- Scanning
 							Result.append_substring (l_source, i, l_source.count)
 							i := l_source.count + 1
 						else
+							if l_source = a_input then
+								last_invalid_character_index := i
+							end
 							set_error ("invalid XML character")
 							i := l_source.count + 1
 						end
@@ -7321,6 +7400,31 @@ feature {NONE} -- Character and name validation
 			-- Is `c' normalized ASCII XML whitespace?
 		do
 			Result := c = ' ' or c = '%T' or c = '%N'
+		end
+
+	is_after_document_element: BOOLEAN
+			-- Is the parser in the main document, after its document element?
+		do
+			Result := element_stack.count = 0 and then not parsing_external_entity and then document_element_count > 0
+		end
+
+	set_outside_document_text_error (a_input: READABLE_STRING_8; a_start_index: INTEGER)
+			-- Report the text that starts at `a_start_index' outside the document element, at its first
+			-- character that is not white space, with or without callbacks (#124). After the document
+			-- element it is Expat's "junk after document element" (code 9); before it, character data
+			-- that is not allowed there.
+		require
+			input_attached: a_input /= Void
+			valid_start: a_start_index >= 1 and a_start_index <= a_input.count
+		do
+			note_position (skip_spaces (a_input, a_start_index).min (a_input.count))
+			if is_after_document_element then
+				set_error ("junk after document element")
+			else
+				set_error ("character data outside document element")
+			end
+		ensure
+			error_set: has_error
 		end
 
 	is_all_xml_space (a_text: READABLE_STRING_8): BOOLEAN
@@ -8093,6 +8197,9 @@ feature {NONE} -- Entity tables
 
 feature {NONE} -- State
 
+	last_invalid_character_index: INTEGER
+			-- Index in its own input of the character that is not an XML Char at which the last
+			-- `normalized_input' stopped, or 0 when it did not stop there or converted the input.
 
 	reset_cached_doctype_body (a_prefix_count: INTEGER; a_doctype_name: STRING_8)
 			-- Restore the completed DTD baseline, retaining all existing declaration tables.
@@ -8141,6 +8248,7 @@ feature {NONE} -- State
 			clear_cached_doctype
 			has_error := False
 			last_error.wipe_out
+			invalid_input_character_index := 0
 			create position_input.make_empty
 			lazy_position_accounting := False
 			last_attribute_name_start := 0

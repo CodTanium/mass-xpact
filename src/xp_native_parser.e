@@ -976,6 +976,17 @@ feature {NONE} -- Parsing implementation
 								else
 									l_ok := parser.parse_prefix (l_parse_input)
 								end
+								if
+									not l_ok and then not parser.is_suspended
+									and then parser.invalid_input_character_index > 0
+									and then parser.invalid_input_character_index <= l_parse_input.count
+								then
+										-- A character that is not an XML Char stopped the parse before any markup.
+										-- Deliver the callbacks in front of it first, as Expat does (#172); callbacks
+										-- the failed attempt already delivered are not repeated.
+									handler.prepare_callback_replay (delivered_callback_count.max (handler.callback_sequence_count))
+									l_ok := parser.parse_prefix_before_invalid_character (l_parse_input, parser.invalid_input_character_index)
+								end
 							end
 						end
 						if l_ok then
@@ -1003,7 +1014,9 @@ feature {NONE} -- Parsing implementation
 						if l_direct_callback_count > 0 then
 							delivered_callback_count := delivered_callback_count + l_direct_callback_count
 						else
-							delivered_callback_count := handler.callback_sequence_count
+								-- A call may re-parse less than an earlier one (for example only up to an
+								-- unfinished DOCTYPE); the callbacks the application already received stay delivered.
+							delivered_callback_count := delivered_callback_count.max (handler.callback_sequence_count)
 						end
 						accounting_indirect_count := accounting_external_child_count + parser.accounting_indirect_byte_count
 						if not l_defer_callbacks and then l_direct_callback_count = 0 and then attached l_input as l_consumed_input then
@@ -2542,6 +2555,8 @@ feature {NONE} -- Error mapping
 			elseif a_error.same_string ("duplicate attribute") then
 				Result := Xml_error_duplicate_attribute
 			elseif a_error.same_string ("multiple document elements") then
+				Result := Xml_error_junk_after_doc_element
+			elseif a_error.same_string ("junk after document element") then
 				Result := Xml_error_junk_after_doc_element
 			elseif a_error.same_string ("undefined entity") then
 				Result := Xml_error_undefined_entity
