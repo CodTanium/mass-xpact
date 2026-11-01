@@ -1,6 +1,6 @@
 # Issue #132: Remove the unused old copy tests/python/run_w3c_conformance.py
 
-Archived from <https://github.com/andersoxie/xpact/issues/132> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/132> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,22 +13,24 @@ Archived from <https://github.com/andersoxie/xpact/issues/132> on 2026-10-28 21:
 
 ## Description
 
-## Task
-Remove `tests/python/run_w3c_conformance.py`. It is an old copy of `scripts/run_w3c_conformance.py` (361 lines against 459) and nothing uses it.
-
-## Evidence
-- Added by the student in #30 (`8850dab`) and last changed in `492c6eb`.
-- The Python tests import the runner from `scripts/` (`tests/python/test_w3c_conformance.py:27`).
-- `grep -rn run_w3c_conformance` finds no other user of the copy.
-- Found in the full check of 2026-10-26 (#104).
-
-## Why it matters
-A second copy with older verdict rules can be run by mistake. The xmlconf work (#117) showed what wrong rules do to the numbers.
-
-## Done when
-- [ ] File removed
-- [ ] Python tests still pass (178 on 2026-10-26)
-- [ ] PLAN.md "Known problems" row moved to Solved
+## Task
+Remove `tests/python/run_w3c_conformance.py`. It is an old copy of `scripts/run_w3c_conformance.py` (361 lines against 459) and nothing uses it.
+
+## Evidence
+- Added by the student in #30 (`8850dab`) and last changed in `492c6eb`.
+- The Python tests import the runner from `scripts/` (`tests/python/test_w3c_conformance.py:27`).
+- `grep -rn run_w3c_conformance` finds no other user of the copy.
+- Found in the full check of 2026-10-26 (#104).
+
+## Why it matters
+A second copy with older verdict rules can be run by mistake. The xmlconf work (#117) showed what wrong rules do to the numbers.
+
+## Done when
+- [x] File removed
+- [x] Python tests still pass (178 on 2026-10-26)
+- [x] PLAN.md "Known problems" row moved to Solved
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

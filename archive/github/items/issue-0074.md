@@ -1,13 +1,13 @@
 # Issue #74: Finding: native build scripts override the machine's MSVC backend with msc_vc140
 
-Archived from <https://github.com/andersoxie/xpact/issues/74> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/74> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-23 07:54 |
-| Closed |  |
+| Closed | 2026-10-31 09:27 |
 | Labels | `type:finding`, `group:B-reliable-results`, `P1`, `build`, `investigation` |
 | Milestone | Week 3 - Failure reporting |
 
@@ -45,3 +45,7 @@ PR #76 updated on 2026-10-26 after #103 and #105 (only rows in reports/README.md
 ### CodTanium, 2026-10-26 20:54: comment
 
 Merged into `student-Mass` in 7cf5a94 (PR #76) after a retest on 2026-10-26 (8/8 choice cases, both DLL smokes, runtime smoke, Eiffel matrix 4/4, MSVC). Staying open until a Jenkins run with this change passes. Note: Jenkins at `cf12dee` (without this change) built fine with the forced `msc_vc140` (report section 6).
+
+### CodTanium, 2026-10-31 09:27: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.

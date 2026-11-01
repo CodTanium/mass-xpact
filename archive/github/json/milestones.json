@@ -105,11 +105,11 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "open_issues": 1,
-  "closed_issues": 30,
+  "open_issues": 0,
+  "closed_issues": 31,
   "state": "open",
   "created_at": "2026-10-21T23:18:06Z",
-  "updated_at": "2026-10-26T20:40:33Z",
+  "updated_at": "2026-10-31T09:27:20Z",
   "due_on": "2026-10-23T00:00:00Z",
   "closed_at": null
  },
@@ -181,11 +181,11 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "open_issues": 7,
-  "closed_issues": 11,
+  "open_issues": 4,
+  "closed_issues": 14,
   "state": "open",
   "created_at": "2026-10-21T23:18:08Z",
-  "updated_at": "2026-10-26T21:27:36Z",
+  "updated_at": "2026-10-31T18:47:00Z",
   "due_on": "2026-11-06T00:00:00Z",
   "closed_at": null
  },
@@ -219,11 +219,11 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "open_issues": 1,
-  "closed_issues": 1,
+  "open_issues": 0,
+  "closed_issues": 2,
   "state": "open",
   "created_at": "2026-10-21T23:18:09Z",
-  "updated_at": "2026-10-28T01:28:33Z",
+  "updated_at": "2026-10-31T09:27:04Z",
   "due_on": "2026-11-13T00:00:00Z",
   "closed_at": null
  },
@@ -257,11 +257,11 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "open_issues": 0,
-  "closed_issues": 0,
+  "open_issues": 3,
+  "closed_issues": 8,
   "state": "open",
   "created_at": "2026-10-21T23:18:09Z",
-  "updated_at": "2026-10-21T23:18:09Z",
+  "updated_at": "2026-10-31T18:32:42Z",
   "due_on": "2026-11-20T00:00:00Z",
   "closed_at": null
  },

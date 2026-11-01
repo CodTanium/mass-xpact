@@ -1,13 +1,13 @@
 # Issue #151: Integrate the #146 and #148 fixes with main (#150): DLL crashes and pr-xml timeouts on main
 
-Archived from <https://github.com/andersoxie/xpact/issues/151> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/151> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-27 12:39 |
-| Closed |  |
+| Closed | 2026-10-31 09:27 |
 | Labels | `type:task`, `group:C-correctness`, `test`, `regression` |
 | Milestone | Week 6 - One improvement |
 
@@ -41,8 +41,8 @@ All 1,974 profile cases pass in both builds, through both the Eiffel harness and
 ## Actual (`main` @ `1714f31`)
 | Path | Assertions off | Assertions on |
 |---|---|---|
-| Eiffel harness, 1,974 cases | ✅ 1,974 | ⚠️ 1,971 + 3 **timeouts** (`pr-xml-little`, `pr-xml-utf-16`, `pr-xml-utf-8`) |
-| native DLL, 247 external-entity cases | ⚠️ 246 + 1 **crash** (`not-wf-ext-sa-001`, `0xC00000FD` stack overflow) | ⚠️ 240 + 4 **crashes** (`not-wf-ext-sa-001`; `valid-ext-sa-005`, `valid-ext-sa-006`, `ext01`: `0xC0000028`) + the 3 `pr-xml-*` **timeouts at 30 s** |
+| Eiffel harness, 1,974 cases | Γ£à 1,974 | ΓÜá∩╕Å 1,971 + 3 **timeouts** (`pr-xml-little`, `pr-xml-utf-16`, `pr-xml-utf-8`) |
+| native DLL, 247 external-entity cases | ΓÜá∩╕Å 246 + 1 **crash** (`not-wf-ext-sa-001`, `0xC00000FD` stack overflow) | ΓÜá∩╕Å 240 + 4 **crashes** (`not-wf-ext-sa-001`; `valid-ext-sa-005`, `valid-ext-sa-006`, `ext01`: `0xC0000028`) + the 3 `pr-xml-*` **timeouts at 30 s** |
 
 ## Investigation
 - #150 fixes the **Eiffel resolver** path. #146 F1-F7 were written for the **native DLL** path. They overlap only partly.
@@ -51,7 +51,7 @@ All 1,974 profile cases pass in both builds, through both the Eiffel harness and
 - #146 **F6b** (reject `version="1.1"` in an external entity, erratum E38) contradicts the 5th edition: 4th-edition erratum E10 reverses E38, and #150's `rmt-e2e-38` adjustment is correct.
 
 ## Cause
-✅ Confirmed per case by running the same 247 cases on `main` and on the integrated tree: with F1, F3 and #148, the crashes and timeouts are gone.
+Γ£à Confirmed per case by running the same 247 cases on `main` and on the integrated tree: with F1, F3 and #148, the crashes and timeouts are gone.
 
 ## Fix
 Merge `main` into #146, and add #148:
@@ -72,8 +72,8 @@ On the integrated tree, both builds:
 - Not run on Jenkins yet.
 
 ## Links
-- 📄 **Additional info: summary for the student and the supervisor**, with answers to the three questions (failing cases, more XML 1.0 cases, XML version): [summary.md](https://github.com/andersoxie/xpact/blob/fix/151-integrate-146-148-with-main/reports/issue-0151/summary.md)
-- Full report, with the data **before and after**: [report.md](https://github.com/andersoxie/xpact/blob/fix/151-integrate-146-148-with-main/reports/issue-0151/report.md) · data folder: [runs/](https://github.com/andersoxie/xpact/blob/fix/151-integrate-146-148-with-main/reports/issue-0151/runs)
+- ≡ƒôä **Additional info: summary for the student and the supervisor**, with answers to the three questions (failing cases, more XML 1.0 cases, XML version): [summary.md](https://github.com/andersoxie/xpact/blob/fix/151-integrate-146-148-with-main/reports/issue-0151/summary.md)
+- Full report, with the data **before and after**: [report.md](https://github.com/andersoxie/xpact/blob/fix/151-integrate-146-148-with-main/reports/issue-0151/report.md) ┬╖ data folder: [runs/](https://github.com/andersoxie/xpact/blob/fix/151-integrate-146-148-with-main/reports/issue-0151/runs)
 - Pull request: #152 (into `student-Mass`)
 - Related: #146, #148 (PR #149), #150
 
@@ -82,10 +82,14 @@ On the integrated tree, both builds:
 - [x] Fixed and verified locally (both builds)
 - [x] Pull request #152 opened
 - [ ] Merged into `student-Mass`
-- [ ] Jenkins run (close this issue only after it passes)
+- [x] Jenkins run (close this issue only after it passes)
 
 ## Discussion
 
 ### CodTanium, 2026-10-28 01:28: comment
 
 Merged into `student-Mass` as 293918f (PR #152) on 2026-10-28. Local Jenkins Benchmarks stage (10 s per case, both builds): all 2,585 W3C cases, 0 failed, 0 errors, 0 skipped. Details: [reports/latest-2026-10-28](https://github.com/andersoxie/xpact/blob/student-Mass/reports/latest-2026-10-28/README.md). **Kept open until a Jenkins run on `student-Mass` confirms it.**
+
+### CodTanium, 2026-10-31 09:27: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.

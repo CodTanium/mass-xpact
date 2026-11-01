@@ -1,6 +1,6 @@
 # Issue #43: Task: bring the student docs up to date (2026-10-22) in the CLAUDE.md layout
 
-Archived from <https://github.com/andersoxie/xpact/issues/43> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/43> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,15 +13,17 @@ Archived from <https://github.com/andersoxie/xpact/issues/43> on 2026-10-28 21:3
 
 ## Description
 
-Bring every student document up to date with the work of 2026-10-21 and 2026-10-22, and lay them out the way `CLAUDE.md` asks: simple first, more detail further in, linked, easy to read, ✅ for done.
+Bring every student document up to date with the work of 2026-10-21 and 2026-10-22, and lay them out the way `CLAUDE.md` asks: simple first, more detail further in, linked, easy to read, ✅ for done.
+
+Affected: `student/README.md` (entry page), `student/PLAN.md` (live plan, known problems as a living TODO), `reports/README.md`, `student/for superviser.txt`, the week 3 note, `student/results/README.md`, `student/baseline/BASELINE.md` (update notes only, no evidence changed), the drafts C02/C03/C10/A04/07, `student/VERSIONING.md` (who merges, stacked pull requests), and the guide written on 2026-10-21 (`guide.txt`, `next-tests.txt`, untracked in the repository root).
+
+## Done when
+- [x] Every page states its date and the commit it describes ⚠️ **not yet:** `student/README.md`, `student/VERSIONING.md`, `student/github/README.md` and `student/report/README.md` do not state a date and commit at the top
+- [x] Every open problem is in one known-problems table with its issue and status (confirmed / suspected / unknown) _(verified 2026-10-22 at `76ac272`)_
+- [x] Links resolve _(verified 2026-10-22 at `76ac272`)_
+- [x] Nothing in `student/baseline/` evidence or in earlier results is overwritten _(verified 2026-10-22 at `76ac272`)_
 
-Affected: `student/README.md` (entry page), `student/PLAN.md` (live plan, known problems as a living TODO), `reports/README.md`, `student/for superviser.txt`, the week 3 note, `student/results/README.md`, `student/baseline/BASELINE.md` (update notes only, no evidence changed), the drafts C02/C03/C10/A04/07, `student/VERSIONING.md` (who merges, stacked pull requests), and the guide written on 2026-10-21 (`guide.txt`, `next-tests.txt`, untracked in the repository root).
-
-## Done when
-- [ ] Every page states its date and the commit it describes ⚠️ **not yet:** `student/README.md`, `student/VERSIONING.md`, `student/github/README.md` and `student/report/README.md` do not state a date and commit at the top
-- [x] Every open problem is in one known-problems table with its issue and status (confirmed / suspected / unknown) _(verified 2026-10-22 at `76ac272`)_
-- [x] Links resolve _(verified 2026-10-22 at `76ac272`)_
-- [x] Nothing in `student/baseline/` evidence or in earlier results is overwritten _(verified 2026-10-22 at `76ac272`)_
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`. The last page, `student/report/README.md`, got its date in #70 (PR #71), so every page now states its date.
 
 ## Discussion
 

@@ -1,13 +1,13 @@
 # Issue #156: Finding: Tokenized attribute values (NMTOKENS, ID, IDREFS, ENTITIES, ...) are not normalized (F01-3)
 
-Archived from <https://github.com/andersoxie/xpact/issues/156> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/156> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-28 19:34 |
-| Closed |  |
+| Closed | 2026-10-31 09:26 |
 | Labels | `bug`, `type:finding`, `group:C-correctness`, `test`, `investigation` |
 | Milestone | - |
 
@@ -43,3 +43,7 @@ Related: #154 (F01-1), #155 (F01-2), #156 (F01-3), #157 (F01-4), #158 (F01-5), #
 ### CodTanium, 2026-10-28 20:10: comment
 
 Fix in PR #161: the declared default of a non-CDATA attribute is now space-normalized where it is parsed (as Expat reports it). W3C output test 393 -> 394 (`valid-sa-096`), 0 worse; #156 now 4/4; all old lanes unchanged in both builds. Report: [reports/issue-0156/report.md](https://github.com/andersoxie/xpact/blob/60c28e4/reports/issue-0156/report.md). Stays open until the PR is merged and Jenkins has run.
+
+### CodTanium, 2026-10-31 09:26: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.

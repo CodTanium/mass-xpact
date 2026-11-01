@@ -1,0 +1,42 @@
+The tests we already had
+Test	Size	Result
+W3C Conformance Suite 2013 (accept/reject)	2,585	✅ 0 failed, 0 skipped
+C# DLL tests against Expat 2.8.1	4,308 inputs	✅ the same answers
+Dual regression lane	61 inputs, 910 runs	✅ 910 / 910
+Chunked CRC, shim audit, ABI smoke, Eiffel matrix, Python	various	✅
+🧪 The 11 extra tests
+All 11 were run once, locally, on 28 October, on the version from before today's fixes.
+
+#	Test	What it checks	Run?	Problems found	Fixed?
+1	W3C output comparison	the right text, attributes and events, not just yes/no	✅	6 (#154–#159)	✅ all fixed and on main, 359 → 399 / 432
+2	W3C fed in pieces	the same result whole / split / byte by byte	✅	3 (F02-1 to F02-3)	⬜
+3	Fuzzing	crashes or hangs on random input	✅	0 in 571,839 inputs	—
+4	Differential against Expat	the same events as Expat on generated documents	✅	2 (F04-1, F04-2)	⬜
+5	Security and limits	billion laughs, deep nesting, XXE, API misuse	✅	4 (F05-1 to F05-4), including quadratic streaming	⬜ needs the supervisor
+6	Expat's own C tests	Expat's 399 C checks against xpact	✅	1 (F06-1, timeouts)	⬜ (no new failures from today's fixes)
+7	libxml2's test files	1,417 tricky real-world files	✅	2 (F07-1, F07-2)	⬜
+8	Encodings	UTF-16, Latin-1, broken UTF-8, encoding handlers	✅	2 (F08-1, F08-2)	⬜
+9	Memory checks	leaks over 20,000 rounds	✅	0 leaks	—
+10	Python's own XML tests	can xpact replace Expat under CPython?	✅	7 groups (F10-1 to F10-7)	⬜
+11	Large files	speed and stability up to 20 MB	✅	streaming too slow, over 10 MB rejected (F05-1)	⬜
+Overall: test #1 is finished and its fixes are merged. Tests 2–11 have been run, and about 25 problems are written up locally in AlotOfTests/README.md, but they have no issues or fixes yet, and they were measured on the older version.
+
+⚪ Skipped on purpose
+2003 xmlconf (replaced by the 2013 suite) · xml:id (not implemented in xpact) · XML Schema / DOM (xpact doesn't validate and has no DOM) · XML Base (no separate W3C suite) · Linux/WSL C tests (Jenkins runs them) · XML 1.1 mode (only matters if xpact gets 1.1 support).
+
+🔗 The sources I found online
+W3C XML Conformance Test Suites: https://www.w3.org/XML/Test
+xmlconf 2013 report: https://www.w3.org/XML/Test/xmlconf-20130923.html
+xml:id test suite: https://www.w3.org/XML/Test/xml-id/
+XML Base testing note: https://www.w3.org/XML/2006/12/xmlbase-testing.html
+libexpat runtests.c (OpenBSD mirror): https://src.rcs.uwaterloo.ca/xref/openbsd-src/lib/libexpat/tests/runtests.c
+libexpat tests folder: https://src.rcs.uwaterloo.ca/xref/openbsd-src/lib/libexpat/tests
+Chromium Expat build (fuzzer target): https://chromium.googlesource.com/chromium/src.git/+/60.0.3112.60/third_party/expat/BUILD.gn
+Chromium libxml2 fuzz README: https://chromium.googlesource.com/chromium/src.git/+/main/third_party/libxml/fuzz/README
+libxml2 check-xml-test-suite.py: https://android.googlesource.com/platform/external/libxml2/+/7b6c139/check-xml-test-suite.py
+xml-fuzz: https://github.com/probelabs/xml-fuzz
+Magma libxml2 targets: https://hexhive.epfl.ch/magma/reports/sample_2/targets/libxml2.html
+➡️ Suggested next step
+Rerun tests 2–11 on the current main (e5d59e2). That updates the problem list, since a few may already be fixed by #154–#159. Then do the small, clear ones one at a time, as with test 1. F02-1 (doctype reported twice) and F04-1/F04-2 are good first candidates.
+
+Do you want me to put these links and the current status into latest600Test.txt?

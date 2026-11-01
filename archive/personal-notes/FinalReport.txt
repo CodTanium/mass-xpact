@@ -1,0 +1,252 @@
+For your four-week internship as a software developer, I would recommend writing a technical internship report with an academic/university structure.
+
+The purpose is not simply to tell your teacher what you have done. You want to demonstrate that you can:
+1. Understand a software development project.
+2. Investigate technical problems.
+3. Analyse errors and identify their causes.
+4. Apply solutions and evaluate the results.
+5. Work professionally with software development tools and workflows.
+6. Reflect on what you have learned as a developer.
+I would structure the report as follows.
+Recommended report structure
+1. Introduction
+Introduce the internship and the project.
+
+Include:
+- Company where you completed your internship.
+- Internship period (four weeks).
+- Your role and responsibilities.
+- Brief introduction to the software project.
+- Why the project exists and what it aims to achieve.
+2. Project background and technical overview
+Explain the project from a technical perspective.
+
+Include:
+- What the software does.
+- What problem it aims to solve.
+- Existing technologies and frameworks.
+- Programming languages used.
+- Project architecture.
+- Important components and how they interact.
+- Existing functionality versus functionality under development.
+The goal is to demonstrate that you understand the bigger picture, not just individual pieces of code.
+3. Objectives and scope
+Explain what you were expected to accomplish during the four weeks.
+
+Include:
+- Main objectives assigned to you.
+- Technical areas you were expected to investigate.
+- Tasks and responsibilities.
+- What was included in your assignment.
+- What was outside your scope.
+4. Development environment and tools
+Document the technical environment in which you worked.
+
+For example:
+Category	What to document
+Programming languages	C, Eiffel, C#, Python, etc.
+IDEs	Visual Studio, EiffelStudio, VS Code
+Version control	Git and GitHub
+Testing	Unit tests, integration tests, conformance tests
+Build system	Build configurations and scripts
+CI/CD	Jenkins and automated testing
+AI tools	Claude, Copilot, Codex, if relevant
+
+Also explain briefly why certain tools were used.
+5. Work performed – four-week breakdown
+This is one of the most important sections.
+
+Describe your actual work, preferably divided into weeks.
+
+For each week, include:
+- Tasks: What were you assigned?
+- Investigation: What did you examine?
+- Problems: What errors or difficulties did you encounter?
+- Analysis: What did you discover about the problems?
+- Solutions: What changes or fixes did you implement?
+- Results: What happened after your changes?
+Example:
+Week	Main focus	Activities
+1	Project familiarisation	Environment setup, architecture investigation, understanding existing code
+2	Troubleshooting	Investigating build errors, configurations and dependencies
+3	Development and testing	Implementing fixes, creating tests, evaluating results
+4	Quality and documentation	Conformance testing, analysing results, documenting findings
+
+Adapt this to what you actually did.
+6. Technical investigation and analysis
+Important academic section
+This is where you go beyond describing your activities.
+
+Choose some of the most interesting technical problems you encountered and analyse them.
+
+For each problem, use this structure:
+1. Problem description – What was wrong?
+2. Initial investigation – How did you approach it?
+3. Technical cause – What caused the problem?
+4. Solution – What changes were made?
+5. Verification – How did you establish that the solution worked?
+6. Evaluation – Were there any remaining limitations?
+You can include:
+- Code examples.
+- Error messages.
+- Architecture diagrams.
+- Before-and-after comparisons.
+- Test results.
+- Relevant GitHub commits or pull requests.
+This section demonstrates your ability to think and work as a software developer.
+7. Testing and quality assurance
+Explain how you evaluated the software.
+
+Include:
+- Types of tests performed.
+- How test cases were selected.
+- Expected versus actual results.
+- Successful and unsuccessful tests.
+- Regression testing.
+- Automated testing.
+- Assertions and their purpose.
+- Known bugs and limitations.
+Where possible, use tables to present test results.
+
+For example:
+Test	Expected result	Actual result	Status
+Valid XML	Accepted	Accepted	Pass
+Incomplete XML	Rejected	Rejected	Pass
+Invalid encoding	Rejected	Accepted	Fail
+
+The important thing is to show how you evaluated correctness, not just whether the software compiled.
+8. Version control and development workflow
+Explain how you worked with the company's development process.
+
+Include:
+- Git branches.
+- Commits and commit messages.
+- Pull requests.
+- Code reviews.
+- Jenkins or CI pipelines.
+- How changes were reviewed before merging.
+- How you documented and tracked problems.
+You can also explain why smaller, focused pull requests are useful in collaborative development.
+9. Results and achievements
+Summarise what you accomplished during the four weeks.
+
+For example:
+- Problems identified and resolved.
+- Improvements implemented.
+- Tests created or executed.
+- Documentation produced.
+- Build processes improved.
+- Technical investigations completed.
+- Contributions submitted through GitHub.
+Distinguish between completed work, ongoing work and identified problems that remain unresolved.
+10. Reflection and learning outcomes
+This is particularly important in an academic internship report.
+
+Discuss what you learned from the experience.
+
+Possible areas:
+- Technical knowledge gained.
+- Understanding of software architecture.
+- Debugging and problem-solving skills.
+- Testing and quality assurance.
+- Working with existing codebases.
+- GitHub and collaborative development.
+- Working independently and with a supervisor.
+- Differences between academic programming exercises and professional software development.
+Also discuss what you found challenging and what you would approach differently next time.
+11. Conclusions and future work
+Finish by summarising the four weeks.
+
+Include:
+- What you achieved.
+- Whether the original objectives were fulfilled.
+- The most important technical findings.
+- Current project status.
+- Remaining challenges.
+- Suggested next steps for the project.
+12. References
+List the technical sources you used.
+
+For example:
+- Official documentation.
+- Programming language documentation.
+- Technical specifications.
+- XML standards.
+- GitHub repositories.
+- Research papers or other relevant publications.
+Use one consistent referencing style, preferably Harvard or IEEE, depending on your school's requirements.
+13. Appendices
+Put supplementary technical material here.
+
+Examples:
+- Detailed test results.
+- Build logs.
+- Additional diagrams.
+- Selected code snippets.
+- GitHub PR overview.
+- Configuration tables.
+- Additional troubleshooting documentation.
+
+My recommendation for your particular internship
+Considering the work you have been doing with XPact, I would give particular attention to these five areas:
+1
+Technical understanding
+
+Understanding XPact's architecture, its relationship with Expat, and how the different components communicate.
+
+2
+Troubleshooting and problem analysis
+
+Investigating build errors, Eiffel configurations, MSVC integration, native bridges and runtime problems.
+
+3
+Testing and software quality
+
+Assertions, regression testing, XML validation, W3C conformance testing and analysing test results.
+
+4
+Development workflow
+
+Git branches, commits, pull requests, Jenkins, scripts and documentation.
+
+5
+Evaluation and reflection
+
+What you learned, what worked, what did not work, and what could be improved.
+
+These are particularly relevant because your work has involved both investigating an existing codebase and improving its build, testing and development processes. 
+Suggested report proportions
+For a report of approximately 12–18 pages (excluding appendices):
+Section	Suggested length
+Introduction	1 page
+Project background	1–2 pages
+Objectives and scope	1 page
+Development environment	1 page
+Work performed	2–3 pages
+Technical investigation and analysis	3–4 pages
+Testing and quality assurance	2 pages
+Development workflow	1 page
+Results	1 page
+Reflection and learning	1–2 pages
+Conclusions	1 page
+
+These are suggestions, not formal university requirements.
+
+One important piece of advice
+There is a difference between a work diary and an academic technical report.
+
+A work diary says:
+
+"I investigated a build error and changed a PowerShell script."
+
+An academic technical report says:
+
+"The build process initially failed because the compiler environment was not correctly configured. An investigation of the build environment identified problems with the environment variables and compiler initialization. A modification was subsequently implemented and tested to verify that the compiler environment was correctly loaded."
+
+The second version explains the problem, investigation, cause, solution and verification.
+
+That is the level of analysis I would aim for.
+
+My suggestion: Treat the report as a technical investigation of your four weeks, rather than four weekly diary entries. Use the weekly breakdown to establish chronology, but let the technical analysis, evidence and evaluation demonstrate your development skills.
+
+I can also help turn this structure into a complete university-style report template in Markdown, with headings, subsections and prompts for what you should write under each heading.

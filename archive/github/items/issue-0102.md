@@ -1,6 +1,6 @@
 # Issue #102: Task: sync student-Mass with main after #82-#100
 
-Archived from <https://github.com/andersoxie/xpact/issues/102> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/102> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,16 +13,18 @@ Archived from <https://github.com/andersoxie/xpact/issues/102> on 2026-10-28 21:
 
 ## Description
 
-## Task
-Bring the supervisor's work on `main` into `student-Mass`, so student work continues on the current code. `main` is only read, never changed.
-
-`main` @ `64d027f` is 37 commits ahead of `student-Mass` @ `c8fa1d3` (PRs #82–#100): libexpat lanes in Jenkins, parser fixes for incremental parsing and handles (#85), faster tag dispatch (#87), WSL GCC benchmarks, Jenkins email alerts, Xpact-core next to xpact (#94–#98), Jenkinsfile and path-length fixes (#99, #100).
-
-## Done when
-- [ ] Trial merge has no conflicts
-- [ ] Pull request `main` → `student-Mass`, merged with a merge commit (not squashed), so every supervisor commit stays in the history
-- [ ] `student-Mass` contains `main` (`git merge-base --is-ancestor origin/main origin/student-Mass`)
-- [ ] Local copy refreshed with `sync-latest.ps1`
+## Task
+Bring the supervisor's work on `main` into `student-Mass`, so student work continues on the current code. `main` is only read, never changed.
+
+`main` @ `64d027f` is 37 commits ahead of `student-Mass` @ `c8fa1d3` (PRs #82–#100): libexpat lanes in Jenkins, parser fixes for incremental parsing and handles (#85), faster tag dispatch (#87), WSL GCC benchmarks, Jenkins email alerts, Xpact-core next to xpact (#94–#98), Jenkinsfile and path-length fixes (#99, #100).
+
+## Done when
+- [x] Trial merge has no conflicts
+- [x] Pull request `main` → `student-Mass`, merged with a merge commit (not squashed), so every supervisor commit stays in the history
+- [x] `student-Mass` contains `main` (`git merge-base --is-ancestor origin/main origin/student-Mass`)
+- [x] Local copy refreshed with `sync-latest.ps1`
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

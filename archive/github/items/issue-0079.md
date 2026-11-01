@@ -1,13 +1,13 @@
 # Issue #79: Finding: parser fails 283 W3C cases and the DLL tests (#38, #39, #40, K3); Jenkins FAILURE on main
 
-Archived from <https://github.com/andersoxie/xpact/issues/79> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/79> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open (reopened) |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-23 16:46 |
-| Closed |  |
+| Closed | 2026-10-31 09:27 |
 | Labels | `bug`, `type:finding`, `P0`, `test` |
 | Milestone | - |
 
@@ -38,3 +38,7 @@ Reopened until Jenkins confirms the fix. It was closed automatically when PR #80
 **Verified so far (student PC):** W3C 1,727/1,727 in both finalized builds, DLL tests 3,360/3,360 on both DLLs, all local Jenkins stages pass ([report](https://github.com/andersoxie/xpact/blob/main/reports/issue-0079/report.md)). GitHub Actions "Python harness tests" passed on `366460d`.
 
 **Still needed:** a Jenkins run of `main` at `366460d` or later that gets through the Benchmarks stage with `unexpected: 0` for Finalized and FinalizedAssertions. Close this issue (and #38, #39, #40) with a link to that run.
+
+### CodTanium, 2026-10-31 09:27: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.

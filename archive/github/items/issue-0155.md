@@ -1,13 +1,13 @@
 # Issue #155: Finding: Attribute defaults are not applied to elements inside an external general entity (F01-2)
 
-Archived from <https://github.com/andersoxie/xpact/issues/155> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/155> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-28 19:34 |
-| Closed |  |
+| Closed | 2026-10-31 09:26 |
 | Labels | `bug`, `type:finding`, `group:C-correctness`, `test` |
 | Milestone | - |
 
@@ -39,3 +39,7 @@ Related: #154 (F01-1), #155 (F01-2), #156 (F01-3), #157 (F01-4), #158 (F01-5), #
 ### CodTanium, 2026-10-28 19:48: comment
 
 Fix in PR #160 (into `student-Mass`): attribute declarations now pass between the parent and the external-entity child parser. W3C output test 359 -> 393 of 432, 0 worse; all old lanes unchanged, both builds. Report: [reports/issue-0154/report.md](https://github.com/andersoxie/xpact/blob/bca7d9d/reports/issue-0154/report.md). Stays open until the PR is merged and Jenkins has run.
+
+### CodTanium, 2026-10-31 09:26: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.

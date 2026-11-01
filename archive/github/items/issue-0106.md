@@ -1,6 +1,6 @@
 # Issue #106: Task: finish the open week 2 and week 3 items in PLAN.md
 
-Archived from <https://github.com/andersoxie/xpact/issues/106> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/106> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,23 +13,25 @@ Archived from <https://github.com/andersoxie/xpact/issues/106> on 2026-10-28 21:
 
 ## Description
 
-## Task
-Finish the unticked items of weeks 2 and 3 in `student/PLAN.md` where the evidence now exists, and say plainly which ones cannot be finished by the student alone.
-
-| Item | Evidence | Action |
-|---|---|---|
-| Week 2: assertions DLL smoke test crashes (K3, draft 07) | #104 check 2026-10-26: `build_native_eiffel.ps1 -BuildTier Assertions` → `xpact Eiffel DLL smoke: ok` | tick; record resolution in draft 07 |
-| Week 2: 53 (later 47) W3C crashes (draft 21) | #104 check: W3C `FinalizedAssertions` 1,727 passed, 0 failed, 0 errors, no crash | tick; record resolution in draft 21 |
-| Week 2: "Report the baseline findings" | all sub-items ticked | tick |
-| Week 3: #46 Jenkins stage turns red | dropped by the student in #64 | tick as dropped (as the Jenkins precompile item in week 2) |
-| Week 2: decision with the supervisor | none recorded | stays open — needs the supervisor |
-| Week 3: #35 six labels | still not on GitHub | stays open — needs the supervisor's OK |
-| Week 3: project board | `gh` token lacks `read:project` | stays open — the student must run `gh auth refresh -s read:project,project` |
-
-## Done when
-- [ ] PLAN.md weeks 2 and 3 updated as above
-- [ ] Drafts 07 and 21 record the resolution with the evidence
-- [ ] Report with verification in `reports/issue-NNNN/`
+## Task
+Finish the unticked items of weeks 2 and 3 in `student/PLAN.md` where the evidence now exists, and say plainly which ones cannot be finished by the student alone.
+
+| Item | Evidence | Action |
+|---|---|---|
+| Week 2: assertions DLL smoke test crashes (K3, draft 07) | #104 check 2026-10-26: `build_native_eiffel.ps1 -BuildTier Assertions` → `xpact Eiffel DLL smoke: ok` | tick; record resolution in draft 07 |
+| Week 2: 53 (later 47) W3C crashes (draft 21) | #104 check: W3C `FinalizedAssertions` 1,727 passed, 0 failed, 0 errors, no crash | tick; record resolution in draft 21 |
+| Week 2: "Report the baseline findings" | all sub-items ticked | tick |
+| Week 3: #46 Jenkins stage turns red | dropped by the student in #64 | tick as dropped (as the Jenkins precompile item in week 2) |
+| Week 2: decision with the supervisor | none recorded | stays open — needs the supervisor |
+| Week 3: #35 six labels | still not on GitHub | stays open — needs the supervisor's OK |
+| Week 3: project board | `gh` token lacks `read:project` | stays open — the student must run `gh auth refresh -s read:project,project` |
+
+## Done when
+- [x] PLAN.md weeks 2 and 3 updated as above
+- [x] Drafts 07 and 21 record the resolution with the evidence
+- [x] Report with verification in `reports/issue-NNNN/`
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

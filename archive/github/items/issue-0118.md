@@ -1,6 +1,6 @@
 # Issue #118: Task: G01 - corpus manifest and 50-100 reviewed W3C cases
 
-Archived from <https://github.com/andersoxie/xpact/issues/118> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/118> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,19 +13,21 @@ Archived from <https://github.com/andersoxie/xpact/issues/118> on 2026-10-28 21:
 
 ## Description
 
-## Task (G01, draft 11)
-Build a portable corpus manifest with sources, versions, hashes, dependencies and expectations, starting with 50-100 applicable W3C XML cases (student guide, task register G01; week 4 "an input matrix with reviewed expected outcomes").
-
-## Plan
-A reproducible script selects the cases from the official catalog (`xmlconf.xml`, suite 20130923, archive SHA-256 pinned in `scripts/run_w3c_conformance.py`), covering text-, tag- and attribute-heavy inputs, namespaces, encodings and DTD/entities, with both accepted and rejected inputs. Per case: ID, path, SHA-256, size, type, XML version/edition, namespace, external-entity dependency, expected outcome by the guide's table, counted or not (with reason), and today's observed result in both builds.
-
-Selection: **by the student, not reviewed by the supervisor** (the student decided to skip the supervisor review); recorded as such.
-
-## Done when
-- [ ] `student/results/G01-corpus/manifest.tsv` + the script + README
-- [ ] 50-100 cases across the listed categories; external-entity and XML 1.1 cases marked, not counted
-- [ ] Every expected outcome checked against the guide's rules and today's results (both builds)
-- [ ] Draft 11 updated; report with verification
+## Task (G01, draft 11)
+Build a portable corpus manifest with sources, versions, hashes, dependencies and expectations, starting with 50-100 applicable W3C XML cases (student guide, task register G01; week 4 "an input matrix with reviewed expected outcomes").
+
+## Plan
+A reproducible script selects the cases from the official catalog (`xmlconf.xml`, suite 20130923, archive SHA-256 pinned in `scripts/run_w3c_conformance.py`), covering text-, tag- and attribute-heavy inputs, namespaces, encodings and DTD/entities, with both accepted and rejected inputs. Per case: ID, path, SHA-256, size, type, XML version/edition, namespace, external-entity dependency, expected outcome by the guide's table, counted or not (with reason), and today's observed result in both builds.
+
+Selection: **by the student, not reviewed by the supervisor** (the student decided to skip the supervisor review); recorded as such.
+
+## Done when
+- [x] `student/results/G01-corpus/manifest.tsv` + the script + README
+- [x] 50-100 cases across the listed categories; external-entity and XML 1.1 cases marked, not counted
+- [x] Every expected outcome checked against the guide's rules and today's results (both builds)
+- [x] Draft 11 updated; report with verification
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

@@ -1,6 +1,6 @@
 # Issue #123: Finding: no events before a malformed-UTF-8 error (Expat delivers them)
 
-Archived from <https://github.com/andersoxie/xpact/issues/123> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/123> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -46,3 +46,9 @@ Same place as #122: the whole input is checked for valid characters before token
 
 ## Fix
 None.
+
+## Discussion
+
+### CodTanium, 2026-10-31 16:09: comment
+
+Effect of the #172 fix (#192, `b069ffb`), same C# DLL tests (both builds): cases without Expat's events before a malformed-UTF-8 error went **598 → 133**, 0 worse. All 133 left are CDATA with the default handler: Expat delivers `default:<![CDATA[` before the bad byte, xpact holds the unfinished CDATA opening back. Evidence: `reports/issue-0172/logs/csharp-vs-expat-*.txt`. Stays open for those 133.

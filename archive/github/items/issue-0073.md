@@ -1,6 +1,6 @@
 # Issue #73: Finding: Jenkins DLL build cannot find the Eiffel include folder (C:\El2502E fallback replaced in #2/#10)
 
-Archived from <https://github.com/andersoxie/xpact/issues/73> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/73> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,31 +13,33 @@ Archived from <https://github.com/andersoxie/xpact/issues/73> on 2026-10-28 21:3
 
 ## Description
 
-## Problem
-Jenkins (`ci/Jenkinsfile.windows-phase1`, run on `main` @ `9e1747d`, 2026-10-23) stops in stage **Build Eiffel-Backed DLL**; every later stage is skipped and the build is FAILURE.
-
-## Environment
-Jenkins machine: EiffelStudio 25.02.9.8723 Enterprise (win64), VS 2022 Build Tools (cl 19.44), Windows 11. Not reproducible on the student PC as is (there the 25.12 Standard path exists).
-
-## Command
-`scripts\build_native_eiffel.ps1` (Jenkins stage "Build Eiffel-Backed DLL")
-
-## Expected / actual
-- Expected: the script finds the Eiffel runtime include folder, as it did before the student fixes (`C:\El2502E\studio\spec\win64\include`).
-- Actual: `Cannot find Eiffel runtime include directory.` at `scripts\build_native_eiffel.ps1:46`
-
-## Cause — confirmed from the code
-`9eb18bd` (#2) **replaced** the fallback `C:\El2502E\...` (EiffelStudio 25.02 Enterprise, the Jenkins install) with `C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard\...` (the student PC) instead of adding it. `20e6bc3` (#10, #11) did the same in `scripts\run_native_runtime_smoke.ps1:40`. `ISE_EIFFEL` is evidently not set on Jenkins (otherwise it would be used first) — suspected, not seen.
-
-## Fix (planned)
-In both scripts, search in order: `ISE_EIFFEL`, `C:\El2502E`, EiffelStudio 25.12 Standard, then the EiffelStudio that provides `ec` on `PATH`. Error message lists the folders searched.
-
-## Done when
-- [ ] Both scripts search the list above
-- [ ] Order tested with a temporary copy of the function and fake install folders
-- [ ] `build_native_eiffel.ps1` and `run_native_runtime_smoke.ps1` still build on the student PC
-- [ ] Jenkins log saved in `reports/issue-NNNN/`; report with verification
-- [ ] Jenkins rerun gets past the include lookup (needs the supervisor)
+## Problem
+Jenkins (`ci/Jenkinsfile.windows-phase1`, run on `main` @ `9e1747d`, 2026-10-23) stops in stage **Build Eiffel-Backed DLL**; every later stage is skipped and the build is FAILURE.
+
+## Environment
+Jenkins machine: EiffelStudio 25.02.9.8723 Enterprise (win64), VS 2022 Build Tools (cl 19.44), Windows 11. Not reproducible on the student PC as is (there the 25.12 Standard path exists).
+
+## Command
+`scripts\build_native_eiffel.ps1` (Jenkins stage "Build Eiffel-Backed DLL")
+
+## Expected / actual
+- Expected: the script finds the Eiffel runtime include folder, as it did before the student fixes (`C:\El2502E\studio\spec\win64\include`).
+- Actual: `Cannot find Eiffel runtime include directory.` at `scripts\build_native_eiffel.ps1:46`
+
+## Cause — confirmed from the code
+`9eb18bd` (#2) **replaced** the fallback `C:\El2502E\...` (EiffelStudio 25.02 Enterprise, the Jenkins install) with `C:\Program Files\Eiffel Software\EiffelStudio 25.12 Standard\...` (the student PC) instead of adding it. `20e6bc3` (#10, #11) did the same in `scripts\run_native_runtime_smoke.ps1:40`. `ISE_EIFFEL` is evidently not set on Jenkins (otherwise it would be used first) — suspected, not seen.
+
+## Fix (planned)
+In both scripts, search in order: `ISE_EIFFEL`, `C:\El2502E`, EiffelStudio 25.12 Standard, then the EiffelStudio that provides `ec` on `PATH`. Error message lists the folders searched.
+
+## Done when
+- [x] Both scripts search the list above
+- [x] Order tested with a temporary copy of the function and fake install folders
+- [x] `build_native_eiffel.ps1` and `run_native_runtime_smoke.ps1` still build on the student PC
+- [x] Jenkins log saved in `reports/issue-NNNN/`; report with verification
+- [x] Jenkins rerun gets past the include lookup (needs the supervisor)
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

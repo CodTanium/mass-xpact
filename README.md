@@ -2,8 +2,9 @@
 
 > **This repository is a full copy of [andersoxie/xpact](https://github.com/andersoxie/xpact)**
 > (Anders Persson's project) with its complete history, kept as a record of the work I,
-> **Masoud Dehdar ([@CodTanium](https://github.com/CodTanium))**, did on it as a
-> student assignment in October 2026. The project itself, its design and its
+> **Masoud Dehdar ([@CodTanium](https://github.com/CodTanium))**, did on it during my
+> internship at Bsharp (6 October – 27 November 2026, System Developer programme at
+> Medieinstitutet). The project itself, its design and its
 > original code are Anders Persson's; my work is on the `student-Mass` branch.
 > The original project README follows [below](#xpact).
 
@@ -21,12 +22,16 @@ failures, and verify fixes with assertions enabled.
 | **Parser correctness** | Strict UTF-8 and XML characters, UTF-16, name rules, DTD declarations, loops that advance on error (#79), CR handling (#28). W3C XML conformance went from 1,491 / 1,444 passed (236 failed, 47 crashes) to **1,727 / 1,727 in both finalized builds**, assertions off and on, on the student PC |
 | **W3C without skips** | All 2,585 W3C XML test cases run, none skipped (was 1,727 run, 858 skipped): 2,283 with a checked verdict + 302 "no crash only", **0 failed, 0 errors** in both builds. Found and fixed DLL crashes with external entities (F1, F3) and a slowdown where each entity reference cost time proportional to the document (XML spec document 16 s → 0.2 s with assertions); integrated with the supervisor's external-resource work (#146, #148, #151, #152, [report](reports/latest-2026-10-28/README.md)) |
 | **DLL testing** | A C# test program for the xpact DLL: 3,360 cases across whole-input and chunked parsing, finding three parser bugs (#37 → #38, #39, #40) |
+| **Comparison with Expat 2.8.1** | The same inputs through xpact and Expat: **the same verdict in all 4,308 C-API cases and all 1,302 chunked configurations** (#121, G03 #169); W3C output 359 → 399 / 432 right (#154-#159); results the same however the input is split in 2,561 of 2,585 W3C documents (#165, #172); a check of which library each test really loads (A04, #168, #179) |
+| **Fixes found by the comparisons** | Events before an error in a whole document (#172, also #122), `<root/>junk` as error 9 (#124), the default handler and a mismatched end tag (#125), DTD declarations before a stray `]` (#173), `#FIXED` defaults (#174), empty system literals (#175); each verified on both builds against Expat |
+| **Final report** | The internship report: [`student/report/ActualReport.md`](student/report/ActualReport.md) (short version: [`ActualReportShorter.md`](student/report/ActualReportShorter.md)) |
 | **Versioning workflow** | Every fix: issue → branch → expected result written first → report with before/after logs → pull request → squash merge, revertable in one commit ([`student/VERSIONING.md`](student/VERSIONING.md), [`student/tools/fix.ps1`](student/tools/fix.ps1)) |
 
 ### 📂 Where to look
 
 | Start here | What it holds |
 |---|---|
+| [`student/report/ActualReport.md`](student/report/ActualReport.md) | **The internship report**: question, method, investigations, results, reflection |
 | [`reports/README.md`](reports/README.md) | Every fix: issue, pull request, commit and a report with verification and logs |
 | [`archive/github/README.md`](archive/github/README.md) | **All issues and pull requests** of the original repository with every comment (GitHub cannot move them, so they are archived here) |
 | [`student/PLAN.md`](student/PLAN.md) | The 10-week plan and its status |
@@ -35,8 +40,7 @@ failures, and verify fixes with assertions enabled.
 
 Branches: `portfolio` (this page, default) = `student-Mass` + this README and the archive.
 `student-Mass` and `main` are unchanged copies of the original repository's branches
-(last refreshed 2026-10-28 evening: `student-Mass` @ `e5d59e2`, with the fixes for #154-#159 (PR #160-#164); `main` deliberately left at `de01371`,
-the original's `main` is at `1714f31` and is contained in `student-Mass`).
+(last refreshed 2026-11-01: `student-Mass` @ `22876e9` and `main` @ `733688e`, the same as the original; `main` is contained in `student-Mass`).
 `latest-integrated` is the branch the 2026-10-28 W3C report was built on.
 
 ---

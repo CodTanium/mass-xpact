@@ -1,13 +1,13 @@
 # Issue #142: Re-enable the DLL smoke tests that CI and the release script skip (-SkipSmoke)
 
-Archived from <https://github.com/andersoxie/xpact/issues/142> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/142> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-26 23:11 |
-| Closed |  |
+| Closed | 2026-10-31 09:27 |
 | Labels | `type:task`, `group:B-reliable-results`, `test`, `build` |
 | Milestone | - |
 
@@ -39,3 +39,7 @@ Merged into student-Mass as 3daef15 (PR #144). Verified locally: CI native stage
 ### CodTanium, 2026-10-28 01:28: comment
 
 `student-Mass` @ 293918f includes this change; the Jenkins run requested for #146/#151 will also show whether the assertions DLL smoke step is green.
+
+### CodTanium, 2026-10-31 09:27: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.

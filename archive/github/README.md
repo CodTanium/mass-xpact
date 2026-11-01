@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-10-28 21:36 UTC with [`export_github.py`](export_github.py): 77 issues and 87 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-11-01 03:16 UTC with [`export_github.py`](export_github.py): 92 issues and 116 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -79,12 +79,12 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#71](items/pr-0071.md) | PR | Close the doc gaps found in the 2026-10-22 checklist audit | merged | - | 2026-10-22 |
 | [#72](items/pr-0072.md) | PR | Student mass | merged | - | 2026-10-23 |
 | [#73](items/issue-0073.md) | Issue | Finding: Jenkins DLL build cannot find the Eiffel include folder (C:\El2502E fallback replaced in #2/#10) | closed (completed) | bug, type:finding, group:B-reliable-results, P0, build, regression | 2026-10-23 |
-| [#74](items/issue-0074.md) | Issue | Finding: native build scripts override the machine's MSVC backend with msc_vc140 | open | type:finding, group:B-reliable-results, P1, build, investigation | 2026-10-23 |
+| [#74](items/issue-0074.md) | Issue | Finding: native build scripts override the machine's MSVC backend with msc_vc140 | closed (completed) | type:finding, group:B-reliable-results, P1, build, investigation | 2026-10-23 |
 | [#75](items/pr-0075.md) | PR | Restore the Jenkins Eiffel include fallback next to the student path (#73) | merged | - | 2026-10-23 |
 | [#76](items/pr-0076.md) | PR | Keep the machine's MSVC backend in the native build scripts (#74) | merged | - | 2026-10-23 |
 | [#77](items/pr-0077.md) | PR | Write the week 3 report | merged | - | 2026-10-23 |
 | [#78](items/pr-0078.md) | PR | Merge student-Mass into main: Jenkins Eiffel include fallback (#73) | merged | - | 2026-10-23 |
-| [#79](items/issue-0079.md) | Issue | Finding: parser fails 283 W3C cases and the DLL tests (#38, #39, #40, K3); Jenkins FAILURE on main | open (reopened) | bug, type:finding, P0, test | 2026-10-23 |
+| [#79](items/issue-0079.md) | Issue | Finding: parser fails 283 W3C cases and the DLL tests (#38, #39, #40, K3); Jenkins FAILURE on main | closed (completed) | bug, type:finding, P0, test | 2026-10-23 |
 | [#80](items/pr-0080.md) | PR | Fix parser conformance: all W3C cases pass; fixes #38, #39, #40, K3 (#79) | merged | - | 2026-10-23 |
 | [#81](items/pr-0081.md) | PR | Sync student-Mass with main after #80 | merged | - | 2026-10-23 |
 | [#82](items/pr-0082.md) | PR | Fix absolute libexpat adapter output paths in Jenkins | merged | - | 2026-10-24 |
@@ -93,12 +93,12 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#85](items/pr-0085.md) | PR | Fix libexpat native failures and parsing timeouts | merged | - | 2026-10-24 |
 | [#86](items/pr-0086.md) | PR | Add WSL2 GCC benchmarks and xpact compiler comparison | merged | - | 2026-10-24 |
 | [#87](items/pr-0087.md) | PR | Improve tag dispatch with cached markup markers | merged | - | 2026-10-24 |
-| [#88](items/issue-0088.md) | Issue | Enable verified WSL Eiffel GCC benchmark settings by default | open | - | 2026-10-25 |
+| [#88](items/issue-0088.md) | Issue | Enable verified WSL Eiffel GCC benchmark settings by default | closed (completed) | - | 2026-10-25 |
 | [#89](items/pr-0089.md) | PR | Enable WSL Eiffel GCC benchmarks by default | merged | - | 2026-10-25 |
-| [#90](items/issue-0090.md) | Issue | Add email notifications for failed and unstable xpact builds | open | - | 2026-10-25 |
+| [#90](items/issue-0090.md) | Issue | Add email notifications for failed and unstable xpact builds | closed (completed) | - | 2026-10-25 |
 | [#91](items/pr-0091.md) | PR | Notify failed and unstable xpact builds by email | merged | - | 2026-10-25 |
 | [#92](items/pr-0092.md) | PR | Fix Declarative email parameter defaults | merged | - | 2026-10-25 |
-| [#93](items/issue-0093.md) | Issue | Pin Xpact-core and add isolated implementation build probes | open | - | 2026-10-25 |
+| [#93](items/issue-0093.md) | Issue | Pin Xpact-core and add isolated implementation build probes | closed (completed) | - | 2026-10-25 |
 | [#94](items/pr-0094.md) | PR | Pin Xpact-core and add isolated implementation builds | merged | - | 2026-10-25 |
 | [#95](items/pr-0095.md) | PR | Inventory tests and benchmarks for dual implementations | merged | - | 2026-10-25 |
 | [#96](items/pr-0096.md) | PR | Run the finalized catalog lane with both implementations | merged | - | 2026-10-25 |
@@ -127,10 +127,10 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#119](items/pr-0119.md) | PR | Re-score the 2026-10-14 xmlconf results with the runner's verdict rules (#117) | merged | - | 2026-10-26 |
 | [#120](items/pr-0120.md) | PR | Add the G01 corpus manifest: 93 reviewed W3C cases (#118) | merged | - | 2026-10-26 |
 | [#121](items/issue-0121.md) | Issue | C03/C10: compare chunk and malformed-UTF-8 results with Expat 2.8.1 | closed (completed) | type:task, group:C-correctness, D2-guided, P0, test | 2026-10-26 |
-| [#122](items/issue-0122.md) | Issue | Finding: malformed UTF-8 error is reported at 1:0, not at the bad byte (Expat 2.8.1 comparison) | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#122](items/issue-0122.md) | Issue | Finding: malformed UTF-8 error is reported at 1:0, not at the bad byte (Expat 2.8.1 comparison) | closed (completed) | type:finding, group:C-correctness, investigation | 2026-10-26 |
 | [#123](items/issue-0123.md) | Issue | Finding: no events before a malformed-UTF-8 error (Expat delivers them) | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
-| [#124](items/issue-0124.md) | Issue | Finding: <root/>junk gives error 4, not 9 (junk after document element); position depends on callbacks and chunks | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
-| [#125](items/issue-0125.md) | Issue | Finding: default handler receives the mismatched end tag before the error | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#124](items/issue-0124.md) | Issue | Finding: <root/>junk gives error 4, not 9 (junk after document element); position depends on callbacks and chunks | closed (completed) | type:finding, group:C-correctness, investigation | 2026-10-26 |
+| [#125](items/issue-0125.md) | Issue | Finding: default handler receives the mismatched end tag before the error | closed (completed) | type:finding, group:C-correctness, investigation | 2026-10-26 |
 | [#126](items/issue-0126.md) | Issue | Finding: default handler receives normalized line ends, not the raw CR (Expat passes raw text) | open | type:finding, group:C-correctness, investigation | 2026-10-26 |
 | [#127](items/pr-0127.md) | PR | C03/C10: compare DLL test results with Expat 2.8.1 (#121) | merged | - | 2026-10-26 |
 | [#128](items/issue-0128.md) | Issue | C02: turn the #38, #39, #40 reproductions into permanent regression tests | closed (completed) | type:task, group:C-correctness, D2-guided, P0, test, regression | 2026-10-26 |
@@ -144,29 +144,73 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#136](items/pr-0136.md) | PR | Record the Jenkins verification of the #73 fix | merged | - | 2026-10-26 |
 | [#137](items/issue-0137.md) | Issue | Finish PR #76 and clean up merged branches | closed (completed) | type:task, workflow | 2026-10-26 |
 | [#138](items/pr-0138.md) | PR | Record PR #76 merged and the branch cleanup (#137) | merged | - | 2026-10-26 |
-| [#139](items/pr-0139.md) | PR | Merge student-Mass into main: weeks 4-6 student work (W3C all cases, parser fixes F1/F3/F7, entity speed) | open | - | 2026-10-26 |
+| [#139](items/pr-0139.md) | PR | Merge student-Mass into main: weeks 4-6 student work (W3C all cases, parser fixes F1/F3/F7, entity speed) | merged | - | 2026-10-26 |
 | [#140](items/issue-0140.md) | Issue | Script for the supervisor: collect dual-implementation and Jenkins information into one .txt | closed (completed) | type:task, workflow, group:G-verification | 2026-10-26 |
 | [#141](items/pr-0141.md) | PR | Script for the supervisor: collect dual-implementation and Jenkins information (#140) | merged | - | 2026-10-26 |
-| [#142](items/issue-0142.md) | Issue | Re-enable the DLL smoke tests that CI and the release script skip (-SkipSmoke) | open | type:task, group:B-reliable-results, test, build | 2026-10-26 |
+| [#142](items/issue-0142.md) | Issue | Re-enable the DLL smoke tests that CI and the release script skip (-SkipSmoke) | closed (completed) | type:task, group:B-reliable-results, test, build | 2026-10-26 |
 | [#143](items/issue-0143.md) | Issue | Finding: 7 native Python tests skip because the CMake bundled with Visual Studio is not found | closed (completed) | type:finding, group:B-reliable-results, test | 2026-10-26 |
 | [#144](items/pr-0144.md) | PR | Re-enable the DLL smoke tests in CI and the release script | merged | - | 2026-10-26 |
 | [#145](items/pr-0145.md) | PR | Find the CMake bundled with Visual Studio in the native Python tests | merged | - | 2026-10-26 |
-| [#146](items/issue-0146.md) | Issue | Option A: run all 2,585 W3C cases (no skips) and fix the 7 parser bugs they expose (F1-F7) | open | bug, type:task, group:C-correctness, test | 2026-10-27 |
+| [#146](items/issue-0146.md) | Issue | Option A: run all 2,585 W3C cases (no skips) and fix the 7 parser bugs they expose (F1-F7) | closed (completed) | bug, type:task, group:C-correctness, test | 2026-10-27 |
 | [#147](items/pr-0147.md) | PR | Option A: all W3C cases without skips (--all-cases) and parser fixes F1-F7 | closed | - | 2026-10-27 |
-| [#148](items/issue-0148.md) | Issue | Finding: each internal entity reference costs time proportional to the document (pr-xml 1.1 s, 16 s with assertions) | open | bug, type:finding, group:C-correctness | 2026-10-27 |
+| [#148](items/issue-0148.md) | Issue | Finding: each internal entity reference costs time proportional to the document (pr-xml 1.1 s, 16 s with assertions) | closed (completed) | bug, type:finding, group:C-correctness | 2026-10-27 |
 | [#149](items/pr-0149.md) | PR | Fix slow internal entity references by keeping the reference position | closed | - | 2026-10-27 |
 | [#150](items/pr-0150.md) | PR | Enable local external resources in the W3C conformance suite | merged | - | 2026-10-27 |
-| [#151](items/issue-0151.md) | Issue | Integrate the #146 and #148 fixes with main (#150): DLL crashes and pr-xml timeouts on main | open | type:task, group:C-correctness, test, regression | 2026-10-27 |
+| [#151](items/issue-0151.md) | Issue | Integrate the #146 and #148 fixes with main (#150): DLL crashes and pr-xml timeouts on main | closed (completed) | type:task, group:C-correctness, test, regression | 2026-10-27 |
 | [#152](items/pr-0152.md) | PR | Integrate the #146 and #148 fixes with main (#150) (#151) | merged | type:task, group:C-correctness, test, regression | 2026-10-27 |
-| [#153](items/issue-0153.md) | Issue | Dual regression lane: small functional cases on xpact and Xpact-core, whole and chunked, with event traces | open | type:task, group:B-reliable-results, test | 2026-10-28 |
-| [#154](items/issue-0154.md) | Issue | Finding: attribute defaults from an external DTD or external parameter entity are not applied (F01-1) | open | bug, type:finding, group:C-correctness, test | 2026-10-28 |
-| [#155](items/issue-0155.md) | Issue | Finding: Attribute defaults are not applied to elements inside an external general entity (F01-2) | open | bug, type:finding, group:C-correctness, test | 2026-10-28 |
-| [#156](items/issue-0156.md) | Issue | Finding: Tokenized attribute values (NMTOKENS, ID, IDREFS, ENTITIES, ...) are not normalized (F01-3) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
-| [#157](items/issue-0157.md) | Issue | Finding: Public identifier of a NOTATION declaration is not normalized (F01-4) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
-| [#158](items/issue-0158.md) | Issue | Finding: A second byte order mark at the start of an external entity is dropped (F01-5) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
-| [#159](items/issue-0159.md) | Issue | Finding: External parameter entity inside an entity value is parsed as declarations instead of included as text (F01-6) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#153](items/issue-0153.md) | Issue | Dual regression lane: small functional cases on xpact and Xpact-core, whole and chunked, with event traces | closed (completed) | type:task, group:B-reliable-results, test | 2026-10-28 |
+| [#154](items/issue-0154.md) | Issue | Finding: attribute defaults from an external DTD or external parameter entity are not applied (F01-1) | closed (completed) | bug, type:finding, group:C-correctness, test | 2026-10-28 |
+| [#155](items/issue-0155.md) | Issue | Finding: Attribute defaults are not applied to elements inside an external general entity (F01-2) | closed (completed) | bug, type:finding, group:C-correctness, test | 2026-10-28 |
+| [#156](items/issue-0156.md) | Issue | Finding: Tokenized attribute values (NMTOKENS, ID, IDREFS, ENTITIES, ...) are not normalized (F01-3) | closed (completed) | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#157](items/issue-0157.md) | Issue | Finding: Public identifier of a NOTATION declaration is not normalized (F01-4) | closed (completed) | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#158](items/issue-0158.md) | Issue | Finding: A second byte order mark at the start of an external entity is dropped (F01-5) | closed (completed) | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
+| [#159](items/issue-0159.md) | Issue | Finding: External parameter entity inside an entity value is parsed as declarations instead of included as text (F01-6) | closed (completed) | bug, type:finding, group:C-correctness, test, investigation | 2026-10-28 |
 | [#160](items/pr-0160.md) | PR | Apply attribute defaults declared in external DTDs and entities | merged | - | 2026-10-28 |
 | [#161](items/pr-0161.md) | PR | Normalize the declared default of tokenized attributes | merged | - | 2026-10-28 |
 | [#162](items/pr-0162.md) | PR | Normalize public identifiers | merged | - | 2026-10-28 |
 | [#163](items/pr-0163.md) | PR | Keep a second byte order mark after UTF-16 decoding | merged | - | 2026-10-28 |
 | [#164](items/pr-0164.md) | PR | Include an external parameter entity's text in an entity literal | merged | - | 2026-10-28 |
+| [#165](items/issue-0165.md) | Issue | Finding: DTD callbacks delivered twice when the input arrives in several pieces (F02-1) | closed (completed) | bug, type:finding, group:C-correctness, test | 2026-10-30 |
+| [#166](items/pr-0166.md) | PR | Keep delivered callbacks delivered across XML_Parse calls | merged | - | 2026-10-30 |
+| [#167](items/pr-0167.md) | PR | Accept categorized xpact W3C results in Jenkins summary | merged | - | 2026-10-31 |
+| [#168](items/issue-0168.md) | Issue | A04 - Verify which library the tests, benchmarks and examples load | closed (completed) | type:task, D2-guided, P1, test, investigation, group:A-orientation | 2026-10-31 |
+| [#169](items/issue-0169.md) | Issue | G03 - Compare xpact and Expat 2.8.1 across chunks (G01 subset, XML_Parse and XML_ParseBuffer) | closed (completed) | type:task, D2-guided, P0, test, group:G-verification | 2026-10-31 |
+| [#170](items/issue-0170.md) | Issue | Finding: error code differs from Expat on 14 W3C cases (G03-1) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-31 |
+| [#171](items/issue-0171.md) | Issue | Finding: error column is 0 (start of the line) where Expat points at the bad token (G03-2) | open | bug, type:finding, group:C-correctness, test, investigation | 2026-10-31 |
+| [#172](items/issue-0172.md) | Issue | Finding: whole document: no events before an invalid-character error; in pieces xpact gives them, as Expat (F02-2, G03-3) | closed (completed) | bug, type:finding, group:C-correctness, test, investigation | 2026-10-31 |
+| [#173](items/issue-0173.md) | Issue | Finding: an error in the internal DTD subset is reported at the DOCTYPE line, before the declarations in front of it (G03-4) | closed (completed) | bug, type:finding, group:C-correctness, test, investigation | 2026-10-31 |
+| [#174](items/issue-0174.md) | Issue | Finding: #FIXED attribute default reported with isrequired = 0 (G03-5) | closed (completed) | bug, type:finding, group:C-correctness, test | 2026-10-31 |
+| [#175](items/issue-0175.md) | Issue | Finding: an empty system literal (SYSTEM '') is reported as NULL, Expat passes "" (G03-6) | closed (completed) | bug, type:finding, group:C-correctness, test | 2026-10-31 |
+| [#176](items/issue-0176.md) | Issue | Finding: in pieces, "]]" of a forbidden "]]>" is delivered as text before the error (G03-7) | open | bug, type:finding, group:C-correctness, test | 2026-10-31 |
+| [#177](items/pr-0177.md) | PR | Student mass | merged | - | 2026-10-31 |
+| [#178](items/pr-0178.md) | PR | G03: compare xpact and Expat 2.8.1 across chunks on the G01 cases | merged | - | 2026-10-31 |
+| [#179](items/issue-0179.md) | Issue | Finding: run_libexpat_adapter.ps1 without -XpactLibrary links the bridge-only xpact.lib (A04-1) | closed (completed) | bug, type:finding, group:B-reliable-results, test, build | 2026-10-31 |
+| [#180](items/issue-0180.md) | Issue | Finding: run_benchmarks.ps1 -Repetitions 1 fails in AddRange (A04-2) | closed (completed) | bug, type:finding, group:B-reliable-results, build | 2026-10-31 |
+| [#181](items/pr-0181.md) | PR | Check which library each test runner loads (A04) | merged | - | 2026-10-31 |
+| [#182](items/pr-0182.md) | PR | Use the Eiffel-backed library by default in the libexpat adapter (#179) | merged | - | 2026-10-31 |
+| [#183](items/issue-0183.md) | Issue | Update the plan and reports after the Jenkins approval of PR #177 | closed (completed) | documentation | 2026-10-31 |
+| [#184](items/pr-0184.md) | PR | Update the plan and reports after the Jenkins approval of PR #177 | merged | - | 2026-10-31 |
+| [#185](items/pr-0185.md) | PR | Mark #179 fixed in the plan | merged | - | 2026-10-31 |
+| [#186](items/pr-0186.md) | PR | Fix run_benchmarks.ps1 with -Repetitions 1 | merged | - | 2026-10-31 |
+| [#187](items/pr-0187.md) | PR | Mark #180 fixed in the plan | merged | - | 2026-10-31 |
+| [#188](items/issue-0188.md) | Issue | Bring main (PR #167) into student-Mass | closed (completed) | - | 2026-10-31 |
+| [#189](items/pr-0189.md) | PR | Merge main (PR #167) into student-Mass | merged | - | 2026-10-31 |
+| [#190](items/pr-0190.md) | PR | Move #179 and #180 to Solved in the plan | merged | - | 2026-10-31 |
+| [#191](items/pr-0191.md) | PR | Drop the Jenkins requirement for closing issues | merged | - | 2026-10-31 |
+| [#192](items/pr-0192.md) | PR | Record the #172 baseline and confirmed cause | merged | - | 2026-10-31 |
+| [#193](items/pr-0193.md) | PR | Move #172 to Solved in the plan | merged | - | 2026-10-31 |
+| [#194](items/pr-0194.md) | PR | Pass an empty system literal as "" instead of NULL | merged | - | 2026-10-31 |
+| [#195](items/pr-0195.md) | PR | Report #FIXED attribute defaults with isrequired set, as Expat | merged | - | 2026-10-31 |
+| [#196](items/pr-0196.md) | PR | Deliver subset declarations before a stray bracket error, as Expat | merged | - | 2026-10-31 |
+| [#197](items/issue-0197.md) | Issue | Run the W3C-in-pieces test (test 2) on several cores | open | test | 2026-10-31 |
+| [#198](items/pr-0198.md) | PR | Report text after the document element as junk, code 9, as Expat | merged | - | 2026-10-31 |
+| [#199](items/pr-0199.md) | PR | Keep a mismatched end tag from the default handler, as Expat | merged | - | 2026-10-31 |
+| [#200](items/pr-0200.md) | PR | Record the fixes of 2026-10-31 and what is left | merged | - | 2026-10-31 |
+| [#201](items/pr-0201.md) | PR | Prepare the student folder for the hand-in | merged | - | 2026-10-31 |
+| [#202](items/pr-0202.md) | PR | Add the investigation report of 2026-10-13 to the history folder | merged | - | 2026-10-31 |
+| [#203](items/pr-0203.md) | PR | Add the final internship report | merged | - | 2026-11-01 |
+| [#204](items/pr-0204.md) | PR | Rename the report to ActualReport.md and add a short version | merged | - | 2026-11-01 |
+| [#205](items/pr-0205.md) | PR | Add a list of more test sources found online | merged | - | 2026-11-01 |
+| [#206](items/pr-0206.md) | PR | Remove PLAN2.md and for superviser.txt from the student folder | merged | - | 2026-11-01 |
+| [#207](items/pr-0207.md) | PR | Add the university, company and internship period to the reports | merged | - | 2026-11-01 |
+| [#208](items/pr-0208.md) | PR | Add the report update before the hand-in to the plan | merged | - | 2026-11-01 |

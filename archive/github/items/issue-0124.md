@@ -1,13 +1,13 @@
 # Issue #124: Finding: <root/>junk gives error 4, not 9 (junk after document element); position depends on callbacks and chunks
 
-Archived from <https://github.com/andersoxie/xpact/issues/124> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/124> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-26 19:30 |
-| Closed |  |
+| Closed | 2026-10-31 18:42 |
 | Labels | `type:finding`, `group:C-correctness`, `investigation` |
 | Milestone | Week 5 - Regressions |
 
@@ -43,3 +43,9 @@ None yet beyond the comparison.
 
 ## Fix
 None.
+
+## Discussion
+
+### CodTanium, 2026-10-31 18:42: comment
+
+Fixed in #198 (`b7b6f69` on `student-Mass`; the merge adds exactly the tested change, 51 lines in, 10 out). Text or `]]>` after the document element is now "junk after document element", code 9, at its first non-space character, with or without callbacks, as Expat 2.8.1. Verified on both builds (`reports/issue-0124/report.md`): C# DLL tests error code **4,308/4,308** = Expat (the 72 cases of this issue), column and byte index 4,308/4,308, 0 worse; probe 9/52 → 30/52 (one row worse where Expat itself differs between whole and pieces); G03, W3C verdicts, output test and W3C in pieces unchanged per case; Expat runtests same 38; Eiffel matrix 4/4 with new assertions; Python 210 OK (also after the merge). Benchmark stage: in the next batch run. Left for #171: the position of text **before** the root (Expat points at its end).

@@ -1,6 +1,6 @@
 # Issue #121: C03/C10: compare chunk and malformed-UTF-8 results with Expat 2.8.1
 
-Archived from <https://github.com/andersoxie/xpact/issues/121> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/121> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,30 +13,32 @@ Archived from <https://github.com/andersoxie/xpact/issues/121> on 2026-10-28 21:
 
 ## Description
 
-## Task
-Week 5, C03 and C10 (part), the open parts: compare xpact's results with **Expat 2.8.1** (`R_2_8_1`, the version the libexpat adapter pins).
-
-Drafts: [`student/github/issues/14-C03.md`](../blob/student-Mass/student/github/issues/14-C03.md), [`15-C10.md`](../blob/student-Mass/student/github/issues/15-C10.md).
-
-## Plan
-1. Build Expat 2.8.1 from source as `libexpat.dll` (MSVC x64, Release, upstream defaults). Build files go under `build\` and are not committed.
-2. Add the two missing C10 inputs to `tests/dotnet/XpactDllTests/Catalog.cs`: a lone continuation byte `80` and `FF`, in the same six places.
-3. Run the C# DLL test program (#37) with `--dll` on `libexpat.dll`, `xpact.dll` and `xpact_assertions.dll`.
-4. Compare the runs case by case: verdict, error code, line, column, and chunked vs whole.
-5. Results go in `student/results/C03-chunks/` and `student/results/C10-utf8/`. Each difference is minimized and saved as a byte-exact fixture.
-
-## Expected (written before running)
-- Expat rejects every malformed UTF-8 input, whole and at every split.
-- On Expat, chunking never changes the verdict or the error code.
-- xpact and Expat agree on every verdict, since all 3,360 cases pass on xpact today.
-- Error codes: known to differ (the catalog's libexpat codes were never checked). Each difference gets recorded, not judged as a bug yet.
-
-## Done when
-- [ ] Expat 2.8.1 DLL built, version and SHA-256 recorded
-- [ ] `80` and `FF` inputs added
-- [ ] Three runs saved, comparison table written
-- [ ] Differences saved as fixtures
-- [ ] C03 and C10 drafts and PLAN.md ticked
+## Task
+Week 5, C03 and C10 (part), the open parts: compare xpact's results with **Expat 2.8.1** (`R_2_8_1`, the version the libexpat adapter pins).
+
+Drafts: [`student/github/issues/14-C03.md`](../blob/student-Mass/student/github/issues/14-C03.md), [`15-C10.md`](../blob/student-Mass/student/github/issues/15-C10.md).
+
+## Plan
+1. Build Expat 2.8.1 from source as `libexpat.dll` (MSVC x64, Release, upstream defaults). Build files go under `build\` and are not committed.
+2. Add the two missing C10 inputs to `tests/dotnet/XpactDllTests/Catalog.cs`: a lone continuation byte `80` and `FF`, in the same six places.
+3. Run the C# DLL test program (#37) with `--dll` on `libexpat.dll`, `xpact.dll` and `xpact_assertions.dll`.
+4. Compare the runs case by case: verdict, error code, line, column, and chunked vs whole.
+5. Results go in `student/results/C03-chunks/` and `student/results/C10-utf8/`. Each difference is minimized and saved as a byte-exact fixture.
+
+## Expected (written before running)
+- Expat rejects every malformed UTF-8 input, whole and at every split.
+- On Expat, chunking never changes the verdict or the error code.
+- xpact and Expat agree on every verdict, since all 3,360 cases pass on xpact today.
+- Error codes: known to differ (the catalog's libexpat codes were never checked). Each difference gets recorded, not judged as a bug yet.
+
+## Done when
+- [x] Expat 2.8.1 DLL built, version and SHA-256 recorded
+- [x] `80` and `FF` inputs added
+- [x] Three runs saved, comparison table written
+- [x] Differences saved as fixtures
+- [x] C03 and C10 drafts and PLAN.md ticked
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

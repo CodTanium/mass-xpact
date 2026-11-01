@@ -1,6 +1,6 @@
 # Issue #108: Task: create the 6 missing labels (#35) and bring the project board up to date
 
-Archived from <https://github.com/andersoxie/xpact/issues/108> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/108> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,16 +13,18 @@ Archived from <https://github.com/andersoxie/xpact/issues/108> on 2026-10-28 21:
 
 ## Description
 
-## Task
-Finish the two remaining week 3 items in `student/PLAN.md` (the student authorized both on 2026-10-26):
-
-1. **#35:** create the 6 labels from `student/github/labels.json` that were not on GitHub: `group:A-orientation`, `group:F-core`, `group:G-verification`, `D1-beginner`, `D4-expert`, `type:blocker`.
-2. **Project board:** the `gh` login now has the `project` scope; read the board and bring it in line with the issues (16 student issues were missing, 7 closed issues and 2 merged PRs were not in Done).
-
-## Done when
-- [ ] Every label in `labels.json` exists on GitHub with the same colour and description
-- [ ] Every student issue is on the board; closed → Done; open ones in the right column
-- [ ] `student/github/README.md`, `student/PLAN.md` updated; report with verification
+## Task
+Finish the two remaining week 3 items in `student/PLAN.md` (the student authorized both on 2026-10-26):
+
+1. **#35:** create the 6 labels from `student/github/labels.json` that were not on GitHub: `group:A-orientation`, `group:F-core`, `group:G-verification`, `D1-beginner`, `D4-expert`, `type:blocker`.
+2. **Project board:** the `gh` login now has the `project` scope; read the board and bring it in line with the issues (16 student issues were missing, 7 closed issues and 2 merged PRs were not in Done).
+
+## Done when
+- [x] Every label in `labels.json` exists on GitHub with the same colour and description
+- [x] Every student issue is on the board; closed → Done; open ones in the right column
+- [x] `student/github/README.md`, `student/PLAN.md` updated; report with verification
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

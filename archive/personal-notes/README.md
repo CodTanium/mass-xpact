@@ -11,7 +11,7 @@ unchanged so the record is complete. They are snapshots: the reports in
 | [`guide.txt`](guide.txt) | 2026-10-19 | Reporting guide: what to record for an error and for a test result, collected from the student guide |
 | [`error.odt`](error.odt) | 2026-10-20 | Error-report checklist (the same fields as `guide.txt`) |
 | [`how each fix work.odt`](how%20each%20fix%20work.odt) | 2026-10-20 | How the `fix.ps1` versioning workflow works, step by step (before the `reports/issue-NNNN/` layout of #14) |
-| [`for superviser (draft 2026-10-20).txt`](for%20superviser%20%28draft%202026-10-20%29.txt) | 2026-10-20 | First draft of the supervisor summary; the committed version is [`student/for superviser.txt`](../../student/for%20superviser.txt) |
+| [`for superviser (draft 2026-10-20).txt`](for%20superviser%20%28draft%202026-10-20%29.txt) | 2026-10-20 | First draft of the supervisor summary; the committed `student/for superviser.txt` grew from it and was removed on 2026-11-01 (its open questions are in [`student/PLAN.md`](../../student/PLAN.md), "Next", item 2) |
 | [`sync-latest.ps1`](sync-latest.ps1) | 2026-10-20 | Script that refreshed the non-git working folder from the git clone |
 | [`builds.txt`](builds.txt) | 2026-10-22 | Map of every ECF target, script, assertion setting and what each build's output verifies |
 | [`jenkins.odt`](jenkins.odt) | 2026-10-23, updated 2026-10-25 | Jenkins notes |
@@ -27,6 +27,11 @@ unchanged so the record is complete. They are snapshots: the reports in
 | [`latest600Test2.txt`](latest600Test2.txt) | 2026-10-28 | Test 1 rerun: the W3C **output** check, 359 of 432 right, the 6 problems F01-1 to F01-6 |
 | [`latest600Test3.md`](latest600Test3.md) | 2026-10-28 | Results of the six fixes #154-#159 (PR #160-#164): W3C output 359 -> 399 of 432, no xpact-only difference left, every check |
 | [`w3c-report-2026-10-28.txt`](w3c-report-2026-10-28.txt) | 2026-10-28 | The W3C result of the integrated version in plain words: 2,585 cases, 0 failed, 0 errors, 0 skipped (full report: [`reports/latest-2026-10-28`](../../reports/latest-2026-10-28/README.md)) |
+| [`Additional11Tests.txt`](Additional11Tests.txt) | 2026-10-30 | The tests already in place and the 11 extra test types, with what each found and which problems are fixed |
+| [`demoDayWeek.txt`](demoDayWeek.txt) | 2026-10-30 | Demo-day notes for 26-30 October: the numbers, what to say in 30 seconds, this week against last week, the tests in plain words, whether xpact is incremental |
+| [`FinalReport.txt`](FinalReport.txt) | 2026-11-01 | Advice on the internship report: the academic structure, what each section needs, and the difference between a work diary and a technical report |
+| [`FinalRerpot2.txt`](FinalRerpot2.txt) | 2026-11-01 | A full report template with the section headings; the finished report is [`student/report/ActualReport.md`](../../student/report/ActualReport.md) |
+| [`CLAUDE-full.md`](CLAUDE-full.md) | 2026-11-01 | My working rules for the AI assistant (Claude Code): never touch `main`, how to report errors and test results, the documentation style |
 
 The Jenkins log of `main` at `cf12dee` (`jenkinReport.txt`) is already in the
 repository as [`reports/issue-0079/jenkins-log-cf12dee-before.txt`](../../reports/issue-0079/jenkins-log-cf12dee-before.txt).

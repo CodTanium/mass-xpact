@@ -1,0 +1,503 @@
+# Internship Report – Software Development
+## Technical Investigation, Development and Quality Assurance of XPact
+
+**Student:** [Your name]  
+**Company:** [Company name]  
+**Supervisor:** [Company supervisor]  
+**University:** [University name]  
+**Programme:** System Developer  
+**Internship period:** [Start date – End date]  
+**Report period:** Four weeks  
+**Date:** [Submission date]
+
+---
+
+# Abstract
+
+This report presents the work carried out during a four-week internship as a software developer at [Company name]. The internship focused on the investigation, development, troubleshooting and testing of the XPact software project.
+
+The work involved analysing the existing software architecture, understanding the development environment, investigating technical problems, implementing improvements and evaluating software behaviour through testing.
+
+Particular attention was given to [main technical areas].
+
+The purpose of this report is to document the work performed, explain the technical investigations and solutions, evaluate the results and reflect on the knowledge and experience gained during the internship.
+
+# Table of Contents
+
+1. Introduction
+2. Project Background
+3. Objectives and Scope
+4. Development Environment and Technologies
+5. Methodology and Working Approach
+6. Work Performed During the Internship
+7. Technical Investigation and Problem Analysis
+8. Testing and Quality Assurance
+9. Version Control and Development Workflow
+10. Results and Achievements
+11. Reflection and Learning Outcomes
+12. Discussion
+13. Conclusion and Future Work
+14. References
+15. Appendices
+
+---
+
+# 1. Introduction
+
+## 1.1 Background
+
+Introduce the internship and explain its context.
+
+Describe:
+- The company and its general area of business.
+- Your role as an intern and software developer.
+- The duration of the internship.
+- The project you were assigned to.
+- The general purpose of the internship.
+
+## 1.2 Purpose of the Report
+
+Explain why this report has been written.
+
+The report aims to document and analyse the technical work carried out during the first four weeks of the internship. It focuses on the development process, technical challenges, troubleshooting, testing and the results of implemented improvements.
+
+## 1.3 Report Structure
+
+Briefly explain how the report is organised and what each major section covers.
+
+# 2. Project Background
+
+## 2.1 Introduction to XPact
+
+Describe XPact and its intended purpose.
+
+Explain:
+- What problem the project aims to solve.
+- What XML parsing means.
+- The relationship between XPact and Expat.
+- What functionality XPact is intended to provide.
+- The current development status of the project.
+
+## 2.2 Technical Architecture
+
+Describe the overall architecture and how its components interact.
+
+Include an architecture diagram if possible.
+
+Explain the responsibilities of the main components:
+
+- C interface and native bridge.
+- Eiffel parser implementation.
+- Event handling.
+- Public API.
+- Testing infrastructure.
+
+## 2.3 Project Requirements
+
+Describe the technical expectations of the project.
+
+Examples:
+- Correct XML parsing.
+- Consistent handling of valid and invalid XML.
+- Compatibility with the intended API.
+- Reliable error handling.
+- Testing and conformance with relevant XML standards.
+
+# 3. Objectives and Scope
+
+## 3.1 Internship Objectives
+
+Describe what you were expected to achieve.
+
+Examples:
+- Understand the existing codebase.
+- Become familiar with the project architecture.
+- Investigate build and runtime problems.
+- Identify and resolve technical errors.
+- Improve testing and documentation.
+- Contribute changes through GitHub.
+
+## 3.2 Scope of Work
+
+Explain which parts of XPact you worked with.
+
+Distinguish between:
+- Areas directly modified.
+- Areas investigated.
+- Areas tested.
+- Areas outside your responsibility.
+
+## 3.3 Limitations
+
+Describe limitations affecting your work.
+
+Examples:
+- Limited internship duration.
+- Existing technical debt.
+- Development environment dependencies.
+- Incomplete project functionality.
+- Platform-specific behaviour.
+
+# 4. Development Environment and Technologies
+
+## 4.1 Hardware and Operating System
+
+Document your development environment.
+
+## 4.2 Programming Languages
+
+Describe the programming languages used and their roles in the project.
+
+## 4.3 Development Tools
+
+Document the tools used.
+
+Examples:
+- EiffelStudio.
+- Visual Studio.
+- Visual Studio Code.
+- PowerShell.
+- Python.
+- Git and GitHub.
+
+## 4.4 Build System
+
+Explain how the project is compiled and built.
+
+Include:
+- Build configurations.
+- ECF files and targets.
+- Build scripts.
+- Compiler configuration.
+- Assertions enabled and disabled.
+
+## 4.5 Testing Tools
+
+Explain the testing infrastructure and tools used.
+
+## 4.6 External Dependencies
+
+Describe important external libraries, frameworks and dependencies.
+
+# 5. Methodology and Working Approach
+
+## 5.1 Investigation Method
+
+Explain how you approached technical problems.
+
+For example:
+1. Reproduce the problem.
+2. Collect error messages and logs.
+3. Identify the affected component.
+4. Investigate possible causes.
+5. Implement a solution.
+6. Run tests to verify the change.
+7. Document the result.
+
+## 5.2 Development Process
+
+Describe how tasks were organised and implemented.
+
+## 5.3 Documentation and Evidence
+
+Explain how you recorded findings, test results, changes and technical decisions.
+
+## 5.4 Use of Version Control
+
+Briefly introduce how Git and GitHub were used during the work.
+
+# 6. Work Performed During the Internship
+
+This section documents the chronological development of the internship.
+
+## 6.1 Week 1 – Project Familiarisation and Environment Setup
+
+**Main focus:** Understanding the project and establishing a working development environment.
+
+### Activities
+- [Describe activities.]
+- [Describe project exploration.]
+- [Describe environment setup.]
+
+### Technical investigations
+- [What did you investigate?]
+- [What did you discover?]
+
+### Problems encountered
+- [Describe errors and difficulties.]
+
+### Solutions and changes
+- [Describe what you changed.]
+
+### Results
+- [What worked afterwards?]
+- [What remained unresolved?]
+
+## 6.2 Week 2 – Build System and Troubleshooting
+
+**Main focus:** Investigating build configurations, dependencies and technical problems.
+
+### Activities
+- [Describe activities.]
+
+### Technical investigations
+- [Describe investigations.]
+
+### Problems encountered
+- [Describe problems.]
+
+### Solutions and changes
+- [Describe implemented fixes.]
+
+### Results
+- [Describe verified results.]
+
+## 6.3 Week 3 – Development and Testing
+
+**Main focus:** Improving functionality and evaluating software behaviour.
+
+### Activities
+- [Describe activities.]
+
+### Technical investigations
+- [Describe investigations.]
+
+### Problems encountered
+- [Describe problems.]
+
+### Solutions and changes
+- [Describe changes.]
+
+### Results
+- [Describe test outcomes.]
+
+## 6.4 Week 4 – Quality Assurance and Documentation
+
+**Main focus:** Testing, analysing results and organising technical documentation.
+
+### Activities
+- [Describe activities.]
+
+### Technical investigations
+- [Describe investigations.]
+
+### Problems encountered
+- [Describe problems.]
+
+### Solutions and changes
+- [Describe changes.]
+
+### Results
+- [Describe outcomes.]
+
+# 7. Technical Investigation and Problem Analysis
+
+This section presents selected technical problems in greater detail.
+
+Each investigation should follow the same structure.
+
+## 7.1 Investigation 1 – [Problem Title]
+
+### Problem Description
+What was the original problem?
+
+### Initial Observations
+What happened when the problem occurred?
+
+### Investigation
+What steps were taken to identify the cause?
+
+### Root Cause Analysis
+What was the underlying technical reason?
+
+### Implemented Solution
+What changes were made?
+
+### Verification
+How was the solution tested?
+
+### Evaluation
+Did the solution resolve the problem? Were there any remaining limitations?
+
+## 7.2 Investigation 2 – [Problem Title]
+
+Use the same structure.
+
+## 7.3 Investigation 3 – [Problem Title]
+
+Use the same structure.
+
+## 7.4 Overall Technical Findings
+
+Summarise the most important findings from the investigations.
+
+# 8. Testing and Quality Assurance
+
+## 8.1 Testing Strategy
+
+Explain the purpose of testing within the project.
+
+## 8.2 Types of Testing
+
+Describe relevant testing approaches:
+
+- Unit testing.
+- Integration testing.
+- Regression testing.
+- XML conformance testing.
+- Assertions.
+- Automated testing.
+
+## 8.3 Test Environment
+
+Document the build configurations, targets, scripts and settings used during testing.
+
+## 8.4 Test Results
+
+Present relevant results in tables.
+
+Include:
+- Test case.
+- Expected result.
+- Actual result.
+- Pass/fail status.
+- Relevant comments.
+
+## 8.5 Failed Tests and Known Issues
+
+Analyse unsuccessful tests and explain whether they represent:
+- Actual software defects.
+- Environment-related problems.
+- Unsupported functionality.
+- Expected limitations.
+
+## 8.6 Evaluation of Test Coverage
+
+Discuss what the tests demonstrate and what they do not demonstrate.
+
+# 9. Version Control and Development Workflow
+
+## 9.1 Git and GitHub
+
+Describe the repository structure and how Git was used.
+
+## 9.2 Branching Strategy
+
+Explain the use of branches for development and investigation.
+
+## 9.3 Commits and Pull Requests
+
+Describe how changes were organised and submitted.
+
+## 9.4 Code Review and CI
+
+Explain the role of supervisor reviews and Jenkins in the development process.
+
+## 9.5 Traceability
+
+Explain how technical problems, code changes, commits and test results were connected and documented.
+
+# 10. Results and Achievements
+
+## 10.1 Completed Work
+
+Summarise the work successfully completed.
+
+## 10.2 Improvements
+
+Describe improvements made to:
+- Software functionality.
+- Build processes.
+- Testing infrastructure.
+- Documentation.
+- Development workflow.
+
+## 10.3 Outstanding Issues
+
+List unresolved problems and explain their current status.
+
+## 10.4 Overall Results
+
+Evaluate the overall contribution made during the four-week period.
+
+# 11. Reflection and Learning Outcomes
+
+## 11.1 Technical Knowledge
+
+What new technologies, tools and programming concepts did you learn?
+
+## 11.2 Problem-Solving Skills
+
+How did your approach to troubleshooting and debugging develop?
+
+## 11.3 Software Development in Practice
+
+What did you learn about working with an existing software project?
+
+## 11.4 Collaboration and Communication
+
+Reflect on working with your supervisor, using GitHub and communicating technical findings.
+
+## 11.5 Challenges and Improvements
+
+What was difficult? What would you approach differently in the future?
+
+## 11.6 Personal Development
+
+How has the internship contributed to your development as a software developer?
+
+# 12. Discussion
+
+Discuss the results in relation to the original objectives.
+
+Consider:
+- Were the objectives achieved?
+- Which technical investigations were most valuable?
+- Were the implemented solutions effective?
+- What limitations affected the results?
+- What could have been done differently?
+- What do the results indicate about the current state of the project?
+
+# 13. Conclusion and Future Work
+
+## 13.1 Conclusion
+
+Summarise the four weeks of work.
+
+Highlight the most important technical findings, improvements and learning outcomes.
+
+## 13.2 Future Work
+
+Identify possible next steps.
+
+Examples:
+- Further investigation of unresolved errors.
+- Additional regression tests.
+- Improved XML conformance.
+- Further API compatibility work.
+- Build system improvements.
+- Additional documentation.
+
+# 14. References
+
+List all external sources used in the report.
+
+Use a consistent referencing style (Harvard or IEEE, depending on university requirements).
+
+# 15. Appendices
+
+Include supplementary technical evidence.
+
+Possible appendices:
+
+- Appendix A – Project architecture diagram.
+- Appendix B – Build configurations and targets.
+- Appendix C – Testing scripts and commands.
+- Appendix D – Detailed test results.
+- Appendix E – Selected troubleshooting logs.
+- Appendix F – GitHub pull request overview.
+- Appendix G – Additional technical documentation.
+
+---
+
+# End of Report Template

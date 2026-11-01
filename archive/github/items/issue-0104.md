@@ -1,6 +1,6 @@
 # Issue #104: Task: full check of student-Mass @ 41731c8 and PLAN.md update (2026-10-26)
 
-Archived from <https://github.com/andersoxie/xpact/issues/104> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/104> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,16 +13,18 @@ Archived from <https://github.com/andersoxie/xpact/issues/104> on 2026-10-28 21:
 
 ## Description
 
-## Task
-Full check of the student working folder and of `student-Mass` @ `41731c8` after the sync with `main` (#102, #103), on 2026-10-26: folder vs git, every build and test with assertions on, every open issue against the result. Record it as a report with logs, and bring `student/PLAN.md` up to date (last updated 2026-10-22; most known-problem rows are out of date).
-
-## Done when
-- [ ] `reports/issue-NNNN/`: report with expected results written before the runs, the actual results, and the complete logs
-- [ ] `student/PLAN.md`: header, "At a glance", known problems (moved to "Solved" where verified), "Next"
-- [ ] `reports/README.md` row
-- [ ] Issues whose fix is verified by this check get the evidence as a comment
-
-Not in scope (listed in the report, no issues filed yet): Python 3.10 vs `hashlib.file_digest`, Jenkins "Eiffel Tests" stage without output, SonarQube 401, old runner copy in `tests/python/`.
+## Task
+Full check of the student working folder and of `student-Mass` @ `41731c8` after the sync with `main` (#102, #103), on 2026-10-26: folder vs git, every build and test with assertions on, every open issue against the result. Record it as a report with logs, and bring `student/PLAN.md` up to date (last updated 2026-10-22; most known-problem rows are out of date).
+
+## Done when
+- [x] `reports/issue-NNNN/`: report with expected results written before the runs, the actual results, and the complete logs
+- [x] `student/PLAN.md`: header, "At a glance", known problems (moved to "Solved" where verified), "Next"
+- [x] `reports/README.md` row
+- [x] Issues whose fix is verified by this check get the evidence as a comment
+
+Not in scope (listed in the report, no issues filed yet): Python 3.10 vs `hashlib.file_digest`, Jenkins "Eiffel Tests" stage without output, SonarQube 401, old runner copy in `tests/python/`.
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

@@ -1,6 +1,6 @@
 # Issue #110: Task: sync student-Mass with main after #101
 
-Archived from <https://github.com/andersoxie/xpact/issues/110> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/110> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,17 +13,19 @@ Archived from <https://github.com/andersoxie/xpact/issues/110> on 2026-10-28 21:
 
 ## Description
 
-## Task
-Bring the supervisor's PR #101 (parser performance, 25-26 October) from `main` into `student-Mass`, so `student-Mass` is 0 commits behind `main`. `main` is only read, never changed.
-
-`main` @ `de01371` is 11 commits ahead of `student-Mass` @ `731f8e2`: ASCII validation in input normalization, attribute name sets without strings, no prefix rescans, CDATA markers, batched text positions, DOCTYPE no-op parsing, plus profiling evidence (`docs/*performance*.md`, `benchmarks/results/`). Parser code: `src/xp_parser.e`, new `src/xp_attribute_name_range_set.e`; tests: +533 lines in `tests/xp_test_root.e`.
-
-## Done when
-- [ ] In-memory trial merge (`git merge-tree`) has no conflicts
-- [ ] Pull request `main` → `student-Mass`, merged with a merge commit (not squashed)
-- [ ] `student-Mass` is 0 behind `main`
-- [ ] Tests on the merged code, expected results written first: Eiffel matrix (4 lanes), both DLLs + C# DLL tests, W3C both builds — all with `ISE_C_COMPILER=msc_vc140`
-- [ ] Local copy refreshed with `sync-latest.ps1`
+## Task
+Bring the supervisor's PR #101 (parser performance, 25-26 October) from `main` into `student-Mass`, so `student-Mass` is 0 commits behind `main`. `main` is only read, never changed.
+
+`main` @ `de01371` is 11 commits ahead of `student-Mass` @ `731f8e2`: ASCII validation in input normalization, attribute name sets without strings, no prefix rescans, CDATA markers, batched text positions, DOCTYPE no-op parsing, plus profiling evidence (`docs/*performance*.md`, `benchmarks/results/`). Parser code: `src/xp_parser.e`, new `src/xp_attribute_name_range_set.e`; tests: +533 lines in `tests/xp_test_root.e`.
+
+## Done when
+- [x] In-memory trial merge (`git merge-tree`) has no conflicts
+- [x] Pull request `main` → `student-Mass`, merged with a merge commit (not squashed)
+- [x] `student-Mass` is 0 behind `main`
+- [x] Tests on the merged code, expected results written first: Eiffel matrix (4 lanes), both DLLs + C# DLL tests, W3C both builds — all with `ISE_C_COMPILER=msc_vc140`
+- [x] Local copy refreshed with `sync-latest.ps1`
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

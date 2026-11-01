@@ -1,6 +1,6 @@
 # Issue #117: Task: xmlconf verdict rules - re-score the 2026-10-14 baseline with the runner's rules (draft 12)
 
-Archived from <https://github.com/andersoxie/xpact/issues/117> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/117> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
@@ -13,18 +13,20 @@ Archived from <https://github.com/andersoxie/xpact/issues/117> on 2026-10-28 21:
 
 ## Description
 
-## Task (draft 12, "Fix xmlconf verdict rules")
-The draft asks to fix the verdict rules of `scripts/run_xmlconf_conformance.ps1`. That script was a weeks 1-2 local script and **never entered git** (`git log --all` has no trace; it survives only in `student/history/patches/01-…` and `02-…`). The correct non-validating rules already live in the supervisor's runner `scripts/run_w3c_conformance.py` (#29), which Jenkins uses. Three of the draft's four boxes were ticked through that runner.
-
-Remaining box: *before/after summary compared with the Python runner in `student/results/xmlconf-verdicts/`*.
-
-## Plan
-Re-score the **same observations** of the 2026-10-14 baseline (`student/baseline/logs/xmlconf-results.tsv`, 2,168 cases, 854 "mismatches") with the runner's rules (`expectation()` / `load_catalog()` from `scripts/run_w3c_conformance.py`), and compare: old rules vs correct rules vs today's runner (2026-10-26, both builds). Show how many of the 854 were wrong rules and how many were real parser bugs, with crashes counted separately. No change to any runner.
-
-## Done when
-- [ ] `student/results/xmlconf-verdicts/`: script, per-case TSV, summary with the three columns, reconciled totals
-- [ ] Draft 12's last box ticked; the old PowerShell runner recorded as superseded (not revived)
-- [ ] Report with verification
+## Task (draft 12, "Fix xmlconf verdict rules")
+The draft asks to fix the verdict rules of `scripts/run_xmlconf_conformance.ps1`. That script was a weeks 1-2 local script and **never entered git** (`git log --all` has no trace; it survives only in `student/history/patches/01-…` and `02-…`). The correct non-validating rules already live in the supervisor's runner `scripts/run_w3c_conformance.py` (#29), which Jenkins uses. Three of the draft's four boxes were ticked through that runner.
+
+Remaining box: *before/after summary compared with the Python runner in `student/results/xmlconf-verdicts/`*.
+
+## Plan
+Re-score the **same observations** of the 2026-10-14 baseline (`student/baseline/logs/xmlconf-results.tsv`, 2,168 cases, 854 "mismatches") with the runner's rules (`expectation()` / `load_catalog()` from `scripts/run_w3c_conformance.py`), and compare: old rules vs correct rules vs today's runner (2026-10-26, both builds). Show how many of the 854 were wrong rules and how many were real parser bugs, with crashes counted separately. No change to any runner.
+
+## Done when
+- [x] `student/results/xmlconf-verdicts/`: script, per-case TSV, summary with the three columns, reconciled totals
+- [x] Draft 12's last box ticked; the old PowerShell runner recorded as superseded (not revived)
+- [x] Report with verification
+
+> ✅ Boxes ticked on 2026-10-30, after checking each item against the closing comment and `main`.
 
 ## Discussion
 

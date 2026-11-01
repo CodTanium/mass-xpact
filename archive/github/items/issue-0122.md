@@ -1,13 +1,13 @@
 # Issue #122: Finding: malformed UTF-8 error is reported at 1:0, not at the bad byte (Expat 2.8.1 comparison)
 
-Archived from <https://github.com/andersoxie/xpact/issues/122> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/122> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-26 19:30 |
-| Closed |  |
+| Closed | 2026-10-31 16:17 |
 | Labels | `type:finding`, `group:C-correctness`, `investigation` |
 | Milestone | Week 5 - Regressions |
 
@@ -49,3 +49,13 @@ Read `src/xp_parser.e`: `normalized_input` checks every character of the whole i
 
 ## Fix
 None. Parser repairs (C08) stay with the experienced developers.
+
+## Discussion
+
+### CodTanium, 2026-10-31 16:09: comment
+
+Effect of the #172 fix (#192, `b069ffb`), measured with the same C# DLL tests this issue used (4,308 cases, both builds): the **3,096** malformed-UTF-8 cases that were at 1:0 are now **all** at Expat 2.8.1's column and byte index (0 left, 0 worse). Evidence: `reports/issue-0172/logs/csharp-vs-expat-*.txt`. Not closed yet: the C# set is the only check of this issue so far.
+
+### CodTanium, 2026-10-31 16:17: comment
+
+Fixed by the #172 change (PR #192, `b069ffb` on `student-Mass`). Verified with this issue's own test, the C# DLL tests (4,308 cases, both builds): the 3,096 malformed-UTF-8 cases at 1:0 are **all** at Expat 2.8.1's column and byte index now, 0 worse in any field (`reports/issue-0172/logs/csharp-vs-expat-*.txt`). The examples in this issue's table, through the assertions DLL vs `libexpat.dll`: `<r>\xC3(</r>` 4 at 1:3 (byte 3) = Expat; `<r a='\xFF'/>` 4 at 1:6 (byte 6) = Expat; `<r>\xFF</r>` 4 at 1:3 = Expat. Cause confirmed in #172: the up-front whole-input check.

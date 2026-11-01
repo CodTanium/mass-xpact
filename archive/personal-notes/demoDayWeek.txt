@@ -1,0 +1,242 @@
+XPACT - DEMO DAY: THIS WEEK (26-30 Oct 2026)
+=============================================
+Local only, nothing committed.
+Code tested: student-Mass @ e5d59e2 (= main @ 2488f44, merged by the supervisor as PR #139)
+plus #165 (PR #166, waiting for merge).
+Reference parser: Expat (pyexpat 2.7.3, Expat 2.8.1 for its C tests).
+
+Contents
+  1. Numbers summary
+  2. What to say (30 seconds)
+  3. This week vs last week
+  4. This week's tests in plain words
+  5. What "36 million parse calls" means
+  6. Online tests not done yet (estimates)
+  7. Is xpact incremental now?
+  8. If someone asks "what's next?"
+
+
+1. NUMBERS SUMMARY
+------------------
+                                              xpact                Expat (reference)
+  W3C conformance (accept/reject verdict)     2,585 / 2,585  [OK]  2,585 / 2,585
+  W3C output test (exact parsed content)      399 / 432 (was 359)  403 / 432
+  W3C fed in pieces (whole/split/byte)        2,438 / 2,585 (was 1,995)  2,576 / 2,585
+  External entities through the DLL           247 / 247      [OK]
+  Same results as Expat (C# DLL tests)        4,308 / 4,308 inputs [OK]
+  Regression lane                             910 / 910      [OK]
+
+  Parse calls (xpact + Expat)                 ~36 million (xpact 18.4M, Expat 17.7M)
+  Different documents tested                  ~2.3 million
+  Crashes                                     0
+  Parser bugs fixed                           15 (14 merged, #165 in review)
+  Merged into main by the supervisor          PR #139
+
+  Note: the W3C suite has 2,585 cases (not 2,565).
+  Note: an earlier draft said 12 bugs; the correct count is 15.
+
+
+2. WHAT TO SAY (about 30 seconds)
+---------------------------------
+"Last week I made the testing trustworthy: I fixed 11 build and test-tool
+problems, so failures were reported honestly.
+
+This week I used that. I ran all 2,585 W3C tests for the first time (last week
+858 were skipped), and I added four new ways to compare xpact with Expat: exact
+output, external entities, data arriving in pieces, and 4,308 direct
+comparisons.
+
+That took about 36 million parse calls with zero crashes. It found 15 parser
+bugs, and 14 are already fixed and merged into main.
+
+xpact now gets every W3C verdict right, and its output matches in 399 of 432
+cases, close to Expat's 403."
+
+Optional extra sentence:
+"Besides these, I ran 9 more test types from the wider XML world: fuzzing,
+Expat's and Python's own test suites, libxml2's test files, security attacks
+and memory checks. That's about 2 million more inputs, with no crashes and no
+memory leaks. They found about 20 more differences from Expat, and those are my
+plan for the coming weeks."
+
+
+3. THIS WEEK VS LAST WEEK
+-------------------------
+Last week = 19-25 Oct, this week = 26-30 Oct.
+Counts from GitHub (own issues and PRs) and the reports.
+
+In short:
+- Last week was about making the tools reliable: the build didn't work on every
+  machine, the test runner stopped at the first failure, and the assertions lane
+  didn't check assertions at all. Once fixed, the tests could be trusted, and
+  they showed 4 parser bugs.
+- This week was about using those tools: every W3C test run for the first time,
+  xpact compared directly with Expat in four new ways, 15 parser bugs found
+  (14 fixed and merged, 1 in review).
+
+                                    LAST WEEK                     THIS WEEK
+  Main focus                        builds, test runner, CI       conformance + comparison with Expat
+  W3C tests run                     1,727 of 2,585 (858 skipped)  2,585 of 2,585 (0 skipped)
+  W3C failures                      0 among the 1,727 run         0 failed, 0 errors, both builds
+                                    (Jenkins FAILURE on main
+                                    earlier in the week, #79)
+  External entities via the DLL     not tested                    247 / 247 (main itself crashed on 5)
+  W3C output test                   did not exist                 399 / 432 (Expat 403)
+  W3C fed in pieces                 did not exist                 2,438 / 2,585 stable (Expat 2,576)
+  Same results as Expat             not compared                  4,308 / 4,308 inputs
+  Regression lane                   did not exist                 910 / 910
+  Reviewed W3C corpus               -                             93 cases (G01)
+  Parse calls                       not counted                   ~36 million, 0 crashes
+  Different documents tested        ~1,700                        ~2.3 million
+  Parser bugs fixed                 4 (#28, #38, #39, #40)        15: F1-F7 (#146), speed (#148),
+                                                                  F01-1..F01-6 (#154-#159), F02-1 (#165)
+  Build and test-tool bugs fixed    11                            2 (#142, #143)
+  New findings left for later       -                             5 differences from Expat (#122-#126)
+  Issues opened / closed            43 / 31                       35 / 22
+  Own PRs merged                    37                            27
+  Merged into main by supervisor    -                             PR #139
+
+
+4. THIS WEEK'S TESTS IN PLAIN WORDS
+-----------------------------------
+  #  Test                            Question it answers                                  Cases
+  1  W3C conformance, all cases      Does xpact accept good XML and reject bad XML?       2,585
+  2  External entities               Does it handle XML that pulls in other files?        247
+  3  Output test                     Is the parsed content exactly right?                 432
+  4  In pieces (whole, every split,  Same answer however the data arrives?                2,585 x 3 modes
+     byte by byte)
+  5  Expat comparison                Does it behave like the industry standard?           4,308
+  6  Regression lane                 Did anything that used to work break?                910
+  7  Eiffel, Python, smoke tests     Is the basic machinery still fine?                   4 + 206 + 2 builds
+
+Each fix ran through all of these, in both builds (assertions on and off).
+
+
+5. WHAT "36 MILLION PARSE CALLS" MEANS
+--------------------------------------
+A parse call is one time a program hands bytes to the parser ("here's the next
+piece of XML"). 18.4 million went to xpact, and the same inputs (17.7 million
+calls) went to Expat, so the results can be compared.
+
+About 32 million of them come from one test: every W3C file fed byte by byte
+and split at every position. A 1,000-byte file fed byte by byte alone is 1,000
+calls.
+
+Is it a good metric? Only partly. It measures HOW MUCH testing was done, not
+HOW GOOD it was.
+
+  Why it matters                                 Why it's weak
+  - none of the 18 million xpact calls crashed   - inflated by byte-by-byte mode: many calls
+  - shows broad, automated testing                 are tiny variations of the same file
+  - caught a real bug only seen when input       - a big number doesn't mean the important
+    arrives in pieces (#165)                       cases were tested
+                                                 - says nothing about code coverage
+
+Better numbers to lead with:
+  Different documents tested   ~2.3 million    real variety, not repeats
+  W3C tests passed             2,585 / 2,585   the official standard
+  Bugs found and fixed         15              the testing worked
+  Crashes                      0               stability
+  Matches Expat                4,308 / 4,308   compatibility
+
+How to say it: "In total about 36 million parse calls, mostly from feeding
+every W3C file in every possible split, with 0 crashes."
+
+
+6. ONLINE TESTS NOT DONE YET (ESTIMATES)
+----------------------------------------
+All 11 online tests already ran once as a quick local exploration on 28 Oct
+(older code 293918f, results in AlotOfTests\). Only tests 1 and 2 are properly
+done (issues, fixes, reports, merges). Tests 3-11 have numbers but no issues
+and no fixes yet, and have not been rerun on the current code.
+All effort and time figures below are ESTIMATES, not measurements.
+
+  #   Test                         Size (quick run)          Quick-run result                 Problems  Rerun (est.)
+  3   Fuzzing                      571,839 inputs            0 crashes, 0 hangs               0         2-4 h
+  4   Differential vs Expat        1.46 million docs         0 crashes                        2         3-5 h
+  5   Security and limits          ~20 attack cases          attacks blocked, no XXE          4         30 min
+  6   Expat's own C tests          399 tests                 361/361 outside allocator tests  1         20 min
+  7   libxml2 test files           1,417 files               1,269 identical to Expat         2         15 min
+  8   Encodings                    146 cases                 141 / 146                        2         5 min
+  9   Memory leaks                 8 scenarios x 20,000      no leak                          0         30 min
+  10  Python's own XML tests       976 tests                 938 / 976 pass                   7         1 h
+  11  Large real files             a few files, up to 10MB+  stable, same events as Expat     1 (F05-1) 1 h
+      TOTAL                        ~2 million inputs                                          ~20       ~1 working day
+
+What still needs fixing:
+  Group                          Problems  Examples                                              Fix effort (est.)
+  Wrong content or verdict       5         encoding given to XML_ParserCreate ignored;           small-medium
+                                           unknown-encoding handler not used (windows-1252)
+  Events differ from Expat       10        F02-2 (no events before an error); #FIXED reported   mostly small, F02-2 medium
+                                           wrong; xmlns="" gives "" not NULL
+  Speed and safety               5         F05-1 streaming is quadratic, input capped at 10 MB;  F07-1 medium, F05-1 large
+                                           F07-1 billion laughs via external entities not
+                                           stopped
+  Needs a supervisor decision    3         hard limits, allocator (38 Expat tests),              decision first
+                                           4th vs 5th edition names
+
+At this week's pace: ~13 small ones about 1-2 weeks, ~6 medium ones about 1-2
+weeks; F05-1 is a project of its own (decide with the supervisor).
+
+Suggested order:
+  [ ] 1. Rerun 3-11 on the current code (~1 day); some problems may already be
+         gone, as F01-3 and F02-1 were
+  [ ] 2. F02-2: the biggest remaining gap in test 2 (139 documents)
+  [ ] 3. F07-1 billion laughs: security, higher priority
+  [ ] 4. The small API differences, one PR each
+  [ ] 5. F05-1 and the limits: decide with the supervisor
+
+
+7. IS XPACT INCREMENTAL NOW?
+----------------------------
+Short answer: the supervisor has built an incremental parser, but in a
+different project. The xpact DLL we test (main @ 2488f44) still re-reads the
+whole buffer on every call.
+
+  Where                                 Incremental?   Evidence
+  Xpact-core (andersoxie/Xpact-core)    YES            README: "A pure Eiffel, incremental,
+  separate repo                                        libexpat-compatible XML parsing core ...
+                                                       partial-token carryover across chunk
+                                                       boundaries, buffer compaction and growth."
+                                                       Last commit 15 Oct.
+  xpact main (the DLL we test)          NO             src/xp_native_parser.e:917 still calls
+                                                       handler.prepare_callback_replay
+                                                       (delivered_callback_count): re-parse
+                                                       everything, skip callbacks already delivered.
+  XP_INCREMENTAL_PARSE_SESSION          STARTED, NOT   Added by the supervisor in June. Its doc:
+  (prototype inside xpact)              CONNECTED      "It is not wired into XP_NATIVE_PARSER yet."
+                                                       Handles only tags, attributes and text.
+
+This week's measurements back this up: test 2 took ~25 minutes per build
+because of the quadratic re-reading (F05-1), and bug #165 only existed
+because of the replay design.
+
+How the pieces fit:
+- xpact = the parser behind the Expat-compatible DLL; all W3C, Expat and DLL
+  tests run on it.
+- Xpact-core = the supervisor's Eiffel rewrite of Expat; it streams properly.
+  The dual regression lane (910/910) already runs it next to xpact, but it is
+  not the code behind xpact.dll.
+
+Questions for the supervisor:
+  1. Did you mean Xpact-core? Will it replace the xpact parser behind the DLL,
+     or should the June prototype be finished inside xpact?
+  2. Should F05-1 (quadratic streaming, 10 MB limit) wait for that, rather than
+     being fixed in the current replay design?
+
+Possible proof: time Xpact-core with the same byte-by-byte feeding. If it is
+really incremental, it should take seconds where xpact takes minutes.
+(Not done yet.)
+
+
+8. IF SOMEONE ASKS "WHAT'S NEXT?"
+---------------------------------
+- F02-2: when a whole document has an error, xpact reports no events before
+  the error, while Expat does. This explains most of the 147 remaining
+  differences in the in-pieces test.
+- F05-1: the parser re-reads the whole buffer on every call. That's why the
+  byte-by-byte test takes 25 minutes and why there is a 10 MB limit.
+  Incremental parsing would fix it (see section 7).
+- Jenkins: waiting for the official CI run before the open issues
+  (#142, #146, #148, #151, #153, #154-#159, #165) are closed.
+- PR #166 (#165): waiting for merge OK.

@@ -1,13 +1,13 @@
 # Issue #125: Finding: default handler receives the mismatched end tag before the error
 
-Archived from <https://github.com/andersoxie/xpact/issues/125> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/125> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-26 19:30 |
-| Closed |  |
+| Closed | 2026-10-31 18:47 |
 | Labels | `type:finding`, `group:C-correctness`, `investigation` |
 | Milestone | Week 5 - Regressions |
 
@@ -40,3 +40,9 @@ Fixture: `student/results/C03-chunks/fixtures/c02-mismatched.xml`.
 
 ## Fix
 None.
+
+## Discussion
+
+### CodTanium, 2026-10-31 18:46: comment
+
+Fixed in #199 (`32bc80a` on `student-Mass`; the merge adds exactly the tested change). With only a default handler, a mismatched end tag is now an error before it reaches the handler, as Expat 2.8.1. Verified on both builds (`reports/issue-0125/report.md`): probe 16/16 = Expat (was 8/16); C# DLL tests events 4,114 → 4,135, the 21 cases of this issue, 0 worse; G03, W3C verdicts, output test and W3C in pieces unchanged per case; Expat runtests same 38; Eiffel matrix 4/4; Python 210 OK (also after the merge). Benchmark stage: in the next batch run.

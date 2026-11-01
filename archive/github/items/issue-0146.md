@@ -1,13 +1,13 @@
 # Issue #146: Option A: run all 2,585 W3C cases (no skips) and fix the 7 parser bugs they expose (F1-F7)
 
-Archived from <https://github.com/andersoxie/xpact/issues/146> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/146> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-27 02:01 |
-| Closed |  |
+| Closed | 2026-10-31 09:27 |
 | Labels | `bug`, `type:task`, `group:C-correctness`, `test` |
 | Milestone | - |
 
@@ -87,3 +87,7 @@ On `main`, F1 and F3 are still needed (DLL crashes on `not-wf-ext-sa-001`, `vali
 ### CodTanium, 2026-10-28 01:28: comment
 
 Merged into `student-Mass` as 293918f (PR #152) on 2026-10-28. Local Jenkins Benchmarks stage (10 s per case, both builds): all 2,585 W3C cases, 0 failed, 0 errors, 0 skipped. Details: [reports/latest-2026-10-28](https://github.com/andersoxie/xpact/blob/student-Mass/reports/latest-2026-10-28/README.md). **Kept open until a Jenkins run on `student-Mass` confirms it.**
+
+### CodTanium, 2026-10-31 09:27: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.

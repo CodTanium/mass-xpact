@@ -1,13 +1,13 @@
 # Issue #153: Dual regression lane: small functional cases on xpact and Xpact-core, whole and chunked, with event traces
 
-Archived from <https://github.com/andersoxie/xpact/issues/153> on 2026-10-28 21:36 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/153> on 2026-11-01 03:16 UTC.
 
 | | |
 |---|---|
-| State | open |
+| State | closed (completed) |
 | Author | CodTanium |
 | Created | 2026-10-28 01:26 |
-| Closed |  |
+| Closed | 2026-10-31 09:26 |
 | Labels | `type:task`, `group:B-reliable-results`, `test` |
 | Milestone | - |
 
@@ -38,3 +38,7 @@ First tracked in the student's own repository as CodTanium/mass-xpact#1; include
 ### CodTanium, 2026-10-28 01:28: comment
 
 Merged into `student-Mass` as 293918f (PR #152) on 2026-10-28. Local Jenkins Benchmarks stage (10 s per case, both builds): all 2,585 W3C cases, 0 failed, 0 errors, 0 skipped. Details: [reports/latest-2026-10-28](https://github.com/andersoxie/xpact/blob/student-Mass/reports/latest-2026-10-28/README.md). **Kept open until a Jenkins run on `student-Mass` confirms it.**
+
+### CodTanium, 2026-10-31 09:26: comment
+
+✅ **Jenkins approved.** The fix is in PR #177 (`student-Mass` → `main`, merged as 733688e on 2026-10-31). The supervisor's Jenkins run on it passed all tests with no issues, so the verification this issue was waiting for is done. Closing as completed.
