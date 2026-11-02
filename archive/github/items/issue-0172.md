@@ -1,6 +1,6 @@
 # Issue #172: Finding: whole document: no events before an invalid-character error; in pieces xpact gives them, as Expat (F02-2, G03-3)
 
-Archived from <https://github.com/andersoxie/xpact/issues/172> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/172> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

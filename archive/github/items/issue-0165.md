@@ -1,6 +1,6 @@
 # Issue #165: Finding: DTD callbacks delivered twice when the input arrives in several pieces (F02-1)
 
-Archived from <https://github.com/andersoxie/xpact/issues/165> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/165> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # Issue #132: Remove the unused old copy tests/python/run_w3c_conformance.py
 
-Archived from <https://github.com/andersoxie/xpact/issues/132> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/132> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

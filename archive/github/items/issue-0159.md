@@ -1,6 +1,6 @@
 # Issue #159: Finding: External parameter entity inside an entity value is parsed as declarations instead of included as text (F01-6)
 
-Archived from <https://github.com/andersoxie/xpact/issues/159> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/159> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

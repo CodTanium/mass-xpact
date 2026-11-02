@@ -1,6 +1,6 @@
 # Issue #38: Finding: with a start handler, the rest of the document is not parsed: <root> is accepted and end events are lost (C01)
 
-Archived from <https://github.com/andersoxie/xpact/issues/38> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/38> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # Issue #169: G03 - Compare xpact and Expat 2.8.1 across chunks (G01 subset, XML_Parse and XML_ParseBuffer)
 
-Archived from <https://github.com/andersoxie/xpact/issues/169> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/169> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

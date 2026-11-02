@@ -1,6 +1,6 @@
 # Issue #154: Finding: attribute defaults from an external DTD or external parameter entity are not applied (F01-1)
 
-Archived from <https://github.com/andersoxie/xpact/issues/154> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/154> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

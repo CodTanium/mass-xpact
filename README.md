@@ -24,6 +24,8 @@ failures, and verify fixes with assertions enabled.
 | **DLL testing** | A C# test program for the xpact DLL: 3,360 cases across whole-input and chunked parsing, finding three parser bugs (#37 → #38, #39, #40) |
 | **Comparison with Expat 2.8.1** | The same inputs through xpact and Expat: **the same verdict in all 4,308 C-API cases and all 1,302 chunked configurations** (#121, G03 #169); W3C output 359 → 399 / 432 right (#154-#159); results the same however the input is split in 2,561 of 2,585 W3C documents (#165, #172); a check of which library each test really loads (A04, #168, #179) |
 | **Fixes found by the comparisons** | Events before an error in a whole document (#172, also #122), `<root/>junk` as error 9 (#124), the default handler and a mismatched end tag (#125), DTD declarations before a stray `]` (#173), `#FIXED` defaults (#174), empty system literals (#175); each verified on both builds against Expat |
+| **11 extra test areas** | W3C output and W3C in pieces (≈ 8 million `XML_Parse` calls), fuzzing (571,839 inputs), differential testing against Expat (1,457,486 documents, 99.94 % same verdict), security attacks, Expat's own C tests (361 / 361), libxml2 (1,417 files), encodings, memory, CPython's XML tests, large files: **0 crashes, 0 hangs, 0 leaks**, 27 problems written up ([results and sources](student/results/AlotOfTests-2026-10-28/README.md), #213) |
+| **Website** | A site to test XML against the parser: React + TypeScript front end, ASP.NET Core API that parses each upload in an isolated worker with memory and time limits, xUnit tests (20 / 20), front page with the project's numbers ([`website/`](website/README.md), #210, #215, #218, #220); hardened for hosting behind a proxy (#224) and a stale-DLL build problem fixed (#216) |
 | **Final report** | The internship report: [`student/report/ActualReport.md`](student/report/ActualReport.md) (short version: [`ActualReportShorter.md`](student/report/ActualReportShorter.md)) |
 | **Versioning workflow** | Every fix: issue → branch → expected result written first → report with before/after logs → pull request → squash merge, revertable in one commit ([`student/VERSIONING.md`](student/VERSIONING.md), [`student/tools/fix.ps1`](student/tools/fix.ps1)) |
 
@@ -40,7 +42,8 @@ failures, and verify fixes with assertions enabled.
 
 Branches: `portfolio` (this page, default) = `student-Mass` + this README and the archive.
 `student-Mass` and `main` are unchanged copies of the original repository's branches
-(last refreshed 2026-11-01: `student-Mass` @ `22876e9` and `main` @ `733688e`, the same as the original; `main` is contained in `student-Mass`).
+(last refreshed 2026-11-02: `student-Mass` @ `6562876` and `main` @ `733688e`, the same as the original; `main` is contained in `student-Mass`).
+`test/227-memory-cap` is work in progress (not merged).
 `latest-integrated` is the branch the 2026-10-28 W3C report was built on.
 
 ---

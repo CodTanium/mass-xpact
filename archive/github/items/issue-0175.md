@@ -1,6 +1,6 @@
 # Issue #175: Finding: an empty system literal (SYSTEM '') is reported as NULL, Expat passes "" (G03-6)
 
-Archived from <https://github.com/andersoxie/xpact/issues/175> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/175> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # Issue #174: Finding: #FIXED attribute default reported with isrequired = 0 (G03-5)
 
-Archived from <https://github.com/andersoxie/xpact/issues/174> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/174> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

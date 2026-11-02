@@ -1,6 +1,6 @@
 # Issue #176: Finding: in pieces, "]]" of a forbidden "]]>" is delivered as text before the error (G03-7)
 
-Archived from <https://github.com/andersoxie/xpact/issues/176> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/176> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

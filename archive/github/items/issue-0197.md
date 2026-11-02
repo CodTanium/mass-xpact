@@ -1,6 +1,6 @@
 # Issue #197: Run the W3C-in-pieces test (test 2) on several cores
 
-Archived from <https://github.com/andersoxie/xpact/issues/197> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/197> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

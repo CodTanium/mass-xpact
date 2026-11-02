@@ -1,6 +1,6 @@
 # Issue #73: Finding: Jenkins DLL build cannot find the Eiffel include folder (C:\El2502E fallback replaced in #2/#10)
 
-Archived from <https://github.com/andersoxie/xpact/issues/73> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/73> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # Issue #157: Finding: Public identifier of a NOTATION declaration is not normalized (F01-4)
 
-Archived from <https://github.com/andersoxie/xpact/issues/157> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/157> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

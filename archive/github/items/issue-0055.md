@@ -1,6 +1,6 @@
 # Issue #55: Finding: run_eiffel_test_matrix.ps1 started outside the repository root runs a stale xpact_tests.exe and reports ok
 
-Archived from <https://github.com/andersoxie/xpact/issues/55> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/55> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

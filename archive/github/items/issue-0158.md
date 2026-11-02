@@ -1,6 +1,6 @@
 # Issue #158: Finding: A second byte order mark at the start of an external entity is dropped (F01-5)
 
-Archived from <https://github.com/andersoxie/xpact/issues/158> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/158> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

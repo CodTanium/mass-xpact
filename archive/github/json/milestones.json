@@ -295,11 +295,11 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "open_issues": 0,
-  "closed_issues": 0,
+  "open_issues": 2,
+  "closed_issues": 1,
   "state": "open",
   "created_at": "2026-10-21T23:18:10Z",
-  "updated_at": "2026-10-21T23:18:10Z",
+  "updated_at": "2026-11-02T10:39:02Z",
   "due_on": "2026-11-27T00:00:00Z",
   "closed_at": null
  },

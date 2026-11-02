@@ -1,6 +1,6 @@
 # Issue #173: Finding: an error in the internal DTD subset is reported at the DOCTYPE line, before the declarations in front of it (G03-4)
 
-Archived from <https://github.com/andersoxie/xpact/issues/173> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/173> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # Issue #125: Finding: default handler receives the mismatched end tag before the error
 
-Archived from <https://github.com/andersoxie/xpact/issues/125> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/125> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # GitHub archive of andersoxie/xpact
 
-Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-11-01 03:16 UTC with [`export_github.py`](export_github.py): 92 issues and 116 pull requests, with all comments, reviews, labels and milestones.
+Every issue and pull request of <https://github.com/andersoxie/xpact>, exported on 2026-11-02 15:47 UTC with [`export_github.py`](export_github.py): 104 issues and 126 pull requests, with all comments, reviews, labels and milestones.
 
 GitHub cannot move issues or pull requests to another repository, so this archive keeps them. Numbers match the original repository, so `#79` in a report is [items/issue-0079.md](items/issue-0079.md). Raw API data: [`json/`](json/).
 
@@ -214,3 +214,25 @@ GitHub cannot move issues or pull requests to another repository, so this archiv
 | [#206](items/pr-0206.md) | PR | Remove PLAN2.md and for superviser.txt from the student folder | merged | - | 2026-11-01 |
 | [#207](items/pr-0207.md) | PR | Add the university, company and internship period to the reports | merged | - | 2026-11-01 |
 | [#208](items/pr-0208.md) | PR | Add the report update before the hand-in to the plan | merged | - | 2026-11-01 |
+| [#209](items/issue-0209.md) | Issue | Finding: the DLL re-parses the whole document on every XML_Parse call, so input in pieces is slow (F05-1) | open | enhancement, question, type:finding, investigation | 2026-11-02 |
+| [#210](items/issue-0210.md) | Issue | Task: XPact website - upload and test XML, docs, conformance and benchmark pages | open | documentation, enhancement, type:task, test | 2026-11-02 |
+| [#211](items/issue-0211.md) | Issue | Finding: nested entity expansion (billion laughs) is rejected after ~7 s as 'syntax error'; Expat stops it in ~0.1 s | open | bug, type:finding, group:C-correctness, investigation | 2026-11-02 |
+| [#212](items/pr-0212.md) | PR | Add the XPact website: upload and test XML, docs, conformance and benchmarks (#210) | merged | documentation, enhancement, type:task, test | 2026-11-02 |
+| [#213](items/issue-0213.md) | Issue | Add the AlotOfTests results (11 tests, 2026-10-28) to the repo with their sources | closed (completed) | documentation, test | 2026-11-02 |
+| [#214](items/pr-0214.md) | PR | Add the AlotOfTests results (11 tests, 2026-10-28) with their sources | merged | - | 2026-11-02 |
+| [#215](items/issue-0215.md) | Issue | Show the testing and project numbers on the website's front page | closed (completed) | documentation, enhancement | 2026-11-02 |
+| [#216](items/issue-0216.md) | Issue | Website test: <root/>junk gives error 4 instead of 9 (junk after document element) | closed (completed) | bug, test, investigation | 2026-11-02 |
+| [#217](items/pr-0217.md) | PR | Show the testing and project numbers on the website's front page | merged | - | 2026-11-02 |
+| [#218](items/issue-0218.md) | Issue | Show the AlotOfTests results against Expat on the website's front page | closed (completed) | documentation, enhancement | 2026-11-02 |
+| [#219](items/pr-0219.md) | PR | Show the AlotOfTests results against Expat on the website's front page | merged | - | 2026-11-02 |
+| [#220](items/issue-0220.md) | Issue | Credit the student's work (testing, fixes, website) on the website | closed (completed) | documentation, enhancement | 2026-11-02 |
+| [#221](items/pr-0221.md) | PR | Credit the student's testing, fixes and website on the site | merged | - | 2026-11-02 |
+| [#222](items/issue-0222.md) | Issue | Website credit: name the DevOps work and set the period to Sep–Nov 2026 | closed (completed) | documentation | 2026-11-02 |
+| [#223](items/pr-0223.md) | PR | Name the DevOps work in the website credit and set Sep–Nov 2026 | merged | - | 2026-11-02 |
+| [#224](items/issue-0224.md) | Issue | Website: rate limit counts the proxy, not the visitor, behind a reverse proxy | closed (completed) | documentation, enhancement | 2026-11-02 |
+| [#225](items/pr-0225.md) | PR | Website: read the visitor's address from X-Forwarded-For behind a proxy | merged | - | 2026-11-02 |
+| [#226](items/pr-0226.md) | PR | Website: copy the XPact DLLs on every build (stale DLL, #216) | merged | - | 2026-11-02 |
+| [#227](items/issue-0227.md) | Issue | Website: test that the worker memory cap stops a document that needs more | open | test | 2026-11-02 |
+| [#228](items/pr-0228.md) | PR | Add the PC2 handover note: where to continue | merged | - | 2026-11-02 |
+| [#229](items/issue-0229.md) | Issue | Website footer: remove DevOps from the credit line | closed (completed) | documentation | 2026-11-02 |
+| [#230](items/pr-0230.md) | PR | Remove DevOps from the website footer credit | merged | - | 2026-11-02 |

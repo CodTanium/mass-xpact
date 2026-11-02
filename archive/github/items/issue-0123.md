@@ -1,6 +1,6 @@
 # Issue #123: Finding: no events before a malformed-UTF-8 error (Expat delivers them)
 
-Archived from <https://github.com/andersoxie/xpact/issues/123> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/123> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # Issue #121: C03/C10: compare chunk and malformed-UTF-8 results with Expat 2.8.1
 
-Archived from <https://github.com/andersoxie/xpact/issues/121> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/121> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|

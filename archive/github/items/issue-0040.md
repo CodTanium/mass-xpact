@@ -1,6 +1,6 @@
 # Issue #40: Finding: a non-final chunk that ends with '<' crashes xpact_assertions.dll (find_markup_declaration_end index_in_bounds)
 
-Archived from <https://github.com/andersoxie/xpact/issues/40> on 2026-11-01 03:16 UTC.
+Archived from <https://github.com/andersoxie/xpact/issues/40> on 2026-11-02 15:47 UTC.
 
 | | |
 |---|---|
