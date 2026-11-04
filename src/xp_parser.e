@@ -2828,7 +2828,8 @@ feature {NONE} -- Character data and references
 	resolved_general_entity_name (a_name: READABLE_STRING_8): STRING_8
 			-- Follow linear aliases without growing the Eiffel call stack.
 		local
-			l_seen: HASH_TABLE [BOOLEAN, STRING_8]
+			l_seen: HASH_TABLE [STRING_8, STRING_8]
+				-- Names already followed. Not a BOOLEAN table: see mass-xpact #20.
 			l_done: BOOLEAN
 		do
 			create Result.make_from_string (a_name)
@@ -2843,7 +2844,7 @@ feature {NONE} -- Character data and references
 				elseif l_seen.has (Result) or else is_entity_active (Result) then
 					set_error ("recursive entity reference")
 				elseif attached entity_value (Result) as l_value and then attached single_entity_reference_name (l_value, '&') as l_next and then not is_predefined_entity (l_next) and then attached entity_value (l_next) then
-					l_seen.force (True, Result)
+					l_seen.force (Result, Result)
 					note_entity_expansion (l_value.count)
 					Result := l_next
 				else
@@ -5497,7 +5498,8 @@ feature {NONE} -- DTD entity declarations
 			-- Expand parameter replacement text without recursion for linear alias chains.
 		local
 			l_name: STRING_8
-			l_seen: HASH_TABLE [BOOLEAN, STRING_8]
+			l_seen: HASH_TABLE [STRING_8, STRING_8]
+				-- Names already followed. Not a BOOLEAN table: see mass-xpact #20.
 			l_done: BOOLEAN
 			i, l_output_start, l_accounting_start, l_adjustment: INTEGER
 		do
@@ -5513,7 +5515,7 @@ feature {NONE} -- DTD entity declarations
 				if is_entity_active (l_name) or else l_seen.has (l_name) then
 					set_error ("recursive entity reference")
 				elseif attached parameter_entity_value (l_name) as l_value then
-					l_seen.force (True, l_name)
+					l_seen.force (l_name, l_name)
 					note_entity_expansion (parameter_entity_accounting_value (l_name))
 					if not has_error then
 						if attached single_entity_reference_name (l_value, '%%') as l_next and then attached parameter_entity_value (l_next) then
@@ -5597,7 +5599,8 @@ feature {NONE} -- DTD entity declarations
 	resolved_parameter_entity_name (a_name: READABLE_STRING_8): STRING_8
 			-- Collapse pure subset aliases, charging each link without a recursive frame.
 		local
-			l_seen: HASH_TABLE [BOOLEAN, STRING_8]
+			l_seen: HASH_TABLE [STRING_8, STRING_8]
+				-- Names already followed. Not a BOOLEAN table: see mass-xpact #20.
 			l_done: BOOLEAN
 		do
 			create Result.make_from_string (a_name)
@@ -5609,7 +5612,7 @@ feature {NONE} -- DTD entity declarations
 				if l_seen.has (Result) or else is_entity_active (Result) then
 					set_error ("recursive entity reference")
 				elseif attached parameter_entity_value (Result) as l_value and then attached single_entity_reference_name (l_value, '%%') as l_next and then attached parameter_entity_value (l_next) then
-					l_seen.force (True, Result)
+					l_seen.force (Result, Result)
 					note_entity_expansion (parameter_entity_accounting_value (Result))
 					Result := l_next
 				else
