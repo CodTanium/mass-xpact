@@ -1,5 +1,5 @@
-/* minidbg.exe <out.txt> <command line...>
-   Runs the command under the Win32 debug API (this process only) and, for every access violation,
+/* minidbg.exe <out.txt> <program> [arguments...]
+   Runs the program under the Win32 debug API (this process only) and, for every access violation,
    writes the exception address and a stack (StackWalk64) as module!+rva lines. */
 #include <windows.h>
 #include <dbghelp.h>
@@ -27,12 +27,47 @@ static void where(FILE *o, DWORD64 a) {
   fprintf(o, "  ?%llx\n", a);
 }
 
+/* Append one argument to cmd, quoted by the rules CommandLineToArgvW and the MSVC runtime use,
+   so an argument can never split into several or end the quoting early. Returns 0 if it does not fit. */
+static int append_arg(char *cmd, size_t cap, size_t *len, const char *arg) {
+  size_t n = *len;
+  #define PUT(ch) do { if (n + 1 >= cap) return 0; cmd[n++] = (ch); } while (0)
+  if (n > 0) PUT(' ');
+  PUT('"');
+  for (const char *p = arg; ; p++) {
+    size_t slashes = 0;
+    while (*p == '\\') { slashes++; p++; }
+    if (*p == '\0') { for (size_t k = 0; k < 2 * slashes; k++) PUT('\\'); break; }   /* before the closing quote */
+    if (*p == '"') { for (size_t k = 0; k < 2 * slashes + 1; k++) PUT('\\'); PUT('"'); }
+    else { for (size_t k = 0; k < slashes; k++) PUT('\\'); PUT(*p); }
+  }
+  PUT('"');
+  #undef PUT
+  cmd[n] = '\0'; *len = n;
+  return 1;
+}
+
 int main(int argc, char **argv) {
-  char cmd[32768] = "";
-  for (int i = 2; i < argc; i++) { strcat(cmd, "\""); strcat(cmd, argv[i]); strcat(cmd, "\" "); }
+  if (argc < 3) { fprintf(stderr, "usage: minidbg.exe <out.txt> <program> [arguments...]\n"); return 2; }
+
+  /* The program is started by its full path (lpApplicationName), never looked up through a shell
+     or re-parsed from the command line. It must be an existing file. */
+  char app[MAX_PATH];
+  DWORD got = SearchPathA(NULL, argv[2], ".exe", MAX_PATH, app, NULL);
+  if (got == 0 || got >= MAX_PATH) { fprintf(stderr, "program not found: %s\n", argv[2]); return 2; }
+  DWORD attr = GetFileAttributesA(app);
+  if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY)) { fprintf(stderr, "not a program file: %s\n", app); return 2; }
+
+  static char cmd[32768]; size_t len = 0;
+  cmd[0] = '\0';
+  if (!append_arg(cmd, sizeof cmd, &len, app)) { fprintf(stderr, "command line too long\n"); return 2; }
+  for (int i = 3; i < argc; i++)
+    if (!append_arg(cmd, sizeof cmd, &len, argv[i])) { fprintf(stderr, "command line too long\n"); return 2; }
+
   FILE *o = fopen(argv[1], "w");
+  if (!o) { fprintf(stderr, "cannot write %s\n", argv[1]); return 2; }
   STARTUPINFOA si = { sizeof si }; PROCESS_INFORMATION pi;
-  if (!CreateProcessA(NULL, cmd, NULL, NULL, FALSE, DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &pi)) { printf("CreateProcess failed %lu\n", GetLastError()); return 2; }
+  if (!CreateProcessA(app, cmd, NULL, NULL, FALSE, DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &pi)) { printf("CreateProcess failed %lu\n", GetLastError()); return 2; }
   proc = pi.hProcess;
   SymInitialize(proc, NULL, FALSE);
   HANDLE threads[4096]; DWORD tids[4096]; int nth = 0;
