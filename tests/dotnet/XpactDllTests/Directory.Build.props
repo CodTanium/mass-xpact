@@ -4,5 +4,7 @@
     <XpactRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\..'))</XpactRoot>
     <BaseOutputPath>$(XpactRoot)\build\dotnet\XpactDllTests\bin\</BaseOutputPath>
     <BaseIntermediateOutputPath>$(XpactRoot)\build\dotnet\XpactDllTests\obj\</BaseIntermediateOutputPath>
+    <!-- packages.lock.json for dependency scanners (Aikido). -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 </Project>

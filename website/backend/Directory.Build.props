@@ -1,0 +1,6 @@
+<Project>
+  <!-- Write packages.lock.json next to each project, so dependency scanners (Aikido) see exact versions. -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+</Project>
