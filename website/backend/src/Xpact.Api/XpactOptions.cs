@@ -24,8 +24,38 @@ public sealed class XpactOptions
     /// <summary>Memory cap per worker process (Windows Job Object).</summary>
     public int WorkerMemoryMb { get; set; } = 512;
 
+    /// <summary>
+    /// Start the worker with no privileges and the Low integrity level, so it cannot write to the
+    /// API account's files, registry or processes. Only turn off on a host where this cannot work.
+    /// </summary>
+    public bool WorkerLowIntegrity { get; set; } = true;
+
     /// <summary>Workers running at once; further requests wait for a free slot.</summary>
     public int MaxConcurrentWorkers { get; set; } = 4;
+
+    /// <summary>Workers one client IP may use at once; more is refused with 429, so one visitor cannot take every worker.</summary>
+    public int MaxWorkersPerClient { get; set; } = 2;
+
+    /// <summary>Longest wait for a free worker; then the request is refused with 503.</summary>
+    public int QueueWaitSeconds { get; set; } = 15;
+
+    /// <summary>Requests that may wait for a worker at once; more are refused with 503 straight away.</summary>
+    public int MaxQueuedRequests { get; set; } = 32;
+
+    /// <summary>
+    /// Memory for request bodies being read and parsed at once, in MB (#357). Each upload reserves about
+    /// four times its size before its body is read; when the budget is full, further uploads get 503.
+    /// </summary>
+    public int MaxBufferedMb { get; set; } = 256;
+
+    /// <summary>
+    /// Longest time for one /api/validate request: upload, queue and parse together (#358). Must stay
+    /// above QueueWaitSeconds + TimeoutSeconds plus the upload time of a 10 MB document on a slow line.
+    /// </summary>
+    public int RequestTimeoutSeconds { get; set; } = 120;
+
+    /// <summary>Open connections the server accepts at once (#358); the reverse proxy may set its own limit.</summary>
+    public int MaxConnections { get; set; } = 500;
 
     /// <summary>Requests per client IP per minute.</summary>
     public int RequestsPerMinute { get; set; } = 30;
@@ -44,6 +74,12 @@ public sealed class XpactOptions
     /// this machine (always trusted). Without this, the rate limit would count every visitor as the proxy.
     /// </summary>
     public string[] KnownProxies { get; set; } = [];
+
+    /// <summary>
+    /// Networks (CIDR, e.g. "10.0.0.0/24") whose proxies are trusted like <see cref="KnownProxies"/>:
+    /// for a proxy whose address changes, such as a load balancer or a Docker network.
+    /// </summary>
+    public string[] KnownNetworks { get; set; } = [];
 
     /// <summary>Resolve a configured path against the API folder.</summary>
     public static string Resolve(string path) =>

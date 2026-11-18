@@ -15,6 +15,8 @@ is not intended to become a second C parser.
 
 **Version 0.9.0** (launch candidate). What each version contains: [CHANGELOG.md](CHANGELOG.md).
 
+**Find anything:** [project knowledge and traceability map](docs/PROJECT-KNOWLEDGE.md) (planning, history, testing, technical docs, decisions) · [overview with all numbers](docs/Comprehensive-Overview-Summary-of-the-Project.md) · [decision log](docs/decision-log.md) · live status: [student/CONTINUE-HERE.md](student/CONTINUE-HERE.md)
+
 This checkpoint is a Windows-only Phase 1 preview, not a final drop-in
 replacement for libexpat.
 
@@ -41,6 +43,10 @@ Implemented and verified now:
   reports for both finalized assertion modes and Jenkins publication.
 - An opt-in large XML benchmark runner for caller-supplied, pre-decompressed
   real corpora.
+- Safe use from several threads, each with its own parsers: calls take turns (EiffelStudio build); the Gobo build of the DLL parses on several cores at once ([#418](https://github.com/andersoxie/xpact/issues/418): 4 threads 0.40 s vs 0.61 s)
+  inside the single-threaded Eiffel runtime, so they do not run in parallel (#274).
+- An internal Eiffel exception (for example out of memory) makes the call fail
+  with an error code instead of ending the process (#273).
 
 The upstream Expat 2.8.1 manifest currently has 399 `START_TEST(...)` entries.
 The expected-failure list expands to 86 rows:
@@ -66,7 +72,9 @@ Before calling xpact a credible drop-in replacement, the project still needs:
 - Linux/WSL packaging for an Eiffel-backed `libxpact.so`;
 - broader consumer ABI coverage across compilers and build systems;
 - a release decision on whether allocator-injection semantics are intentionally
-  unsupported or emulated at the C ABI boundary.
+  unsupported or emulated at the C ABI boundary;
+- parallel parsing on several threads: needs a multi-threaded Eiffel runtime
+  build (today calls are serialized, #274).
 
 ## Reading Order
 
@@ -188,6 +196,28 @@ Run benchmarks including the W3C XML conformance suite:
 The suite runs by default in both Jenkins benchmark pipelines. See
 [W3C conformance benchmarks](docs/w3c-xml-conformance.md) for the supported
 profile, offline setup, and detailed reports.
+
+> **Testing a DLL you already built (#302):** by default `run_benchmarks.ps1`
+> rebuilds `build\native-eiffel\*.dll` and rewrites `docs\benchmarks.md`. To test
+> the exact DLL you built and checked, and keep the docs, add
+> `-UseExistingNativeDll -NoDocsUpdate` (the page then goes to
+> `build\benchmarks\benchmarks.md`). These scripts also rebuild the DLL unless told
+> not to: `run_large_xml_benchmarks.ps1`, `run_chunked_crc_harness.ps1`,
+> `run_incremental_shim_audit.ps1`, `package_windows_release.ps1` (`-SkipBuild`)
+> and `run_libexpat_adapter.ps1` (`-SkipNativeBuild`); so do
+> `website\scripts\build-dll.ps1` and `student\baseline\run_baseline.ps1` (on
+> purpose). `run_large_xml_benchmarks.ps1` also rewrites
+> `docs\large-xml-benchmarks.md` unless `-NoPublishDocs`. Check the DLL's SHA-256
+> before and after a run.
+>
+> **Freeze the tested DLL (#319):** `build_native_eiffel.ps1` prints the DLL it
+> replaces with its SHA-256 before and after. Set `$env:XPACT_FROZEN_DLL = "1"`
+> before a test run and any runner that tries to rebuild stops at once with an
+> error instead of replacing the DLL (child scripts inherit the variable).
+>
+> **Python (#308):** `run_benchmarks.ps1` and `run_large_xml_benchmarks.ps1` use
+> `$env:XPACT_PYTHON` if set, otherwise `python` from PATH. They stop at once if
+> that is the Microsoft Store alias (`...\WindowsApps\python.exe`).
 
 Run the additional Eiffel/GCC comparison inside WSL2 (requires Linux
 EiffelStudio and Gobo Eiffel in that distribution):

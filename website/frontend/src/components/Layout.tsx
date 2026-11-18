@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { AUTHOR, LINKS } from "../data/site";
 
 const NAV = [
@@ -10,7 +10,25 @@ const NAV = [
   { to: "/project", label: "Project" },
 ];
 
+/** One title per page: search results, browser tabs and screen readers can tell the pages apart. */
+function usePageTitle() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    let path = pathname;
+    while (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
+    const page = NAV.find((item) => item.to === path);
+    let title = "Page not found";
+    if (path === "/") title = "";
+    else if (page) title = page.label;
+    document.title = title ? `${title} · XPact XML Parser` : "XPact XML Parser";
+  }, [pathname]);
+}
+
 type Theme = "light" | "dark" | "system";
+
+// Lookup tables instead of nested ternaries (SonarQube S3358, #329).
+const NEXT_THEME: Record<Theme, Theme> = { system: "light", light: "dark", dark: "system" };
+const THEME_LABEL: Record<Theme, string> = { system: "◐ Auto", light: "☀ Light", dark: "☾ Dark" };
 
 function useTheme(): [Theme, () => void] {
   const [theme, setTheme] = useState<Theme>(() => {
@@ -30,13 +48,14 @@ function useTheme(): [Theme, () => void] {
       // Storage may be blocked; the theme still applies for this visit.
     }
   }, [theme]);
-  const next = () => setTheme((t) => (t === "system" ? "light" : t === "light" ? "dark" : "system"));
+  const next = () => setTheme((t) => NEXT_THEME[t]);
   return [theme, next];
 }
 
 export function Layout() {
   const [theme, nextTheme] = useTheme();
-  const themeLabel = theme === "system" ? "◐ Auto" : theme === "light" ? "☀ Light" : "☾ Dark";
+  usePageTitle();
+  const themeLabel = THEME_LABEL[theme];
 
   return (
     <>
@@ -44,7 +63,7 @@ export function Layout() {
         <div className="container">
           <NavLink to="/" className="brand" aria-label="XPact home">
             <img src="/favicon.svg" alt="" />
-            XPact
+            <span>XPact</span>
           </NavLink>
           <nav className="nav" aria-label="Main">
             {NAV.map((item) => (

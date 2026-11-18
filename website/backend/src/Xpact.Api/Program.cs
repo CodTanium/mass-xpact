@@ -1,6 +1,3 @@
-using System.Net;
-using System.Text;
-using System.Text.Json;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
@@ -18,18 +15,48 @@ var xpact = builder.Configuration.GetSection(XpactOptions.Section).Get<XpactOpti
 // where escaping (quotes, line ends) can make a document up to twice as long, so the body may be 2x the document.
 // The document itself is still checked against MaxDocumentBytes below.
 long maxBody = 2L * xpact.MaxDocumentBytes + 64 * 1024;
-builder.Services.Configure<KestrelServerOptions>(o => o.Limits.MaxRequestBodySize = maxBody);
-builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = maxBody);
-
-// Behind IIS or nginx the visitor's address arrives in X-Forwarded-For. Only a proxy on this
-// machine or one listed in KnownProxies is believed, so a visitor cannot pick their own address.
-builder.Services.Configure<ForwardedHeadersOptions>(o =>
+builder.Services.Configure<KestrelServerOptions>(o =>
 {
-    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    foreach (string proxy in xpact.KnownProxies) o.KnownProxies.Add(IPAddress.Parse(proxy));
+    o.Limits.MaxRequestBodySize = maxBody;
+    o.AddServerHeader = false; // no "Server: Kestrel": do not advertise the server software
+    // #358: a client trickling its upload must not hold a connection for hours (Kestrel's default
+    // minimum is 240 B/s: a 20 MB body could take 24 h). Together with RequestTimeoutSeconds below.
+    o.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 4096, gracePeriod: TimeSpan.FromSeconds(10));
+    o.Limits.MaxConcurrentConnections = Math.Max(1, xpact.MaxConnections);
+});
+builder.Services.AddRequestTimeouts();
+
+// Brotli/gzip for the page, its script and CSS, and the JSON results (about 300 KB less per first visit).
+// No response carries a secret, so compression over HTTPS does not open a BREACH-style leak.
+builder.Services.AddResponseCompression(o =>
+{
+    o.EnableForHttps = true;
+    o.MimeTypes = Microsoft.AspNetCore.ResponseCompression.ResponseCompressionDefaults.MimeTypes
+        .Concat(["image/svg+xml", "application/problem+json"]);
+});
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(
+    o => o.Level = System.IO.Compression.CompressionLevel.Optimal);
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(
+    o => o.Level = System.IO.Compression.CompressionLevel.Optimal);
+builder.Services.Configure<FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = maxBody;
+    // #359: keep uploaded files in memory. The default (64 KB) spools larger files to a temp file in
+    // %TEMP%, so visitors' documents touched the disk. The memory is bounded by UploadGate (#357).
+    o.MemoryBufferThreshold = (int)Math.Min(maxBody, int.MaxValue);
 });
 
+// Which proxies may set X-Forwarded-For: see SecurityMiddleware.ConfigureForwardedHeaders.
+builder.Services.Configure<ForwardedHeadersOptions>(o => SecurityMiddleware.ConfigureForwardedHeaders(o, xpact));
+
+// HSTS: browsers that saw the site over HTTPS keep using HTTPS for a year. Sent only on HTTPS
+// requests outside Development; behind a proxy, X-Forwarded-Proto tells the API the visitor used HTTPS.
+builder.Services.AddHsts(o => o.MaxAge = TimeSpan.FromDays(365));
+builder.Services.AddSingleton<IWorkerLimiter, JobObjectWorkerLimiter>();
+builder.Services.AddSingleton<IWorkerLauncher>(sp =>
+    new WorkerLauncher(sp.GetRequiredService<IOptions<XpactOptions>>().Value.WorkerLowIntegrity));
 builder.Services.AddSingleton<IWorkerRunner, WorkerRunner>();
+builder.Services.AddSingleton<UploadGate>();
 builder.Services.AddProblemDetails();
 builder.Services.AddCors(o => o.AddPolicy("dev", p => p.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddRateLimiter(o =>
@@ -48,141 +75,21 @@ builder.Services.AddRateLimiter(o =>
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UseUntrustedProxyWarning();
+if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseExceptionHandler();
-app.Use(async (context, next) =>
-{
-    var headers = context.Response.Headers;
-    headers["X-Content-Type-Options"] = "nosniff";
-    headers["Referrer-Policy"] = "no-referrer";
-    headers["X-Frame-Options"] = "DENY";
-    headers["Content-Security-Policy"] =
-        "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'";
-    await next();
-});
+app.UseSecurityHeaders();
 if (app.Environment.IsDevelopment()) app.UseCors("dev");
 app.UseRateLimiter();
+app.UseRequestTimeouts();
+app.UseResponseCompression();
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(SiteFiles.Options);
 
-var api = app.MapGroup("/api");
-
-api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-
-api.MapGet("/info", (IOptions<XpactOptions> options) =>
-{
-    var o = options.Value;
-    return Results.Ok(new
-    {
-        parser = "XPact",
-        builds = o.Builds.Select(b => new
-        {
-            name = b.Key,
-            available = File.Exists(XpactOptions.Resolve(b.Value)),
-        }),
-        limits = new
-        {
-            maxDocumentBytes = o.MaxDocumentBytes,
-            timeoutSeconds = o.TimeoutSeconds,
-            workerMemoryMb = o.WorkerMemoryMb,
-            requestsPerMinute = o.RequestsPerMinute,
-            maxEvents = o.MaxEvents,
-        },
-    });
-});
-
-api.MapPost("/validate", async (HttpRequest http, IWorkerRunner runner, IOptions<XpactOptions> options,
-    CancellationToken cancellationToken) =>
-{
-    var o = options.Value;
-    ValidateInput input;
-    try
-    {
-        input = await ValidateInput.ReadAsync(http, cancellationToken);
-    }
-    catch (Exception e) when (e is Microsoft.AspNetCore.Http.BadHttpRequestException or InvalidDataException or JsonException)
-    {
-        return Problem(StatusCodes.Status400BadRequest, "Unreadable request", e.Message);
-    }
-
-    if (input.Document is null)
-        return Problem(StatusCodes.Status400BadRequest, "No document",
-            "Send the XML as a file (field 'file'), as text (field or property 'xml'), or as the raw request body.");
-    if (input.Document.Length > o.MaxDocumentBytes)
-        return Problem(StatusCodes.Status413PayloadTooLarge, "Document too large",
-            $"The limit is {o.MaxDocumentBytes:N0} bytes; this document has {input.Document.Length:N0}.");
-
-    string build = string.IsNullOrWhiteSpace(input.Build) ? runner.Builds.First() : input.Build.Trim().ToLowerInvariant();
-    if (!runner.Builds.Contains(build))
-        return Problem(StatusCodes.Status400BadRequest, "Unknown build",
-            $"Use one of: {string.Join(", ", runner.Builds)}.");
-
-    int chunk = input.ChunkSize ?? 0;
-    if (chunk < 0 || (chunk > 0 && chunk < o.MinChunkSize))
-        return Problem(StatusCodes.Status400BadRequest, "Bad chunk size",
-            $"Use 0 for the whole document, or a size of at least {o.MinChunkSize} byte(s).");
-
-    var result = await runner.RunAsync(new ParseRequest(input.Document, build, chunk), cancellationToken);
-    return Results.Ok(result);
-}).RequireRateLimiting("validate").DisableAntiforgery();
-
-// Conformance and benchmark numbers, exported from the repository's reports by scripts/export-data.py.
-string[] dataFiles = { "conformance", "benchmarks", "comparison", "testing" };
-api.MapGet("/results/{name}", (string name, IOptions<XpactOptions> options) =>
-{
-    if (!dataFiles.Contains(name)) return Results.NotFound();
-    string path = Path.Combine(XpactOptions.Resolve(options.Value.DataDirectory), name + ".json");
-    return File.Exists(path)
-        ? Results.File(path, "application/json")
-        : Problem(StatusCodes.Status404NotFound, "No data", $"{name}.json has not been exported yet.");
-});
+ApiEndpoints.Map(app, xpact, maxBody);
 
 // The React site, when it has been built into wwwroot (scripts/publish.ps1).
 if (File.Exists(Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html")))
-    app.MapFallbackToFile("index.html");
+    app.MapFallbackToFile("index.html", SiteFiles.Options);
 
-app.Run();
-
-static IResult Problem(int status, string title, string detail) =>
-    Results.Problem(statusCode: status, title: title, detail: detail);
-
-/// <summary>The three accepted request shapes: multipart form, JSON, or a raw XML body.</summary>
-internal sealed record ValidateInput(byte[]? Document, string? Build, int? ChunkSize)
-{
-    public static async Task<ValidateInput> ReadAsync(HttpRequest http, CancellationToken cancellationToken)
-    {
-        string? build = http.Query["build"];
-        int? chunk = int.TryParse(http.Query["chunkSize"], out int q) ? q : null;
-
-        if (http.HasFormContentType)
-        {
-            var form = await http.ReadFormAsync(cancellationToken);
-            build = form["build"].FirstOrDefault() ?? build;
-            if (int.TryParse(form["chunkSize"].FirstOrDefault(), out int f)) chunk = f;
-            if (form.Files.GetFile("file") is { } file)
-            {
-                using var buffer = new MemoryStream();
-                await file.CopyToAsync(buffer, cancellationToken);
-                return new ValidateInput(buffer.ToArray(), build, chunk);
-            }
-            string? text = form["xml"].FirstOrDefault();
-            return new ValidateInput(text is null ? null : Encoding.UTF8.GetBytes(text), build, chunk);
-        }
-
-        if (http.HasJsonContentType())
-        {
-            var body = await http.ReadFromJsonAsync<JsonBody>(cancellationToken);
-            return new ValidateInput(body?.Xml is null ? null : Encoding.UTF8.GetBytes(body.Xml),
-                body?.Build ?? build, body?.ChunkSize ?? chunk);
-        }
-
-        // Raw body (for example curl --data-binary @file.xml -H "Content-Type: application/xml").
-        using var raw = new MemoryStream();
-        await http.Body.CopyToAsync(raw, cancellationToken);
-        return new ValidateInput(raw.Length == 0 ? null : raw.ToArray(), build, chunk);
-    }
-
-    private sealed record JsonBody(string? Xml, string? Build, int? ChunkSize);
-}
-
-/// <summary>Lets the integration tests start the API in memory.</summary>
-public partial class Program;
+await app.RunAsync();

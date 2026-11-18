@@ -3,6 +3,114 @@
 #include <stdint.h>
 #include <string.h>
 
+/*
+ * One call at a time (#274): the Eiffel runtime is built without thread support
+ * (`concurrency support="none"`), so its garbage collector and globals must never run on two
+ * threads at once. Every trampoline holds this process-wide lock while it is inside Eiffel:
+ * `xp_rt_X` takes the lock and calls `xp_rt_X_body`, the unlocked trampoline. A CRITICAL_SECTION
+ * is re-entrant, so a handler that calls back into xpact on the same thread (for example
+ * XML_GetCurrentLineNumber) still works. Parsers on different threads are therefore safe but do
+ * not parse in parallel. `__finally` releases the lock even if a call is left by an exception.
+ */
+#ifdef _WIN32
+#include <windows.h>
+static INIT_ONCE xp_eiffel_lock_once = INIT_ONCE_STATIC_INIT;
+static CRITICAL_SECTION xp_eiffel_lock;
+
+static BOOL CALLBACK
+xp_init_eiffel_lock(PINIT_ONCE once, PVOID parameter, PVOID *context) {
+	(void)once;
+	(void)parameter;
+	(void)context;
+	InitializeCriticalSectionAndSpinCount(&xp_eiffel_lock, 4000);
+	return TRUE;
+}
+
+#ifdef XP_GOBO_RUNTIME
+/*
+ * Gobo Eiffel build (reports/gobo-dll, #418): Gobo's runtime is multi-threaded (Boehm GC), so parsers on
+ * different threads parse in parallel: no process-wide lock. A thread that Gobo did not create gets a Gobo
+ * context first. The installer's shared tables have their own short lock (xp_registry_lock below).
+ * XPACT_GLOBAL_LOCK=1 in the environment brings back the #274 process-wide lock (for comparisons).
+ */
+extern void xp_gobo_ensure_thread(void);
+static INIT_ONCE xp_global_lock_once = INIT_ONCE_STATIC_INIT;
+static int xp_global_lock_on;
+
+static BOOL CALLBACK
+xp_init_global_lock_mode(PINIT_ONCE once, PVOID parameter, PVOID *context) {
+	char value[8];
+	(void)once;
+	(void)parameter;
+	(void)context;
+	xp_global_lock_on = GetEnvironmentVariableA("XPACT_GLOBAL_LOCK", value, sizeof(value)) > 0 && value[0] == '1';
+	InitializeCriticalSectionAndSpinCount(&xp_eiffel_lock, 4000);
+	return TRUE;
+}
+
+static void
+xp_eiffel_lock_enter(void) {
+	xp_gobo_ensure_thread();
+	InitOnceExecuteOnce(&xp_global_lock_once, xp_init_global_lock_mode, NULL, NULL);
+	if (xp_global_lock_on) {
+		EnterCriticalSection(&xp_eiffel_lock);
+	}
+}
+
+static void
+xp_eiffel_lock_leave(void) {
+	if (xp_global_lock_on) {
+		LeaveCriticalSection(&xp_eiffel_lock);
+	}
+}
+
+static INIT_ONCE xp_registry_once = INIT_ONCE_STATIC_INIT;
+static CRITICAL_SECTION xp_registry_cs;
+
+static BOOL CALLBACK
+xp_init_registry(PINIT_ONCE once, PVOID parameter, PVOID *context) {
+	(void)once;
+	(void)parameter;
+	(void)context;
+	InitializeCriticalSectionAndSpinCount(&xp_registry_cs, 4000);
+	return TRUE;
+}
+
+void
+xp_registry_lock(void) {
+	InitOnceExecuteOnce(&xp_registry_once, xp_init_registry, NULL, NULL);
+	EnterCriticalSection(&xp_registry_cs);
+}
+
+void
+xp_registry_unlock(void) {
+	LeaveCriticalSection(&xp_registry_cs);
+}
+#else
+static void
+xp_eiffel_lock_enter(void) {
+	InitOnceExecuteOnce(&xp_eiffel_lock_once, xp_init_eiffel_lock, NULL, NULL);
+	EnterCriticalSection(&xp_eiffel_lock);
+}
+
+static void
+xp_eiffel_lock_leave(void) {
+	LeaveCriticalSection(&xp_eiffel_lock);
+}
+
+/* EiffelStudio build: the process-wide lock above already serializes everything; the registry lock is a no-op. */
+void
+xp_registry_lock(void) {
+}
+
+void
+xp_registry_unlock(void) {
+}
+#endif
+#else
+#error "xpact: the Eiffel runtime bridge needs a call lock on this platform (#274)"
+#endif
+
 typedef struct XPACT_EiffelRuntimeBridgeState {
 	EIF_OBJECT installer;
 	XPACT_EiffelParserCreateRoutine parser_create;
@@ -85,7 +193,7 @@ xp_release_runtime_bridge(void) {
 }
 
 static void *XMLCALL
-xp_rt_parser_create(
+xp_rt_parser_create_body(
 	void *context,
 	const XML_Char *encoding,
 	const XML_Memory_Handling_Suite *memsuite,
@@ -104,8 +212,25 @@ xp_rt_parser_create(
 	);
 }
 
+static void *XMLCALL
+xp_rt_parser_create(
+	void *context,
+	const XML_Char *encoding,
+	const XML_Memory_Handling_Suite *memsuite,
+	const XML_Char *namespaceSeparator
+) {
+	void * result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_parser_create_body(context, encoding, memsuite, namespaceSeparator);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static XML_Bool XMLCALL
-xp_rt_parser_reset(void *context, void *parser, const XML_Char *encoding) {
+xp_rt_parser_reset_body(void *context, void *parser, const XML_Char *encoding) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->parser_reset == NULL) {
@@ -114,8 +239,20 @@ xp_rt_parser_reset(void *context, void *parser, const XML_Char *encoding) {
 	return state->parser_reset(installer, (EIF_POINTER)parser, (EIF_POINTER)encoding) ? XML_TRUE : XML_FALSE;
 }
 
+static XML_Bool XMLCALL
+xp_rt_parser_reset(void *context, void *parser, const XML_Char *encoding) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_parser_reset_body(context, parser, encoding);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static void XMLCALL
-xp_rt_parser_free(void *context, void *parser) {
+xp_rt_parser_free_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->parser_free != NULL) {
@@ -124,7 +261,17 @@ xp_rt_parser_free(void *context, void *parser) {
 }
 
 static void XMLCALL
-xp_rt_set_native_parser_handle(void *context, void *parser, void *nativeParser) {
+xp_rt_parser_free(void *context, void *parser) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_parser_free_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_native_parser_handle_body(void *context, void *parser, void *nativeParser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_native_parser_handle != NULL) {
@@ -132,8 +279,18 @@ xp_rt_set_native_parser_handle(void *context, void *parser, void *nativeParser) 
 	}
 }
 
+static void XMLCALL
+xp_rt_set_native_parser_handle(void *context, void *parser, void *nativeParser) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_native_parser_handle_body(context, parser, nativeParser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
 static enum XML_Status XMLCALL
-xp_rt_set_encoding(void *context, void *parser, const XML_Char *encoding) {
+xp_rt_set_encoding_body(void *context, void *parser, const XML_Char *encoding) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->set_encoding == NULL) {
@@ -142,8 +299,20 @@ xp_rt_set_encoding(void *context, void *parser, const XML_Char *encoding) {
 	return (enum XML_Status)state->set_encoding(installer, (EIF_POINTER)parser, (EIF_POINTER)encoding);
 }
 
+static enum XML_Status XMLCALL
+xp_rt_set_encoding(void *context, void *parser, const XML_Char *encoding) {
+	enum XML_Status result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_encoding_body(context, parser, encoding);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static XML_Bool XMLCALL
-xp_rt_set_external_entity_context(void *context, void *parser, const XML_Char *entityContext) {
+xp_rt_set_external_entity_context_body(void *context, void *parser, const XML_Char *entityContext) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->set_external_entity_context == NULL) {
@@ -155,7 +324,19 @@ xp_rt_set_external_entity_context(void *context, void *parser, const XML_Char *e
 }
 
 static XML_Bool XMLCALL
-xp_rt_set_external_entity_parameter_context(void *context, void *parser, XML_Bool isParameter) {
+xp_rt_set_external_entity_context(void *context, void *parser, const XML_Char *entityContext) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_external_entity_context_body(context, parser, entityContext);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_set_external_entity_parameter_context_body(void *context, void *parser, XML_Bool isParameter) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->set_external_entity_parameter_context == NULL) {
@@ -169,7 +350,19 @@ xp_rt_set_external_entity_parameter_context(void *context, void *parser, XML_Boo
 }
 
 static XML_Bool XMLCALL
-xp_rt_set_external_entity_parameter_literal_context(void *context, void *parser, XML_Bool isLiteral) {
+xp_rt_set_external_entity_parameter_context(void *context, void *parser, XML_Bool isParameter) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_external_entity_parameter_context_body(context, parser, isParameter);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_set_external_entity_parameter_literal_context_body(void *context, void *parser, XML_Bool isLiteral) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->set_external_entity_parameter_literal_context == NULL) {
@@ -183,7 +376,19 @@ xp_rt_set_external_entity_parameter_literal_context(void *context, void *parser,
 }
 
 static XML_Bool XMLCALL
-xp_rt_inherit_external_entity_context(void *context, void *parser, void *parentParser) {
+xp_rt_set_external_entity_parameter_literal_context(void *context, void *parser, XML_Bool isLiteral) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_external_entity_parameter_literal_context_body(context, parser, isLiteral);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_inherit_external_entity_context_body(void *context, void *parser, void *parentParser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->inherit_external_entity_context == NULL) {
@@ -197,7 +402,19 @@ xp_rt_inherit_external_entity_context(void *context, void *parser, void *parentP
 }
 
 static XML_Bool XMLCALL
-xp_rt_merge_external_entity_context(void *context, void *parser, void *childParser) {
+xp_rt_inherit_external_entity_context(void *context, void *parser, void *parentParser) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_inherit_external_entity_context_body(context, parser, parentParser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_merge_external_entity_context_body(void *context, void *parser, void *childParser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->merge_external_entity_context == NULL) {
@@ -211,7 +428,19 @@ xp_rt_merge_external_entity_context(void *context, void *parser, void *childPars
 }
 
 static XML_Bool XMLCALL
-xp_rt_merge_accounting(void *context, void *parser, void *childParser) {
+xp_rt_merge_external_entity_context(void *context, void *parser, void *childParser) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_merge_external_entity_context_body(context, parser, childParser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_merge_accounting_body(void *context, void *parser, void *childParser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->merge_accounting == NULL) {
@@ -225,7 +454,19 @@ xp_rt_merge_accounting(void *context, void *parser, void *childParser) {
 }
 
 static XML_Bool XMLCALL
-xp_rt_set_param_entity_parsing(void *context, void *parser, enum XML_ParamEntityParsing parsing) {
+xp_rt_merge_accounting(void *context, void *parser, void *childParser) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_merge_accounting_body(context, parser, childParser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_set_param_entity_parsing_body(void *context, void *parser, enum XML_ParamEntityParsing parsing) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->set_param_entity_parsing == NULL) {
@@ -237,7 +478,19 @@ xp_rt_set_param_entity_parsing(void *context, void *parser, enum XML_ParamEntity
 }
 
 static XML_Bool XMLCALL
-xp_rt_set_foreign_dtd(void *context, void *parser, XML_Bool useDTD) {
+xp_rt_set_param_entity_parsing(void *context, void *parser, enum XML_ParamEntityParsing parsing) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_param_entity_parsing_body(context, parser, parsing);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_set_foreign_dtd_body(void *context, void *parser, XML_Bool useDTD) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->set_foreign_dtd == NULL) {
@@ -248,8 +501,20 @@ xp_rt_set_foreign_dtd(void *context, void *parser, XML_Bool useDTD) {
 		: XML_FALSE;
 }
 
+static XML_Bool XMLCALL
+xp_rt_set_foreign_dtd(void *context, void *parser, XML_Bool useDTD) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_foreign_dtd_body(context, parser, useDTD);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static void XMLCALL
-xp_rt_set_user_data(void *context, void *parser, void *userData) {
+xp_rt_set_user_data_body(void *context, void *parser, void *userData) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_user_data != NULL) {
@@ -258,7 +523,17 @@ xp_rt_set_user_data(void *context, void *parser, void *userData) {
 }
 
 static void XMLCALL
-xp_rt_set_element_handler(
+xp_rt_set_user_data(void *context, void *parser, void *userData) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_user_data_body(context, parser, userData);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_element_handler_body(
 	void *context,
 	void *parser,
 	XML_StartElementHandler start,
@@ -277,7 +552,22 @@ xp_rt_set_element_handler(
 }
 
 static void XMLCALL
-xp_rt_set_character_data_handler(void *context, void *parser, XML_CharacterDataHandler handler) {
+xp_rt_set_element_handler(
+	void *context,
+	void *parser,
+	XML_StartElementHandler start,
+	XML_EndElementHandler end
+) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_element_handler_body(context, parser, start, end);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_character_data_handler_body(void *context, void *parser, XML_CharacterDataHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_character_data_handler != NULL) {
@@ -290,7 +580,17 @@ xp_rt_set_character_data_handler(void *context, void *parser, XML_CharacterDataH
 }
 
 static void XMLCALL
-xp_rt_set_processing_instruction_handler(
+xp_rt_set_character_data_handler(void *context, void *parser, XML_CharacterDataHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_character_data_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_processing_instruction_handler_body(
 	void *context,
 	void *parser,
 	XML_ProcessingInstructionHandler handler
@@ -307,7 +607,21 @@ xp_rt_set_processing_instruction_handler(
 }
 
 static void XMLCALL
-xp_rt_set_xml_decl_handler(void *context, void *parser, XML_XmlDeclHandler handler) {
+xp_rt_set_processing_instruction_handler(
+	void *context,
+	void *parser,
+	XML_ProcessingInstructionHandler handler
+) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_processing_instruction_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_xml_decl_handler_body(void *context, void *parser, XML_XmlDeclHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_xml_decl_handler != NULL) {
@@ -320,7 +634,17 @@ xp_rt_set_xml_decl_handler(void *context, void *parser, XML_XmlDeclHandler handl
 }
 
 static void XMLCALL
-xp_rt_set_comment_handler(void *context, void *parser, XML_CommentHandler handler) {
+xp_rt_set_xml_decl_handler(void *context, void *parser, XML_XmlDeclHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_xml_decl_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_comment_handler_body(void *context, void *parser, XML_CommentHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_comment_handler != NULL) {
@@ -333,7 +657,17 @@ xp_rt_set_comment_handler(void *context, void *parser, XML_CommentHandler handle
 }
 
 static void XMLCALL
-xp_rt_set_cdata_section_handler(
+xp_rt_set_comment_handler(void *context, void *parser, XML_CommentHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_comment_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_cdata_section_handler_body(
 	void *context,
 	void *parser,
 	XML_StartCdataSectionHandler start,
@@ -352,7 +686,22 @@ xp_rt_set_cdata_section_handler(
 }
 
 static void XMLCALL
-xp_rt_set_default_handler(void *context, void *parser, XML_DefaultHandler handler, XML_Bool expand) {
+xp_rt_set_cdata_section_handler(
+	void *context,
+	void *parser,
+	XML_StartCdataSectionHandler start,
+	XML_EndCdataSectionHandler end
+) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_cdata_section_handler_body(context, parser, start, end);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_default_handler_body(void *context, void *parser, XML_DefaultHandler handler, XML_Bool expand) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_default_handler != NULL) {
@@ -366,7 +715,17 @@ xp_rt_set_default_handler(void *context, void *parser, XML_DefaultHandler handle
 }
 
 static void XMLCALL
-xp_rt_set_doctype_decl_handler(
+xp_rt_set_default_handler(void *context, void *parser, XML_DefaultHandler handler, XML_Bool expand) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_default_handler_body(context, parser, handler, expand);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_doctype_decl_handler_body(
 	void *context,
 	void *parser,
 	XML_StartDoctypeDeclHandler start,
@@ -385,7 +744,22 @@ xp_rt_set_doctype_decl_handler(
 }
 
 static void XMLCALL
-xp_rt_set_not_standalone_handler(void *context, void *parser, XML_NotStandaloneHandler handler) {
+xp_rt_set_doctype_decl_handler(
+	void *context,
+	void *parser,
+	XML_StartDoctypeDeclHandler start,
+	XML_EndDoctypeDeclHandler end
+) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_doctype_decl_handler_body(context, parser, start, end);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_not_standalone_handler_body(void *context, void *parser, XML_NotStandaloneHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_not_standalone_handler != NULL) {
@@ -398,7 +772,17 @@ xp_rt_set_not_standalone_handler(void *context, void *parser, XML_NotStandaloneH
 }
 
 static void XMLCALL
-xp_rt_set_element_decl_handler(void *context, void *parser, XML_ElementDeclHandler handler) {
+xp_rt_set_not_standalone_handler(void *context, void *parser, XML_NotStandaloneHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_not_standalone_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_element_decl_handler_body(void *context, void *parser, XML_ElementDeclHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_element_decl_handler != NULL) {
@@ -411,7 +795,17 @@ xp_rt_set_element_decl_handler(void *context, void *parser, XML_ElementDeclHandl
 }
 
 static void XMLCALL
-xp_rt_set_notation_decl_handler(void *context, void *parser, XML_NotationDeclHandler handler) {
+xp_rt_set_element_decl_handler(void *context, void *parser, XML_ElementDeclHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_element_decl_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_notation_decl_handler_body(void *context, void *parser, XML_NotationDeclHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_notation_decl_handler != NULL) {
@@ -424,7 +818,17 @@ xp_rt_set_notation_decl_handler(void *context, void *parser, XML_NotationDeclHan
 }
 
 static void XMLCALL
-xp_rt_set_attlist_decl_handler(void *context, void *parser, XML_AttlistDeclHandler handler) {
+xp_rt_set_notation_decl_handler(void *context, void *parser, XML_NotationDeclHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_notation_decl_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_attlist_decl_handler_body(void *context, void *parser, XML_AttlistDeclHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_attlist_decl_handler != NULL) {
@@ -437,7 +841,17 @@ xp_rt_set_attlist_decl_handler(void *context, void *parser, XML_AttlistDeclHandl
 }
 
 static void XMLCALL
-xp_rt_set_entity_decl_handler(void *context, void *parser, XML_EntityDeclHandler handler) {
+xp_rt_set_attlist_decl_handler(void *context, void *parser, XML_AttlistDeclHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_attlist_decl_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_entity_decl_handler_body(void *context, void *parser, XML_EntityDeclHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_entity_decl_handler != NULL) {
@@ -450,7 +864,17 @@ xp_rt_set_entity_decl_handler(void *context, void *parser, XML_EntityDeclHandler
 }
 
 static void XMLCALL
-xp_rt_set_unparsed_entity_decl_handler(void *context, void *parser, XML_UnparsedEntityDeclHandler handler) {
+xp_rt_set_entity_decl_handler(void *context, void *parser, XML_EntityDeclHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_entity_decl_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_unparsed_entity_decl_handler_body(void *context, void *parser, XML_UnparsedEntityDeclHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_unparsed_entity_decl_handler != NULL) {
@@ -463,7 +887,17 @@ xp_rt_set_unparsed_entity_decl_handler(void *context, void *parser, XML_Unparsed
 }
 
 static void XMLCALL
-xp_rt_set_external_entity_ref_handler(void *context, void *parser, XML_ExternalEntityRefHandler handler) {
+xp_rt_set_unparsed_entity_decl_handler(void *context, void *parser, XML_UnparsedEntityDeclHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_unparsed_entity_decl_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_external_entity_ref_handler_body(void *context, void *parser, XML_ExternalEntityRefHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_external_entity_ref_handler != NULL) {
@@ -476,7 +910,17 @@ xp_rt_set_external_entity_ref_handler(void *context, void *parser, XML_ExternalE
 }
 
 static void XMLCALL
-xp_rt_set_external_entity_ref_handler_arg(void *context, void *parser, void *arg) {
+xp_rt_set_external_entity_ref_handler(void *context, void *parser, XML_ExternalEntityRefHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_external_entity_ref_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_external_entity_ref_handler_arg_body(void *context, void *parser, void *arg) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_external_entity_ref_handler_arg != NULL) {
@@ -485,7 +929,17 @@ xp_rt_set_external_entity_ref_handler_arg(void *context, void *parser, void *arg
 }
 
 static void XMLCALL
-xp_rt_set_skipped_entity_handler(void *context, void *parser, XML_SkippedEntityHandler handler) {
+xp_rt_set_external_entity_ref_handler_arg(void *context, void *parser, void *arg) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_external_entity_ref_handler_arg_body(context, parser, arg);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_set_skipped_entity_handler_body(void *context, void *parser, XML_SkippedEntityHandler handler) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->set_skipped_entity_handler != NULL) {
@@ -498,7 +952,17 @@ xp_rt_set_skipped_entity_handler(void *context, void *parser, XML_SkippedEntityH
 }
 
 static void XMLCALL
-xp_rt_default_current(void *context, void *parser) {
+xp_rt_set_skipped_entity_handler(void *context, void *parser, XML_SkippedEntityHandler handler) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_set_skipped_entity_handler_body(context, parser, handler);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
+static void XMLCALL
+xp_rt_default_current_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer != NULL && state->default_current != NULL) {
@@ -506,8 +970,18 @@ xp_rt_default_current(void *context, void *parser) {
 	}
 }
 
+static void XMLCALL
+xp_rt_default_current(void *context, void *parser) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_default_current_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
 static enum XML_Status XMLCALL
-xp_rt_parse(void *context, void *parser, const char *s, int len, int isFinal) {
+xp_rt_parse_body(void *context, void *parser, const char *s, int len, int isFinal) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->parse == NULL) {
@@ -522,8 +996,20 @@ xp_rt_parse(void *context, void *parser, const char *s, int len, int isFinal) {
 	);
 }
 
+static enum XML_Status XMLCALL
+xp_rt_parse(void *context, void *parser, const char *s, int len, int isFinal) {
+	enum XML_Status result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_parse_body(context, parser, s, len, isFinal);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static void *XMLCALL
-xp_rt_get_buffer(void *context, void *parser, int len) {
+xp_rt_get_buffer_body(void *context, void *parser, int len) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_buffer == NULL) {
@@ -532,8 +1018,20 @@ xp_rt_get_buffer(void *context, void *parser, int len) {
 	return (void *)state->get_buffer(installer, (EIF_POINTER)parser, (EIF_INTEGER)len);
 }
 
+static void *XMLCALL
+xp_rt_get_buffer(void *context, void *parser, int len) {
+	void * result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_buffer_body(context, parser, len);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static enum XML_Status XMLCALL
-xp_rt_parse_buffer(void *context, void *parser, int len, int isFinal) {
+xp_rt_parse_buffer_body(void *context, void *parser, int len, int isFinal) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->parse_buffer == NULL) {
@@ -547,8 +1045,20 @@ xp_rt_parse_buffer(void *context, void *parser, int len, int isFinal) {
 	);
 }
 
+static enum XML_Status XMLCALL
+xp_rt_parse_buffer(void *context, void *parser, int len, int isFinal) {
+	enum XML_Status result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_parse_buffer_body(context, parser, len, isFinal);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static enum XML_Error XMLCALL
-xp_rt_get_error_code(void *context, void *parser) {
+xp_rt_get_error_code_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_error_code == NULL) {
@@ -557,8 +1067,20 @@ xp_rt_get_error_code(void *context, void *parser) {
 	return (enum XML_Error)state->get_error_code(installer, (EIF_POINTER)parser);
 }
 
+static enum XML_Error XMLCALL
+xp_rt_get_error_code(void *context, void *parser) {
+	enum XML_Error result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_error_code_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static XML_Size XMLCALL
-xp_rt_get_current_line_number(void *context, void *parser) {
+xp_rt_get_current_line_number_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_current_line_number == NULL) {
@@ -568,7 +1090,19 @@ xp_rt_get_current_line_number(void *context, void *parser) {
 }
 
 static XML_Size XMLCALL
-xp_rt_get_current_column_number(void *context, void *parser) {
+xp_rt_get_current_line_number(void *context, void *parser) {
+	XML_Size result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_current_line_number_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Size XMLCALL
+xp_rt_get_current_column_number_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_current_column_number == NULL) {
@@ -577,8 +1111,20 @@ xp_rt_get_current_column_number(void *context, void *parser) {
 	return (XML_Size)state->get_current_column_number(installer, (EIF_POINTER)parser);
 }
 
+static XML_Size XMLCALL
+xp_rt_get_current_column_number(void *context, void *parser) {
+	XML_Size result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_current_column_number_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static XML_Index XMLCALL
-xp_rt_get_current_byte_index(void *context, void *parser) {
+xp_rt_get_current_byte_index_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_current_byte_index == NULL) {
@@ -587,8 +1133,20 @@ xp_rt_get_current_byte_index(void *context, void *parser) {
 	return (XML_Index)state->get_current_byte_index(installer, (EIF_POINTER)parser);
 }
 
+static XML_Index XMLCALL
+xp_rt_get_current_byte_index(void *context, void *parser) {
+	XML_Index result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_current_byte_index_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static int XMLCALL
-xp_rt_get_current_byte_count(void *context, void *parser) {
+xp_rt_get_current_byte_count_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_current_byte_count == NULL) {
@@ -598,7 +1156,19 @@ xp_rt_get_current_byte_count(void *context, void *parser) {
 }
 
 static int XMLCALL
-xp_rt_get_specified_attribute_count(void *context, void *parser) {
+xp_rt_get_current_byte_count(void *context, void *parser) {
+	int result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_current_byte_count_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static int XMLCALL
+xp_rt_get_specified_attribute_count_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_specified_attribute_count == NULL) {
@@ -608,7 +1178,19 @@ xp_rt_get_specified_attribute_count(void *context, void *parser) {
 }
 
 static int XMLCALL
-xp_rt_get_id_attribute_index(void *context, void *parser) {
+xp_rt_get_specified_attribute_count(void *context, void *parser) {
+	int result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_specified_attribute_count_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static int XMLCALL
+xp_rt_get_id_attribute_index_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_id_attribute_index == NULL) {
@@ -617,8 +1199,20 @@ xp_rt_get_id_attribute_index(void *context, void *parser) {
 	return (int)state->get_id_attribute_index(installer, (EIF_POINTER)parser);
 }
 
+static int XMLCALL
+xp_rt_get_id_attribute_index(void *context, void *parser) {
+	int result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_id_attribute_index_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static const char *XMLCALL
-xp_rt_get_input_context(void *context, void *parser, int *offset, int *size) {
+xp_rt_get_input_context_body(void *context, void *parser, int *offset, int *size) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_input_context == NULL) {
@@ -638,8 +1232,20 @@ xp_rt_get_input_context(void *context, void *parser, int *offset, int *size) {
 	);
 }
 
+static const char *XMLCALL
+xp_rt_get_input_context(void *context, void *parser, int *offset, int *size) {
+	const char * result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_input_context_body(context, parser, offset, size);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static unsigned long long XMLCALL
-xp_rt_get_accounting_direct_count(void *context, void *parser) {
+xp_rt_get_accounting_direct_count_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_accounting_direct_count == NULL) {
@@ -649,7 +1255,19 @@ xp_rt_get_accounting_direct_count(void *context, void *parser) {
 }
 
 static unsigned long long XMLCALL
-xp_rt_get_accounting_indirect_count(void *context, void *parser) {
+xp_rt_get_accounting_direct_count(void *context, void *parser) {
+	unsigned long long result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_accounting_direct_count_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static unsigned long long XMLCALL
+xp_rt_get_accounting_indirect_count_body(void *context, void *parser) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->get_accounting_indirect_count == NULL) {
@@ -658,8 +1276,20 @@ xp_rt_get_accounting_indirect_count(void *context, void *parser) {
 	return (unsigned long long)state->get_accounting_indirect_count(installer, (EIF_POINTER)parser);
 }
 
+static unsigned long long XMLCALL
+xp_rt_get_accounting_indirect_count(void *context, void *parser) {
+	unsigned long long result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_get_accounting_indirect_count_body(context, parser);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
 static void XMLCALL
-xp_rt_get_parsing_status(void *context, void *parser, XML_ParsingStatus *status) {
+xp_rt_get_parsing_status_body(void *context, void *parser, XML_ParsingStatus *status) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (status == NULL) {
@@ -673,8 +1303,18 @@ xp_rt_get_parsing_status(void *context, void *parser, XML_ParsingStatus *status)
 	}
 }
 
+static void XMLCALL
+xp_rt_get_parsing_status(void *context, void *parser, XML_ParsingStatus *status) {
+	xp_eiffel_lock_enter();
+	__try {
+		xp_rt_get_parsing_status_body(context, parser, status);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+}
+
 static XML_Bool XMLCALL
-xp_rt_set_hash_salt(void *context, void *parser, unsigned long hash_salt) {
+xp_rt_set_hash_salt_body(void *context, void *parser, unsigned long hash_salt) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
 	EIF_REFERENCE installer = xp_installer_reference(state);
 	if (installer == NULL || state->set_hash_salt == NULL) {
@@ -686,7 +1326,19 @@ xp_rt_set_hash_salt(void *context, void *parser, unsigned long hash_salt) {
 }
 
 static XML_Bool XMLCALL
-xp_rt_set_hash_salt_16_bytes(void *context, void *parser, const uint8_t entropy[16]) {
+xp_rt_set_hash_salt(void *context, void *parser, unsigned long hash_salt) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_hash_salt_body(context, parser, hash_salt);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
+}
+
+static XML_Bool XMLCALL
+xp_rt_set_hash_salt_16_bytes_body(void *context, void *parser, const uint8_t entropy[16]) {
 	XPACT_EiffelRuntimeBridgeState *state = xp_runtime_state(context);
     EIF_REFERENCE installer;
 	installer = xp_installer_reference(state);
@@ -696,6 +1348,18 @@ xp_rt_set_hash_salt_16_bytes(void *context, void *parser, const uint8_t entropy[
 	return state->set_hash_salt_16_bytes(installer, (EIF_POINTER)parser, (EIF_POINTER)entropy)
 		? XML_TRUE
 		: XML_FALSE;
+}
+
+static XML_Bool XMLCALL
+xp_rt_set_hash_salt_16_bytes(void *context, void *parser, const uint8_t entropy[16]) {
+	XML_Bool result;
+	xp_eiffel_lock_enter();
+	__try {
+		result = xp_rt_set_hash_salt_16_bytes_body(context, parser, entropy);
+	} __finally {
+		xp_eiffel_lock_leave();
+	}
+	return result;
 }
 
 static XML_Bool
